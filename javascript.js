@@ -70,6 +70,7 @@ function initMap()
 	map.addLayer(new OpenLayers.Layer.Google("Google Streets", {'sphericalMercator': true}));
 	map.addLayer(new OpenLayers.Layer.Google("Google Satellite", {type: G_SATELLITE_MAP, 'sphericalMercator': true, numZoomLevels: 22}));
 	map.addLayer(new OpenLayers.Layer.Google("Google Hybrid", {type: G_HYBRID_MAP, 'sphericalMercator': true}));
+	map.addLayer(new OpenLayers.Layer.Google("Google Terrain", {type: G_PHYSICAL_MAP, 'sphericalMercator': true}));
 
 	map.addLayer(new OpenLayers.Layer.Yahoo("Yahoo Street", {'sphericalMercator': true}));
 	map.addLayer(new OpenLayers.Layer.Yahoo("Yahoo Satellite", {'type': YAHOO_MAP_SAT, 'sphericalMercator': true}));
