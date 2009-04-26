@@ -67,6 +67,8 @@ function initMap()
 	map.addLayer(new OpenLayers.Layer.OSM("OpenStreetBrowser", "http://openstreetbrowser.org/tiles/base/", {numZoomLevels: 19}));
 	map.addLayer(new OpenLayers.Layer.OpenTiles("Reit- und Wanderkarte", "http://opentiles.com/nop/get.php?", {numZoomLevels: 16, layername:'trails', attribution: "Rendering by <a href=\"http://opentiles.com/nop/\">OSMC Reit- und Wanderkarte</a>. Data by <a href=\"http://openstreetmap.org/\">OpenStreetMap</a>" }));
 	map.addLayer(new OpenLayers.Layer.OSM("OpenPisteMap", "http://openpistemap.org/tiles/contours/", {numZoomLevels: 18}));
+	map.addLayer(new OpenLayers.Layer.OSM("ÖPNV-Karte Low Zoom", "http://xn--pnvkarte-m4a.de/tiles/", {numZoomLevels: 19}));
+	map.addLayer(new OpenLayers.Layer.WMS("ÖPNV-Karte High Zoom","http://xn--pnvkarte-m4a.de/cgi-bin/mapnikserv.py?", {map:'/opt/mapnik/test.xml', mode: 'view', format:'image/png256'},{numZoomLevels:19,singleTile:true,projection:OSMProjection} ));
 
 	map.addLayer(new OpenLayers.Layer.Google("Google Streets", {'sphericalMercator': true}));
 	map.addLayer(new OpenLayers.Layer.Google("Google Satellite", {type: G_SATELLITE_MAP, 'sphericalMercator': true, numZoomLevels: 22}));
@@ -334,7 +336,6 @@ function geoSearch(zoomback, markersvisible)
 					if(first) first = false;
 
 					var feature = new OpenLayers.Feature(layerResults, lonlat);
-					feature.closeBox = true;
 					feature.popupClass = OpenLayers.Popup.FramedCloud;
 					feature.data.popupContentHTML = "<div><strong>"+htmlspecialchars(named[i].getAttribute("name"))+"</strong> ("+htmlspecialchars(named[i].getAttribute("info") ? named[i].getAttribute("info") : "unknown")+")</div>";
 					feature.data.autoSize = true;
@@ -342,7 +343,8 @@ function geoSearch(zoomback, markersvisible)
 					var marker = feature.createMarker();
 					var markerClick = function (evt) {
 						if (this.popup == null) {
-							this.popup = this.createPopup(this.closeBox);
+							this.popup = this.createPopup(true);
+							//this.popup.addCloseBox(function(){updateLocationHash();});
 							map.addPopup(this.popup);
 							this.popup.show();
 						} else {
