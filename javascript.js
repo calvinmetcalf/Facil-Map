@@ -174,6 +174,8 @@ function initMap()
 
 function zoomToQuery(query)
 {
+	var search_may_zoom = (typeof query.lon == "undefined" && typeof query.lat == "undefined");
+
 	if(!query.lon)
 		query.lon = 0;
 	if(!query.lat)
@@ -203,7 +205,7 @@ function zoomToQuery(query)
 	if(query.search)
 	{
 		document.getElementById("search-input").value = query.search;
-		geoSearch(function(){map.setCenter(new OpenLayers.LonLat(query.lon, query.lat).transform(map.displayProjection, map.getProjectionObject()), query.zoom);}, query.smopen);
+		geoSearch(search_may_zoom ? false : function(){map.setCenter(new OpenLayers.LonLat(query.lon, query.lat).transform(map.displayProjection, map.getProjectionObject()), query.zoom);}, query.smopen);
 	}
 }
 
@@ -265,7 +267,7 @@ function doUpdateLocationHash()
 function decodeQueryString(str)
 {
 	var obj = { };
-	var str_split = str.split(";");
+	var str_split = str.split(/[;&]/);
 	for(var i=0; i<str_split.length; i++)
 	{
 		var equal_sign = str_split[i].indexOf("=");
