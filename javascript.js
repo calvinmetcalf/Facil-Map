@@ -85,7 +85,8 @@ function initMap()
 	map.addLayer(new OpenLayers.Layer.OSM.Minutely("Minutely Mapnik"));
 	//map.addLayer(new OpenLayers.Layer.OSM.CloudMade("CloudMade Mapnik"));
 	map.addLayer(new OpenLayers.Layer.OSM("OpenStreetBrowser", "http://openstreetbrowser.org/tiles/base/", {numZoomLevels: 19}));
-	map.addLayer(new OpenLayers.Layer.OpenTiles("Reit- und Wanderkarte", "http://opentiles.com/nop/get.php?", {numZoomLevels: 16, layername:'trails', attribution: "Rendering by <a href=\"http://opentiles.com/nop/\">OSMC Reit- und Wanderkarte</a>. Data by <a href=\"http://openstreetmap.org/\">OpenStreetMap</a>" }));
+	if(OpenLayers.Layer.OpenTiles)
+		map.addLayer(new OpenLayers.Layer.OpenTiles("Reit- und Wanderkarte", "http://opentiles.com/nop/get.php?", {numZoomLevels: 16, layername:'trails', attribution: "Rendering by <a href=\"http://opentiles.com/nop/\">OSMC Reit- und Wanderkarte</a>. Data by <a href=\"http://openstreetmap.org/\">OpenStreetMap</a>" }));
 	map.addLayer(new OpenLayers.Layer.OSM("OpenPisteMap", "http://openpistemap.org/tiles/contours/", {numZoomLevels: 18}));
 	map.addLayer(new OpenLayers.Layer.OSM("ÖPNV-Karte Low Zoom", "http://xn--pnvkarte-m4a.de/tiles/", {numZoomLevels: 19}));
 	map.addLayer(new OpenLayers.Layer.WMS("ÖPNV-Karte High Zoom","http://xn--pnvkarte-m4a.de/cgi-bin/mapnikserv.py?", {map:'/opt/mapnik/test.xml', mode: 'view', format:'image/png256'},{numZoomLevels:19,singleTile:true,projection:OSMProjection} ));
@@ -106,16 +107,8 @@ function initMap()
 
 	map.addLayer(new OpenLayers.Layer.XYZ("OpenAerialMap","http://tile.openaerialmap.org/tiles/1.0.0/openaerialmap-900913/${z}/${x}/${y}.png",{sphericalMercator: true}));
 
-	/*map.addLayer(new OpenLayers.Layer.WMS('ÖPNV-Karte (PSV map)', "http://91.143.81.171/cgi-bin/mapserv?map=/data/osm/oepnv.map&", {
-		layers: 'Bus_Station,Bus_Linien',
-		format: 'image/png; mode=24bit'
-	}, {
-		numZoomLevels: 19,
-		singleTile: true,
-		ratio: 1
-	}));*/
-
-	map.addLayer(new OpenLayers.Layer.OpenTiles("Relief", "http://opentiles.com/nop/get.php?", {numZoomLevels: 16, isBaseLayer:true, layername:'relief', attribution: "Rendering by <a href=\"http://opentiles.com/nop/\">OSMC Reit- und Wanderkarte</a>. DEM by <a href='http://srtm.csi.cgiar.org'>CIAT</a>" }));
+	if(OpenLayers.Layer.OpenTiles)
+		map.addLayer(new OpenLayers.Layer.OpenTiles("Relief", "http://opentiles.com/nop/get.php?", {numZoomLevels: 16, isBaseLayer:true, layername:'relief', attribution: "Rendering by <a href=\"http://opentiles.com/nop/\">OSMC Reit- und Wanderkarte</a>. DEM by <a href='http://srtm.csi.cgiar.org'>CIAT</a>" }));
 
 	layerMarkers = new OpenLayers.Layer.Markers("Markers", { displayInLayerSwitcher : false });
 	map.addLayer(layerMarkers);
@@ -357,7 +350,7 @@ function geoSearch(zoomback, markersvisible)
 
 					var feature = new OpenLayers.Feature(layerResults, lonlat);
 					feature.popupClass = OpenLayers.Popup.FramedCloud;
-					feature.data.popupContentHTML = "<div><strong>"+htmlspecialchars(named[i].getAttribute("name"))+"</strong> ("+htmlspecialchars(named[i].getAttribute("info") ? named[i].getAttribute("info") : "unknown")+")</div>";
+					feature.data.popupContentHTML = "<div><strong>"+htmlspecialchars(named[i].getAttribute("name"))+"</strong> ("+htmlspecialchars(named[i].getAttribute("info") ? named[i].getAttribute("info") : "unknown")+")</div><div><a href=\"javascript:map.setCenter(new OpenLayers.LonLat("+named[i].getAttribute("lon")+", "+named[i].getAttribute("lat")+").transform(map.displayProjection, map.getProjectionObject()), "+named[i].getAttribute("zoom")+");\">Zoom</a></div>";
 					feature.data.autoSize = true;
 					feature.data.icon = this_icon;
 					var marker = feature.createMarker();
@@ -419,6 +412,6 @@ function addLonLatMarker(lonlat, title)
 	if(title)
 		marker.cdauthTitle = title;
 	layerMarkers.addMarker(marker);
-	var framecloud = new OpenLayers.Popup.FramedCloud("lonlat", lonlat, null, (title ? "<h6 class=\"marker-heading\">"+htmlspecialchars(title)+"</div>" : "")+"<dl><dt>Longitude</dt><dd>"+Math.round(lonlat_readable.lon*100000000)/100000000+"</dd><dt>Latitude</dt><dd>"+Math.round(lonlat_readable.lat*100000000)/100000000+"</dd></dl><ul><li><a href=\"http://www.openstreetmap.org/?lat="+lonlat_readable.lat+"&amp;lon="+lonlat_readable.lon+"&amp;zoom="+map.getZoom()+"\">OpenStreetMap Permalink</a></li><li><a href=\"http://www.openstreetmap.org/?mlat="+lonlat_readable.lat+"&amp;mlon="+lonlat_readable.lon+"&amp;zoom="+map.getZoom()+"\">OpenStreetMap Marker</a></li><li><a href=\"http://maps.google.com/?q="+lonlat_readable.lat+","+lonlat_readable.lon+"\">Google Maps Marker</a></li><li><a href=\"http://maps.yahoo.com/broadband/#lat="+lonlat_readable.lat+"&amp;lon="+lonlat_readable.lon+"&amp;zoom="+map.getZoom()+"\">Yahoo Maps Permalink</a></li></ul>", this_icon, true, function(evt){if(title) delete marker.cdauthTitle; layerMarkers.removeMarker(marker); framecloud.destroy(); updateLocationHash(); OpenLayers.Event.stop(evt); });
+	var framecloud = new OpenLayers.Popup.FramedCloud("lonlat", lonlat, null, (title ? "<h6 class=\"marker-heading\">"+htmlspecialchars(title)+"</div>" : "")+"<dl><dt>Longitude</dt><dd>"+Math.round(lonlat_readable.lon*100000000)/100000000+"</dd><dt>Latitude</dt><dd>"+Math.round(lonlat_readable.lat*100000000)/100000000+"</dd></dl><ul><li><a href=\"http://data.giub.uni-bonn.de/openrouteservice/index.php?end="+lonlat_readable.lon+","+lonlat_readable.lat+"&amp;lat="+lonlat_readable.lat+"&amp;lon="+lonlat_readable.lon+"&amp;zoom="+map.getZoom()+"\">Get directions (OpenRouteService)</a></li><li><a href=\"http://www.openstreetmap.org/?lat="+lonlat_readable.lat+"&amp;lon="+lonlat_readable.lon+"&amp;zoom="+map.getZoom()+"\">OpenStreetMap Permalink</a></li><li><a href=\"http://www.openstreetmap.org/?mlat="+lonlat_readable.lat+"&amp;mlon="+lonlat_readable.lon+"&amp;zoom="+map.getZoom()+"\">OpenStreetMap Marker</a></li><li><a href=\"http://maps.google.com/?q="+lonlat_readable.lat+","+lonlat_readable.lon+"\">Google Maps Marker</a></li><li><a href=\"http://maps.yahoo.com/broadband/#lat="+lonlat_readable.lat+"&amp;lon="+lonlat_readable.lon+"&amp;zoom="+map.getZoom()+"\">Yahoo Maps Permalink</a></li><li><a href=\"http://osmtools.de/osmlinks/?lat="+lonlat_readable.lat+"&amp;lon="+lonlat_readable.lon+"&amp;zoom="+map.getZoom()+"\">OpenStreetMap Links</a></li><li><a href=\"http://stable.toolserver.org/geohack/geohack.php?params="+lonlat_readable.lat+"_N_"+lonlat_readable.lon+"_E\">Wikimedia GeoHack</a></li></ul>", this_icon, true, function(evt){if(title) delete marker.cdauthTitle; layerMarkers.removeMarker(marker); framecloud.destroy(); updateLocationHash(); OpenLayers.Event.stop(evt); });
 	map.addPopup(framecloud);
 }
