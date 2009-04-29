@@ -29,6 +29,7 @@ var newLocationHash;
 var icon;
 var iconHighlight;
 var lastSearch;
+var lastSearchLayer;
 
 OpenLayers.Layer.OSM.Minutely = OpenLayers.Class(OpenLayers.Layer.OSM, {
     initialize: function(name, options) {
@@ -331,6 +332,11 @@ function geoSearch(zoomback, markersvisible)
 	}
 
 	layerResults.clearMarkers();
+	if(lastSearchLayer)
+	{
+		map.removeLayer(lastSearchLayer);
+		lastSearchLayer = null;
+	}
 	lastSearch = null;
 	updateLocationHash();
 	var search_input = document.getElementById("search-input");
@@ -338,81 +344,103 @@ function geoSearch(zoomback, markersvisible)
 	var string = search_input.value;
 	if(!string)
 		return;
+
 	search_input.disabled = search_button.disabled = true;
-	OpenLayers.loadURL("namefinder.php", { "find": string }, null, function(request) {
+
+	if(string.match(/^[a-z0-9]+:\/\/./i))
+	{
+		lastSearch = string;
+		updateLocationHash();
+		var format;
+		if(string.match(/\.gpx$/i))
+			format = OpenLayers.Format.GPX;
+		else if(string.match(/\.gml$/i))
+			format = OpenLayers.Format.GML;
+		else if(string.match(/\.osm$/i))
+			format = OpenLayers.Format.OSM;
+		lastSearchLayer = new OpenLayers.Layer.GML("Geographic file", string, { format: format });
+		map.addLayer(lastSearchLayer);
+		if(!zoomback)
+			map.zoomToExtent(lastSearchLayer.getMaxExtent());
 		search_input.disabled = search_button.disabled = false;
-		if(request.responseXML)
-		{
-			var searchresults = request.responseXML.getElementsByTagName("searchresults");
-			if(searchresults.length > 0)
+	}
+	else
+	{
+		OpenLayers.loadURL("namefinder.php", { "find": string }, null, function(request) {
+			search_input.disabled = search_button.disabled = false;
+			if(request.responseXML)
 			{
-				lastSearch = string;
-				updateLocationHash();
-
-				var named = searchresults[0].childNodes;
-				var markers = [ ];
-				var zoom;
-				var last_lonlat;
-				var first = true;
-				for(var i=0; i<named.length; i++)
+				var searchresults = request.responseXML.getElementsByTagName("searchresults");
+				if(searchresults.length > 0)
 				{
-					if(named[i].nodeType != 1) continue;
+					lastSearch = string;
+					updateLocationHash();
 
-					zoom = named[i].getAttribute("zoom");
+					var named = searchresults[0].childNodes;
+					var markers = [ ];
+					var zoom;
+					var last_lonlat;
+					var first = true;
+					for(var i=0; i<named.length; i++)
+					{
+						if(named[i].nodeType != 1) continue;
 
-					var lonlat = new OpenLayers.LonLat(named[i].getAttribute("lon"), named[i].getAttribute("lat")).transform(nameFinderProjection, map.getProjectionObject());
-					last_lonlat = lonlat;
-					var this_icon = (first ? iconHighlight : icon).clone();
-					if(first) first = false;
+						zoom = named[i].getAttribute("zoom");
 
-					var feature = new OpenLayers.Feature(layerResults, lonlat);
-					feature.popupClass = OpenLayers.Popup.FramedCloud;
-					feature.data.popupContentHTML = "<h6 class=\"result-heading\"><strong>"+htmlspecialchars(named[i].getAttribute("name"))+"</strong> ("+htmlspecialchars(named[i].getAttribute("info") ? named[i].getAttribute("info") : "unknown")+"), <a href=\"javascript:map.setCenter(new OpenLayers.LonLat("+named[i].getAttribute("lon")+", "+named[i].getAttribute("lat")+").transform(map.displayProjection, map.getProjectionObject()), "+named[i].getAttribute("zoom")+");\">[Zoom]</a></h6>"+makePermalinks(new OpenLayers.LonLat(named[i].getAttribute("lon"), named[i].getAttribute("lat")), named[i].getAttribute("zoom"));
-					feature.data.autoSize = true;
-					feature.data.icon = this_icon;
-					var marker = feature.createMarker();
-					var markerClick = function (evt) {
-						if (this.popup == null) {
-							this.popup = this.createPopup(true);
-							//this.popup.addCloseBox(function(){updateLocationHash();});
-							map.addPopup(this.popup);
-							this.popup.show();
-						} else {
-							this.popup.toggle();
-						}
-						updateLocationHash();
-						OpenLayers.Event.stop(evt);
-					};
-					marker.events.register("mousedown", feature, markerClick);
-					marker.cdauthFeature = feature;
-					markers.push(marker);
-				}
-				for(var i=markers.length-1; i>=0; i--)
-				{
-					if((markersvisible && typeof markersvisible[i] != "undefined" && markersvisible[i] != "0") || ((!markersvisible || typeof markersvisible[i] == "undefined") && i==0))
-						markers[i].events.triggerEvent("mousedown");
-					layerResults.addMarker(markers[i]);
-				}
+						var lonlat = new OpenLayers.LonLat(named[i].getAttribute("lon"), named[i].getAttribute("lat")).transform(nameFinderProjection, map.getProjectionObject());
+						last_lonlat = lonlat;
+						var this_icon = (first ? iconHighlight : icon).clone();
+						if(first) first = false;
 
-				if(zoomback)
-					zoomback();
-				else
-				{
-					if(markers.length == 0)
-						alert("No results.");
-					else if(markers.length == 1)
-						map.setCenter(last_lonlat, zoom);
+						var feature = new OpenLayers.Feature(layerResults, lonlat);
+						feature.popupClass = OpenLayers.Popup.FramedCloud;
+						feature.data.popupContentHTML = "<h6 class=\"result-heading\"><strong>"+htmlspecialchars(named[i].getAttribute("name"))+"</strong> ("+htmlspecialchars(named[i].getAttribute("info") ? named[i].getAttribute("info") : "unknown")+"), <a href=\"javascript:map.setCenter(new OpenLayers.LonLat("+named[i].getAttribute("lon")+", "+named[i].getAttribute("lat")+").transform(map.displayProjection, map.getProjectionObject()), "+named[i].getAttribute("zoom")+");\">[Zoom]</a></h6>"+makePermalinks(new OpenLayers.LonLat(named[i].getAttribute("lon"), named[i].getAttribute("lat")), named[i].getAttribute("zoom"));
+						feature.data.autoSize = true;
+						feature.data.icon = this_icon;
+						var marker = feature.createMarker();
+						var markerClick = function (evt) {
+							if (this.popup == null) {
+								this.popup = this.createPopup(true);
+								//this.popup.addCloseBox(function(){updateLocationHash();});
+								map.addPopup(this.popup);
+								this.popup.show();
+							} else {
+								this.popup.toggle();
+							}
+							updateLocationHash();
+							OpenLayers.Event.stop(evt);
+						};
+						marker.events.register("mousedown", feature, markerClick);
+						marker.cdauthFeature = feature;
+						markers.push(marker);
+					}
+					for(var i=markers.length-1; i>=0; i--)
+					{
+						if((markersvisible && typeof markersvisible[i] != "undefined" && markersvisible[i] != "0") || ((!markersvisible || typeof markersvisible[i] == "undefined") && i==0))
+							markers[i].events.triggerEvent("mousedown");
+						layerResults.addMarker(markers[i]);
+					}
+
+					if(zoomback)
+						zoomback();
 					else
-						map.zoomToExtent(layerResults.getDataExtent());
+					{
+						if(markers.length == 0)
+							alert("No results.");
+						else if(markers.length == 1)
+							map.setCenter(last_lonlat, zoom);
+						else
+							map.zoomToExtent(layerResults.getDataExtent());
+					}
+					return;
 				}
-				return;
 			}
-		}
-		alert("Search failed.");
-	}, function() {
-		search_input.disabled = search_button.disabled = false;
-		alert("Search failed.");
-	});
+			alert("Search failed.");
+		}, function() {
+			search_input.disabled = search_button.disabled = false;
+			alert("Search failed.");
+		});
+	}
 }
 
 function htmlspecialchars(str)
