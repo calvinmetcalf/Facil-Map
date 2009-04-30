@@ -401,14 +401,20 @@ function geoSearch(zoomback, markersvisible)
 						var markerClick = function (evt) {
 							if (this.popup == null) {
 								this.popup = this.createPopup(true);
-								//this.popup.addCloseBox(function(){updateLocationHash();});
+								OpenLayers.Event.observe(this.popup.closeDiv, "click", OpenLayers.Function.bindAsEventListener(function(e)
+								{
+									this.popup.hide();
+									OpenLayers.Event.stop(e);
+									updateLocationHash();
+								}, this));
+
 								map.addPopup(this.popup);
 								this.popup.show();
 							} else {
 								this.popup.toggle();
 							}
-							updateLocationHash();
 							OpenLayers.Event.stop(evt);
+							updateLocationHash();
 						};
 						marker.events.register("mousedown", feature, markerClick);
 						marker.cdauthFeature = feature;
