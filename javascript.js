@@ -30,6 +30,7 @@ var icon;
 var iconHighlight;
 var lastSearch;
 var lastSearchLayer;
+var psvMapLow,psvMapHigh;
 
 OpenLayers.Layer.OSM.Minutely = OpenLayers.Class(OpenLayers.Layer.OSM, {
     initialize: function(name, options) {
@@ -100,8 +101,12 @@ function initMap()
 	if(OpenLayers.Layer.OpenTiles)
 		map.addLayer(new OpenLayers.Layer.OpenTiles("Reit- und Wanderkarte", "http://opentiles.com/nop/get.php?", {numZoomLevels: 16, layername:'trails', attribution: "Rendering by <a href=\"http://opentiles.com/nop/\">OSMC Reit- und Wanderkarte</a>. Data by <a href=\"http://openstreetmap.org/\">OpenStreetMap</a>" }));
 	map.addLayer(new OpenLayers.Layer.OSM("OpenPisteMap", "http://openpistemap.org/tiles/contours/", {numZoomLevels: 18}));
-	map.addLayer(new OpenLayers.Layer.OSM("ÖPNV-Karte Low Zoom", "http://xn--pnvkarte-m4a.de/tiles/", {numZoomLevels: 19}));
-	map.addLayer(new OpenLayers.Layer.WMS("ÖPNV-Karte High Zoom","http://xn--pnvkarte-m4a.de/cgi-bin/mapnikserv.py?", {map:'/opt/mapnik/test.xml', mode: 'view', format:'image/png256'},{numZoomLevels:19,singleTile:true,projection:OSMProjection} ));
+
+	psvMapLow = new OpenLayers.Layer.OSM("ÖPNV-Karte", "http://xn--pnvkarte-m4a.de/tiles/", {numZoomLevels: 19, displayInLayerSwitcher: false});
+	psvMapHigh = new OpenLayers.Layer.WMS("ÖPNV-Karte","http://xn--pnvkarte-m4a.de/cgi-bin/mapnikserv.py?", {map:'/opt/mapnik/test.xml', mode: 'view', format:'image/png256'},{numZoomLevels:19,singleTile:true,projection:OSMProjection, displayInLayerSwitcher: false} );
+	map.addLayer(psvMapLow);
+	map.addLayer(psvMapHigh);
+	switchPSVMap();
 
 	map.addLayer(new OpenLayers.Layer.Google("Google Streets", {'sphericalMercator': true}));
 	map.addLayer(new OpenLayers.Layer.Google("Google Satellite", {type: G_SATELLITE_MAP, 'sphericalMercator': true, numZoomLevels: 22}));
@@ -170,6 +175,7 @@ function initMap()
 	map.events.register("move", map, updateLocationHash);
 	map.events.register("changebaselayer", map, updateLocationHash);
 	map.events.register("zoomend", map, function() {
+		switchPSVMap();
 		for(var i=0; i<layerMarkers.markers.length; i++)
 			layerMarkers.markers[i].cdauthPopup.setContentHTML((layerMarkers.markers[i].cdauthTitle ? "<h6 class=\"marker-heading\">"+htmlspecialchars(layerMarkers.markers[i].cdauthTitle)+"</h6>" : "")+makePermalinks(layerMarkers.markers[i].lonlat.clone().transform(map.getProjectionObject(), map.displayProjection), map.getZoom()));
 	});
@@ -192,6 +198,7 @@ function zoomToQuery(query)
 		var matching_layers = map.getLayersByName(query.layer);
 		if(matching_layers.length > 0)
 			map.setBaseLayer(matching_layers[0]);
+		switchPSVMap();
 	}
 
 	layerMarkers.clearMarkers();
@@ -481,4 +488,22 @@ function makePermalinks(lonlat, zoom)
 		+ "<li><a href=\"http://maps.yahoo.com/broadband/#lat="+lonlat.lat+"&amp;lon="+lonlat.lon+"&amp;zoom="+zoom+"\">Yahoo Maps Permalink</a></li>"
 		+ "<li><a href=\"http://osmtools.de/osmlinks/?lat="+lonlat.lat+"&amp;lon="+lonlat.lon+"&amp;zoom="+zoom+"\">OpenStreetMap Links</a></li>"
 		+ "<li><a href=\"http://stable.toolserver.org/geohack/geohack.php?params="+lonlat.lat+"_N_"+lonlat.lon+"_E\">Wikimedia GeoHack</a></li></ul>";
+}
+
+function switchPSVMap()
+{
+	if(map.getZoom() >= 14)
+	{
+		psvMapLow.addOptions({displayInLayerSwitcher: false});
+		psvMapHigh.addOptions({displayInLayerSwitcher: true});
+		if(map.baseLayer == psvMapLow)
+			map.setBaseLayer(psvMapHigh);
+	}
+	else
+	{
+		psvMapLow.addOptions({displayInLayerSwitcher: true});
+		psvMapHigh.addOptions({displayInLayerSwitcher: false});
+		if(map.baseLayer == psvMapHigh)
+			map.setBaseLayer(psvMapLow);
+	}
 }
