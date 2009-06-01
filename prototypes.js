@@ -231,7 +231,9 @@ OpenLayers.Control.cdauth = { };
 /**
  * Provides an add-marker click control to the map. Clicking on any point on the map will create a marker there with the coordinates and Permalinks.
  * Use the following code to add the control to the map.
- * var click = new OpenLayers.Control.cdauth.MarkerClick();
+ * var layerMarkers = new OpenLayers.Layer.cdauth.makers.LonLat("Markers");
+ * map.addLayer(layerMarkers);
+ * var click = new OpenLayers.Control.cdauth.MarkerClick(layerMarkers);
  * map.addControl(click);
  * click.activate();
 */
@@ -246,7 +248,7 @@ OpenLayers.Control.cdauth.MarkerClick = OpenLayers.Class(OpenLayers.Control, {
 	},
 
 	/**
-	 * @param OpenLayers.Layer.Markers layerMarkers The Layer that the markers should be added to. May be OpenLayers.Layer.cdauth.markers.LonLat.
+	 * @param OpenLayers.Layer.cdauth.markers.LonLat layerMarkers The Layer that the markers should be added to.
 	*/
 	initialize: function(layerMarkers, options) {
 		this.layerMarkers = layerMarkers;
@@ -363,7 +365,7 @@ if(OpenLayers.Layer.OSM)
 		*/
 		OpenLayers.Layer.cdauth.OSM.OPNVKarte.High = new OpenLayers.Class(OpenLayers.Layer.WMS, {
 			initialize: function(name, options) {
-				OpenLayers.Layer.WMS.prototype.initialize.apply(this, [ name, "http://xn--pnvkarte-m4a.de/cgi-bin/mapnikserv.py?", {map: '/opt/mapnik/test.xml', mode: 'view', format: 'image/png256'}, OpenLayers.Util.extend({numZoomLevels: 19, singleTile: true, projection: OSMProjection, displayInLayerSwitcher: false}, options) ]);
+				OpenLayers.Layer.WMS.prototype.initialize.apply(this, [ name, "http://xn--pnvkarte-m4a.de/cgi-bin/mapnikserv.py?", {map: '/opt/mapnik/test.xml', mode: 'view', format: 'image/png256'}, OpenLayers.Util.extend({numZoomLevels: 19, singleTile: true, projection: new OpenLayers.Projection("EPSG:900913"), displayInLayerSwitcher: false}, options) ]);
 			}
 		});
 	}
