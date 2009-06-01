@@ -23,6 +23,10 @@
  * Include http://www.openlayers.org/dev/OpenLayers.js for full OpenLayers support.
 */
 
+/**
+ * A map with the default values needed for OpenStreetMap and other world maps.
+*/
+
 OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 	initialize : function(div, options)
 	{
@@ -42,7 +46,7 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 	},
 
 	/**
-	 * Adds all available layers to your map.
+	 * Adds all available layers from this library to your map.
 	*/
 	addAllAvailableLayers : function()
 	{
@@ -225,6 +229,8 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 
 OpenLayers.Control.cdauth = { };
 /**
+ * Provides an add-marker click control to the map. Clicking on any point on the map will create a marker there with the coordinates and Permalinks.
+ * Use the following code to add the control to the map.
  * var click = new OpenLayers.Control.cdauth.MarkerClick();
  * map.addControl(click);
  * click.activate();
@@ -239,6 +245,9 @@ OpenLayers.Control.cdauth.MarkerClick = OpenLayers.Class(OpenLayers.Control, {
 		'stopDouble': false
 	},
 
+	/**
+	 * @param OpenLayers.Layer.Markers layerMarkers The Layer that the markers should be added to. May be OpenLayers.Layer.cdauth.markers.LonLat.
+	*/
 	initialize: function(layerMarkers, options) {
 		this.layerMarkers = layerMarkers;
 		this.handlerOptions = OpenLayers.Util.extend(
@@ -376,6 +385,7 @@ if(OpenLayers.Layer.OpenTiles)
 if(OpenLayers.Layer.Google)
 {
 	/**
+	 * Google Streets (http://maps.google.com/)
 	 * Get a Google map key from http://code.google.com/apis/maps/signup.html and include
 	 * http://maps.google.com/maps?file=api&v=2&key=[Your key] for this to work.
 	*/
@@ -386,6 +396,7 @@ if(OpenLayers.Layer.Google)
 	});
 
 	/**
+	 * Google Satellite (http://maps.google.com/)
 	 * Get a Google map key from http://code.google.com/apis/maps/signup.html and include
 	 * http://maps.google.com/maps?file=api&v=2&key=[Your key] for this to work.
 	*/
@@ -396,6 +407,7 @@ if(OpenLayers.Layer.Google)
 	});
 
 	/**
+	 * Google Hybrid (Streets and Satellite) (http://maps.google.com/)
 	 * Get a Google map key from http://code.google.com/apis/maps/signup.html and include
 	 * http://maps.google.com/maps?file=api&v=2&key=[Your key] for this to work.
 	*/
@@ -406,6 +418,7 @@ if(OpenLayers.Layer.Google)
 	});
 
 	/**
+	 * Google Terrain (http://maps.google.com/)
 	 * Get a Google map key from http://code.google.com/apis/maps/signup.html and include
 	 * http://maps.google.com/maps?file=api&v=2&key=[Your key] for this to work.
 	*/
@@ -416,6 +429,7 @@ if(OpenLayers.Layer.Google)
 	});
 
 	/**
+	 * Google MapMaker streets (http://www.google.com/mapmaker)
 	 * Get a Google map key from http://code.google.com/apis/maps/signup.html and include
 	 * http://maps.google.com/maps?file=api&v=2&key=[Your key] for this to work.
 	*/
@@ -426,6 +440,7 @@ if(OpenLayers.Layer.Google)
 	});
 
 	/**
+	 * Google MapMaker hybrid (streets and satellite) (http://www.google.com/mapmaker)
 	 * Get a Google map key from http://code.google.com/apis/maps/signup.html and include
 	 * http://maps.google.com/maps?file=api&v=2&key=[Your key] for this to work.
 	*/
@@ -439,6 +454,7 @@ if(OpenLayers.Layer.Google)
 if(OpenLayers.Layer.Yahoo)
 {
 	/**
+	 * Yahoo Streets (http://maps.yahoo.com/)
 	 * Include http://api.maps.yahoo.com/ajaxymap?v=3.0&appid=cdauths-map for this to work.
 	*/
 	OpenLayers.Layer.cdauth.Yahoo.Maps = new OpenLayers.Class(OpenLayers.Layer.Yahoo, {
@@ -448,6 +464,7 @@ if(OpenLayers.Layer.Yahoo)
 	});
 
 	/**
+	 * Yahoo Satellite (http://maps.yahoo.com/)
 	 * Include http://api.maps.yahoo.com/ajaxymap?v=3.0&appid=cdauths-map for this to work.
 	*/
 	OpenLayers.Layer.cdauth.Yahoo.Satellite = new OpenLayers.Class(OpenLayers.Layer.cdauth.Yahoo.Maps, {
@@ -457,6 +474,7 @@ if(OpenLayers.Layer.Yahoo)
 	});
 
 	/**
+	 * Yahoo Hybrid (Streets and Satellite)
 	 * Include http://api.maps.yahoo.com/ajaxymap?v=3.0&appid=cdauths-map for this to work.
 	*/
 	OpenLayers.Layer.cdauth.Yahoo.Hybrid = new OpenLayers.Class(OpenLayers.Layer.cdauth.Yahoo.Maps, {
@@ -468,6 +486,9 @@ if(OpenLayers.Layer.Yahoo)
 
 if(OpenLayers.Layer.XYZ)
 {
+	/**
+	 * OpenAerialMap (http://openaerialmap.org/). You may have to use the current unstable version of OpenLayers for this to be supported.
+	*/
 	OpenLayers.Layer.cdauth.other.OpenAerialMap = new OpenLayers.Class(OpenLayers.Layer.XYZ, {
 		initialize: function(name, options) {
 			OpenLayers.Layer.XYZ.prototype.initialize.apply(this, [ name, "http://tile.openaerialmap.org/tiles/1.0.0/openaerialmap-900913/${z}/${x}/${y}.png", OpenLayers.Util.extend({sphericalMercator: true}, options) ]);
@@ -489,6 +510,7 @@ if(OpenLayers.Layer.OpenTiles)
 }
 
 /**
+ * A Markers layer for adding LonLat markers. These markers display their coordinates and list various Permalinks to other map services.
  * @event markerAdded
  * @event markerRemoved
 */
@@ -496,6 +518,10 @@ if(OpenLayers.Layer.OpenTiles)
 OpenLayers.Layer.cdauth.markers.LonLat = new OpenLayers.Class(OpenLayers.Layer.Markers, {
 	defaultIcon : false,
 	EVENT_TYPES : [ "markerAdded", "markerRemoved" ],
+
+	/**
+	 * @param OpenLayers.Icon defaultIcon The icon to be used for the markers added by addLonLatMarker()
+	*/
 	initialize : function(name, defaultIcon, options) {
 		this.defaultIcon = defaultIcon;
 		this.EVENT_TYPES = OpenLayers.Layer.cdauth.markers.LonLat.prototype.EVENT_TYPES.concat(OpenLayers.Layer.Markers.prototype.EVENT_TYPES);
@@ -514,11 +540,14 @@ OpenLayers.Layer.cdauth.markers.LonLat = new OpenLayers.Class(OpenLayers.Layer.M
 		var framecloud = new OpenLayers.Popup.FramedCloud("lonlat", lonlat, null, ".", this_icon, true, function(evt){if(title) delete marker.cdauthTitle; layerMarkers.removeMarker(marker); framecloud.destroy(); layer.events.triggerEvent("markerRemoved"); OpenLayers.Event.stop(evt); });
 		marker.cdauthPopup = framecloud;
 		this.map.addPopup(framecloud);
-		// FIXME: Does not work yet
-		this.map.events.register("zoomend", this.map, this.resetPopupContent);
+		this.map.events.register("zoomend", this, this.resetPopupContent);
 		this.resetPopupContent();
 		this.events.triggerEvent("markerAdded");
 	},
+
+	/**
+	 * Is executed automatically on a zoom level change, recreates the Permalinks of the markers.
+	*/
 	resetPopupContent : function()
 	{
 		for(var i=0; i<this.markers.length; i++)
@@ -527,6 +556,7 @@ OpenLayers.Layer.cdauth.markers.LonLat = new OpenLayers.Class(OpenLayers.Layer.M
 });
 
 /**
+ * A markers layer to display the search results of the OpenStreetMap NameFinder.
  * @event lastSearchChange The value of lastSearch has changed.
  * @event searchBegin
  * @event searchSuccess
@@ -543,6 +573,8 @@ OpenLayers.Layer.cdauth.markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 
 	/**
 	 * @param String nameFinderURL http://gazetteer.openstreetmap.org/namefinder/search.xml (search=%s will be appended). To work around the same origin policy, pass a wrapper that lives on your webspace.
+	 * @param OpenLayers.Icon defaultIcon The default icon to use for the search result markers.
+	 * @param OpenLayers.Icon highlightIcon The marker icon to use for the first search result.
 	*/
 	initialize: function(name, nameFinderURL, defaultIcon, highlightIcon, options) {
 		this.nameFinderURL = nameFinderURL;
@@ -553,9 +585,10 @@ OpenLayers.Layer.cdauth.markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 	},
 
 	/**
+	 * Use the NameFinder to search in OpenStreetMap data and add the search results as markers to this layer.
 	 * @param String query The search string.
-	 * @param Function zoomback This function will be run after adding the result markers. It can be used to zoom back, as OpenLayers moves the map to make added markers visible.
-	 * @param Array markersvisible Contains a boolean value (or a string representing a boolean) for each search result to indicate if its popup should be visible.
+	 * @param Function zoomback This function will be run after adding the result markers. It can be used to zoom back, as OpenLayers moves the map to make added markers visible. If this is set, the alert box indicating that no results have been found will not be shown.
+	 * @param Array markersvisible Contains a boolean value (or a string representing a boolean) for each search result to indicate if a popup should be opened.
 	*/
 	geoSearch: function(query, zoomback, markersvisible)
 	{
