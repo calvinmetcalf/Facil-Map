@@ -34,7 +34,7 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 			controls: [
 				new OpenLayers.Control.Navigation(),
 				new OpenLayers.Control.PanZoomBar(),
-				new OpenLayers.Control.LayerSwitcher(),
+				new OpenLayers.Control.cdauth.LayerSwitcher(),
 				new OpenLayers.Control.Attribution() ],
 			maxExtent: new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34),
 			maxResolution: 156543.0399,
@@ -43,6 +43,12 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 			projection: new OpenLayers.Projection("EPSG:4326"),
 			displayProjection: new OpenLayers.Projection("EPSG:4326")
 		}, options) ]);
+	},
+
+	updateSize : function()
+	{
+		OpenLayers.Map.prototype.updateSize.apply(this);
+		this.events.triggerEvent("resize");
 	},
 
 	/**
@@ -228,6 +234,19 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 });
 
 OpenLayers.Control.cdauth = { };
+
+/**
+ * A layer switcher that has a scroll bar if the height of the map is too small.
+*/
+OpenLayers.Control.cdauth.LayerSwitcher = OpenLayers.Class(OpenLayers.Control.LayerSwitcher, {
+	loadContents : function() {
+		OpenLayers.Control.LayerSwitcher.prototype.loadContents.apply(this);
+		this.layersDiv.style.paddingRight = "0";
+		this.layersDiv.style.overflow = "auto";
+		this.map.events.register("resize", this, function(){this.layersDiv.style.maxHeight = (this.map.size.h-100)+"px"});
+	}
+});
+
 /**
  * Provides an add-marker click control to the map. Clicking on any point on the map will create a marker there with the coordinates and Permalinks.
  * Use the following code to add the control to the map.
@@ -402,55 +421,70 @@ if(OpenLayers.Layer.Google)
 	 * Get a Google map key from http://code.google.com/apis/maps/signup.html and include
 	 * http://maps.google.com/maps?file=api&v=2&key=[Your key] for this to work.
 	*/
-	OpenLayers.Layer.cdauth.Google.MapsSatellite = new OpenLayers.Class(OpenLayers.Layer.cdauth.Google.Maps, {
-		initialize: function(name, options) {
-			OpenLayers.Layer.cdauth.Google.Maps.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({type: G_SATELLITE_MAP, numZoomLevels: 22}, options) ]);
-		}
-	});
+	if(typeof G_SATELLITE_MAP != "undefined")
+	{
+		OpenLayers.Layer.cdauth.Google.MapsSatellite = new OpenLayers.Class(OpenLayers.Layer.cdauth.Google.Maps, {
+			initialize: function(name, options) {
+				OpenLayers.Layer.cdauth.Google.Maps.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({type: G_SATELLITE_MAP, numZoomLevels: 22}, options) ]);
+			}
+		});
+	}
 
 	/**
 	 * Google Hybrid (Streets and Satellite) (http://maps.google.com/)
 	 * Get a Google map key from http://code.google.com/apis/maps/signup.html and include
 	 * http://maps.google.com/maps?file=api&v=2&key=[Your key] for this to work.
 	*/
-	OpenLayers.Layer.cdauth.Google.MapsHybrid = new OpenLayers.Class(OpenLayers.Layer.cdauth.Google.Maps, {
-		initialize: function(name, options) {
-			OpenLayers.Layer.cdauth.Google.Maps.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({type: G_HYBRID_MAP}, options) ]);
-		}
-	});
+	if(typeof G_HYBRID_MAP != "undefined")
+	{
+		OpenLayers.Layer.cdauth.Google.MapsHybrid = new OpenLayers.Class(OpenLayers.Layer.cdauth.Google.Maps, {
+			initialize: function(name, options) {
+				OpenLayers.Layer.cdauth.Google.Maps.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({type: G_HYBRID_MAP}, options) ]);
+			}
+		});
+	}
 
 	/**
 	 * Google Terrain (http://maps.google.com/)
 	 * Get a Google map key from http://code.google.com/apis/maps/signup.html and include
 	 * http://maps.google.com/maps?file=api&v=2&key=[Your key] for this to work.
 	*/
-	OpenLayers.Layer.cdauth.Google.MapsTerrain = new OpenLayers.Class(OpenLayers.Layer.cdauth.Google.Maps, {
-		initialize: function(name, options) {
-			OpenLayers.Layer.cdauth.Google.Maps.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({type: G_PHYSICAL_MAP}, options) ]);
-		}
-	});
+	if(typeof G_PHYSICAL_MAP != "undefined")
+	{
+		OpenLayers.Layer.cdauth.Google.MapsTerrain = new OpenLayers.Class(OpenLayers.Layer.cdauth.Google.Maps, {
+			initialize: function(name, options) {
+				OpenLayers.Layer.cdauth.Google.Maps.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({type: G_PHYSICAL_MAP}, options) ]);
+			}
+		});
+	}
 
 	/**
 	 * Google MapMaker streets (http://www.google.com/mapmaker)
 	 * Get a Google map key from http://code.google.com/apis/maps/signup.html and include
 	 * http://maps.google.com/maps?file=api&v=2&key=[Your key] for this to work.
 	*/
-	OpenLayers.Layer.cdauth.Google.MapMaker = new OpenLayers.Class(OpenLayers.Layer.cdauth.Google.Maps, {
-		initialize: function(name, options) {
-			OpenLayers.Layer.cdauth.Google.Maps.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({type: G_MAPMAKER_NORMAL_MAP}, options) ]);
-		}
-	});
+	if(typeof G_MAPMAKER_NORMAL_MAP != "undefined")
+	{
+		OpenLayers.Layer.cdauth.Google.MapMaker = new OpenLayers.Class(OpenLayers.Layer.cdauth.Google.Maps, {
+			initialize: function(name, options) {
+				OpenLayers.Layer.cdauth.Google.Maps.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({type: G_MAPMAKER_NORMAL_MAP}, options) ]);
+			}
+		});
+	}
 
 	/**
 	 * Google MapMaker hybrid (streets and satellite) (http://www.google.com/mapmaker)
 	 * Get a Google map key from http://code.google.com/apis/maps/signup.html and include
 	 * http://maps.google.com/maps?file=api&v=2&key=[Your key] for this to work.
 	*/
-	OpenLayers.Layer.cdauth.Google.MapMakerHybrid = new OpenLayers.Class(OpenLayers.Layer.cdauth.Google.Maps, {
-		initialize: function(name, options) {
-			OpenLayers.Layer.cdauth.Google.Maps.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({type: G_MAPMAKER_HYBRID_MAP}, options) ]);
-		}
-	});
+	if(typeof G_MAPMAKER_HYBRID_MAP != "undefined")
+	{
+		OpenLayers.Layer.cdauth.Google.MapMakerHybrid = new OpenLayers.Class(OpenLayers.Layer.cdauth.Google.Maps, {
+			initialize: function(name, options) {
+				OpenLayers.Layer.cdauth.Google.Maps.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({type: G_MAPMAKER_HYBRID_MAP}, options) ]);
+			}
+		});
+	}
 }
 
 if(OpenLayers.Layer.Yahoo)
@@ -469,21 +503,27 @@ if(OpenLayers.Layer.Yahoo)
 	 * Yahoo Satellite (http://maps.yahoo.com/)
 	 * Include http://api.maps.yahoo.com/ajaxymap?v=3.0&appid=cdauths-map for this to work.
 	*/
-	OpenLayers.Layer.cdauth.Yahoo.Satellite = new OpenLayers.Class(OpenLayers.Layer.cdauth.Yahoo.Maps, {
-		initialize: function(name, options) {
-			OpenLayers.Layer.cdauth.Yahoo.Maps.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({type: YAHOO_MAP_SAT}, options) ]);
-		}
-	});
+	if(typeof YAHOO_MAP_SAT != "undefined")
+	{
+		OpenLayers.Layer.cdauth.Yahoo.Satellite = new OpenLayers.Class(OpenLayers.Layer.cdauth.Yahoo.Maps, {
+			initialize: function(name, options) {
+				OpenLayers.Layer.cdauth.Yahoo.Maps.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({type: YAHOO_MAP_SAT}, options) ]);
+			}
+		});
+	}
 
 	/**
 	 * Yahoo Hybrid (Streets and Satellite)
 	 * Include http://api.maps.yahoo.com/ajaxymap?v=3.0&appid=cdauths-map for this to work.
 	*/
-	OpenLayers.Layer.cdauth.Yahoo.Hybrid = new OpenLayers.Class(OpenLayers.Layer.cdauth.Yahoo.Maps, {
-		initialize: function(name, options) {
-			OpenLayers.Layer.cdauth.Yahoo.Maps.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({type: YAHOO_MAP_HYB}, options) ]);
-		}
-	});
+	if(typeof YAHOO_MAP_HYB != "undefined")
+	{
+		OpenLayers.Layer.cdauth.Yahoo.Hybrid = new OpenLayers.Class(OpenLayers.Layer.cdauth.Yahoo.Maps, {
+			initialize: function(name, options) {
+				OpenLayers.Layer.cdauth.Yahoo.Maps.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({type: YAHOO_MAP_HYB}, options) ]);
+			}
+		});
+	}
 }
 
 if(OpenLayers.Layer.XYZ)
@@ -697,6 +737,50 @@ OpenLayers.Layer.cdauth.markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 	}
 });
 
+// TODO
+OpenLayers.Layer.cdauth.markers.OpenStreetBugs = new OpenLayers.Class(OpenLayers.Layer.Markers, {
+	/*function refresh_osb()
+	{
+		if (refresh_osb.call_count == undefined)
+			refresh_osb.call_count = 0;
+		else
+			++refresh_osb.call_count;
+
+		bounds = osb_map.getExtent().toArray();
+		b = shorter_coord(y2lat(bounds[1]));
+		t = shorter_coord(y2lat(bounds[3]));
+		l = shorter_coord(x2lon(bounds[0]));
+		r = shorter_coord(x2lon(bounds[2]));
+
+		refresh_sidebar();
+
+		var params = { "b": b, "t": t, "l": l, "r": r, "ucid": refresh_osb.call_count };
+		make_request("getBugs", params);
+	}
+
+function shorter_coord(coord)
+{
+	return Math.round(coord*100000)/100000;
+}
+
+function make_request(url, params)
+{
+	url = osb_server_path+url;
+	for (var name in params)
+	{
+		url += (url.indexOf("?") > -1) ? "&" : "?";
+		url += encodeURIComponent(name) + "=" + encodeURIComponent(params[name]);
+	}
+
+	var script = document.createElement("script");
+	script.src = url;
+	script.type = "text/javascript";
+	document.body.appendChild(script);
+}
+
+	*/
+});
+
 /**
  * Decodes a URL query string (the part after the ?).
  * @param String str
@@ -773,7 +857,7 @@ function encodeQueryString(obj, prefix, arr)
 function htmlspecialchars(str)
 {
 	if(!str) return "";
-	return str.replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;");
+	return str.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;");
 }
 
 /**
