@@ -25,6 +25,7 @@
 
 /**
  * A map with the default values needed for OpenStreetMap and other world maps.
+ * @event resize
 */
 
 OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
@@ -43,6 +44,7 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 			projection: new OpenLayers.Projection("EPSG:4326"),
 			displayProjection: new OpenLayers.Projection("EPSG:4326")
 		}, options) ]);
+		this.events.addEventType("resize");
 	},
 
 	updateSize : function()
@@ -552,36 +554,85 @@ if(OpenLayers.Layer.OpenTiles)
 }
 
 /**
+ * A Markers layer with a function to easily add a marker with a popup.
+*/
+
+OpenLayers.Layer.cdauth.markers.Markers = new OpenLayers.Class(OpenLayers.Layer.Markers, {
+	initialize : function(name, options) {
+		OpenLayers.Layer.Markers.prototype.initialize.apply(this, [ name, options ]);
+		this.events.addEventType("markersChanged");
+	},
+	defaultIcon : new OpenLayers.Icon('http://osm.cdauth.de/map/marker.png', new OpenLayers.Size(21,25), new OpenLayers.Pixel(-9, -25)),
+	createMarker : function(lonlat, popupContent, popupVisible, icon) {
+		var feature = new OpenLayers.Feature(this, lonlat);
+		feature.data.icon = icon ? icon : this.defaultIcon.clone();
+		if(popupContent)
+		{
+			feature.popupClass = OpenLayers.Popup.FramedCloud;
+			feature.data.popupContentHTML = popupContent;
+			feature.data.autoSize = true;
+		}
+		var marker = feature.createMarker();
+		marker.events.addEventType("close");
+		marker.events.addEventType("open");
+		if(popupContent)
+		{
+			var layer = this;
+			var markerClick = function (evt) {
+				if(this.popup == null)
+				{
+					this.popup = this.createPopup(true);
+					OpenLayers.Event.observe(this.popup.closeDiv, "click", OpenLayers.Function.bindAsEventListener(function(e)
+					{
+						this.popup.hide();
+						layer.events.triggerEvent("markersChanged");
+						this.marker.events.triggerEvent("close");
+						OpenLayers.Event.stop(e);
+					}, this));
+
+					layer.map.addPopup(this.popup);
+					this.popup.show();
+				}
+				else
+				{
+					this.popup.toggle();
+					this.marker.events.triggerEvent(this.popup.visible ? "close" : "open");
+				}
+				OpenLayers.Event.stop(evt);
+				layer.events.triggerEvent("markersChanged");
+			};
+			marker.events.register("mousedown", feature, markerClick);
+		}
+		marker.cdauthFeature = feature;
+		this.addMarker(marker);
+		if(popupVisible)
+			marker.events.triggerEvent("mousedown");
+		return marker;
+	}
+});
+
+/**
  * A Markers layer for adding LonLat markers. These markers display their coordinates and list various Permalinks to other map services.
  * @event markerAdded
  * @event markerRemoved
 */
 
-OpenLayers.Layer.cdauth.markers.LonLat = new OpenLayers.Class(OpenLayers.Layer.Markers, {
-	defaultIcon : false,
-	EVENT_TYPES : [ "markerAdded", "markerRemoved" ],
-
+OpenLayers.Layer.cdauth.markers.LonLat = new OpenLayers.Class(OpenLayers.Layer.cdauth.markers.Markers, {
 	/**
 	 * @param OpenLayers.Icon defaultIcon The icon to be used for the markers added by addLonLatMarker()
 	*/
-	initialize : function(name, defaultIcon, options) {
-		this.defaultIcon = defaultIcon;
-		this.EVENT_TYPES = OpenLayers.Layer.cdauth.markers.LonLat.prototype.EVENT_TYPES.concat(OpenLayers.Layer.Markers.prototype.EVENT_TYPES);
-		OpenLayers.Layer.Markers.prototype.initialize.apply(this, [ name, options ]);
+	initialize : function(name, options) {
+		OpenLayers.Layer.cdauth.markers.Markers.prototype.initialize.apply(this, [ name, options ]);
+		this.events.addEventType("markerAdded");
+		this.events.addEventType("markerRemoved");
 	},
-	addLonLatMarker : function(lonlat, title)
+	addLonLatMarker : function(lonlat, title, icon)
 	{
 		var layer = this;
 
 		var lonlat_readable = lonlat.clone().transform(this.map.getProjectionObject(), this.map.displayProjection);
-		var this_icon = this.defaultIcon.clone();
-		var marker = new OpenLayers.Marker(lonlat, this_icon);
-		if(title)
-			marker.cdauthTitle = title;
-		this.addMarker(marker);
-		var framecloud = new OpenLayers.Popup.FramedCloud("lonlat", lonlat, null, ".", this_icon, true, function(evt){if(title) delete marker.cdauthTitle; layerMarkers.removeMarker(marker); framecloud.destroy(); layer.events.triggerEvent("markerRemoved"); OpenLayers.Event.stop(evt); });
-		marker.cdauthPopup = framecloud;
-		this.map.addPopup(framecloud);
+		var marker = this.createMarker(lonlat, ".", true);
+		marker.events.registerPriority("close", this, function(evt) { this.removeMarker(marker); marker.cdauthFeature.popup.destroy(); this.events.triggerEvent("markerRemoved"); OpenLayers.Event.stop(evt); });
 		this.map.events.register("zoomend", this, this.resetPopupContent);
 		this.resetPopupContent();
 		this.events.triggerEvent("markerAdded");
@@ -593,7 +644,7 @@ OpenLayers.Layer.cdauth.markers.LonLat = new OpenLayers.Class(OpenLayers.Layer.M
 	resetPopupContent : function()
 	{
 		for(var i=0; i<this.markers.length; i++)
-			this.markers[i].cdauthPopup.setContentHTML((this.markers[i].cdauthTitle ? "<h6 class=\"marker-heading\">"+htmlspecialchars(this.markers[i].cdauthTitle)+"</h6>" : "")+makePermalinks(this.markers[i].lonlat.clone().transform(this.map.getProjectionObject(), this.map.displayProjection), this.map.getZoom()));
+			this.markers[i].cdauthFeature.popup.setContentHTML((this.markers[i].cdauthTitle ? "<h6 class=\"marker-heading\">"+htmlspecialchars(this.markers[i].cdauthTitle)+"</h6>" : "")+makePermalinks(this.markers[i].lonlat.clone().transform(this.map.getProjectionObject(), this.map.displayProjection), this.map.getZoom()));
 	}
 });
 
@@ -606,12 +657,11 @@ OpenLayers.Layer.cdauth.markers.LonLat = new OpenLayers.Class(OpenLayers.Layer.M
  * @event markersChanged A marker has been opened or closed.
 */
 
-OpenLayers.Layer.cdauth.markers.GeoSearch = new OpenLayers.Class(OpenLayers.Layer.Markers, {
+OpenLayers.Layer.cdauth.markers.GeoSearch = new OpenLayers.Class(OpenLayers.Layer.cdauth.markers.Markers, {
 	lastSearch : false,
 	nameFinderURL : false,
 	defaultIcon : false,
 	highlighIcon : false,
-	EVENT_TYPES : [ "lastSearchChange", "searchBegin", "searchSuccess", "searchFailure", "markersChanged" ],
 
 	/**
 	 * @param String nameFinderURL http://gazetteer.openstreetmap.org/namefinder/search.xml (search=%s will be appended). To work around the same origin policy, pass a wrapper that lives on your webspace.
@@ -619,11 +669,14 @@ OpenLayers.Layer.cdauth.markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 	 * @param OpenLayers.Icon highlightIcon The marker icon to use for the first search result.
 	*/
 	initialize: function(name, nameFinderURL, defaultIcon, highlightIcon, options) {
+		OpenLayers.Layer.cdauth.markers.Markers.prototype.initialize.apply(this, [ name, options ]);
 		this.nameFinderURL = nameFinderURL;
 		this.defaultIcon = defaultIcon;
 		this.highlightIcon = highlightIcon;
-		this.EVENT_TYPES = OpenLayers.Layer.cdauth.markers.GeoSearch.prototype.EVENT_TYPES.concat(OpenLayers.Layer.Markers.prototype.EVENT_TYPES);
-		OpenLayers.Layer.Markers.prototype.initialize.apply(this, [ name, options ]);
+		this.events.addEventType("lastSearchChange");
+		this.events.addEventType("searchBegin");
+		this.events.addEventType("searchSuccess");
+		this.events.addEventType("searchFailure");
 	},
 
 	/**
@@ -650,90 +703,81 @@ OpenLayers.Layer.cdauth.markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 
 		this.events.triggerEvent("searchBegin");
 
-		OpenLayers.loadURL(this.nameFinderURL, { "find": query }, null, function(request) {
-			if(request.responseXML)
-			{
-				var searchresults = request.responseXML.getElementsByTagName("searchresults");
-				if(searchresults.length > 0)
+		var query_match;
+		if(query_match = query.match(/^\s*(-?\s*\d+([.,]\d+)?)\s*[,;]?\s*(-?\s*\d+([.,]\d+)?)\s*$/))
+		{ // Coordinates
+			results = [ {
+				zoom : this.map.getZoom(),
+				lon : query_match[3].replace(",", ".").replace(/\s+/, ""),
+				lat : query_match[1].replace(",", ".").replace(/\s+/, ""),
+				name : query,
+				info : "Coordinates"
+			} ];
+			this.showResults(results, query, zoomback, markersvisible);
+		}
+		else
+		{ // NameFinder
+			var layer = this;
+			OpenLayers.loadURL(this.nameFinderURL, { "find": query }, null, function(request) {
+				if(request.responseXML)
 				{
-					var named = searchresults[0].childNodes;
-					var markers = [ ];
-					var zoom;
-					var last_lonlat;
-					var first = true;
-					for(var i=0; i<named.length; i++)
+					var searchresults = request.responseXML.getElementsByTagName("searchresults");
+					if(searchresults.length > 0)
 					{
-						if(named[i].nodeType != 1) continue;
+						var named = searchresults[0].childNodes;
+						var results = [ ];
+						for(var i=0; i<named.length; i++)
+						{
+							if(named[i].nodeType != 1) continue;
 
-						zoom = named[i].getAttribute("zoom");
+							results.push({
+								zoom : named[i].getAttribute("zoom"),
+								lon : named[i].getAttribute("lon"),
+								lat : named[i].getAttribute("lat"),
+								name : named[i].getAttribute("name"),
+								info : named[i].getAttribute("info"),
+							});
+						}
 
-						var lonlat = new OpenLayers.LonLat(named[i].getAttribute("lon"), named[i].getAttribute("lat")).transform(new OpenLayers.Projection("EPSG:4326"), this.map.getProjectionObject());
-						last_lonlat = lonlat;
-						var this_icon = (first ? layer.highlightIcon : layer.defaultIcon).clone();
-						if(first) first = false;
+						layer.showResults(results, query, zoomback, markersvisible);
 
-						var feature = new OpenLayers.Feature(this, lonlat);
-						feature.popupClass = OpenLayers.Popup.FramedCloud;
-						// FIXME: global variable map is still used
-						feature.data.popupContentHTML = "<h6 class=\"result-heading\"><strong>"+htmlspecialchars(named[i].getAttribute("name"))+"</strong> ("+htmlspecialchars(named[i].getAttribute("info") ? named[i].getAttribute("info") : "unknown")+"), <a href=\"javascript:map.setCenter(new OpenLayers.LonLat("+named[i].getAttribute("lon")+", "+named[i].getAttribute("lat")+").transform(map.displayProjection, map.getProjectionObject()), "+named[i].getAttribute("zoom")+");\">[Zoom]</a></h6>"+makePermalinks(new OpenLayers.LonLat(named[i].getAttribute("lon"), named[i].getAttribute("lat")), named[i].getAttribute("zoom"));
-						feature.data.autoSize = true;
-						feature.data.icon = this_icon;
-						var marker = feature.createMarker();
-						var markerClick = function (evt) {
-							if (this.popup == null) {
-								this.popup = this.createPopup(true);
-								OpenLayers.Event.observe(this.popup.closeDiv, "click", OpenLayers.Function.bindAsEventListener(function(e)
-								{
-									this.popup.hide();
-									OpenLayers.Event.stop(e);
-									layer.events.triggerEvent("markersChanged");
-								}, this));
-
-								layer.map.addPopup(this.popup);
-								this.popup.show();
-							} else {
-								this.popup.toggle();
-							}
-							OpenLayers.Event.stop(evt);
-							layer.events.triggerEvent("markersChanged");
-						};
-						marker.events.register("mousedown", feature, markerClick);
-						marker.cdauthFeature = feature;
-						markers.push(marker);
+						return;
 					}
-					for(var i=markers.length-1; i>=0; i--)
-					{
-						if((markersvisible && typeof markersvisible[i] != "undefined" && markersvisible[i] != "0") || ((!markersvisible || typeof markersvisible[i] == "undefined") && i==0))
-							markers[i].events.triggerEvent("mousedown");
-						layer.addMarker(markers[i]);
-					}
-
-					if(zoomback)
-						zoomback();
-					else
-					{
-						if(markers.length == 0)
-							alert("No results.");
-						else if(markers.length == 1)
-							layer.map.setCenter(last_lonlat, zoom);
-						else
-							layer.map.zoomToExtent(layer.getDataExtent());
-					}
-
-					layer.lastSearch = query;
-					layer.events.triggerEvent("lastSearchChange");
-
-					layer.events.triggerEvent("searchSuccess");
-
-					return;
 				}
-			}
-			this.events.triggerEvent("searchFailure");
-			alert("Search failed.");
-		}, function() {
-			this.events.triggerEvent("searchFailure");
-			alert("Search failed.");
-		});
+				layer.events.triggerEvent("searchFailure");
+				alert("Search failed.");
+			}, function() {
+				layer.events.triggerEvent("searchFailure");
+				alert("Search failed.");
+			});
+		}
+	},
+	showResults : function(results, query, zoomback, markersvisible) {
+		for(var i=results.length-1; i>=0; i--)
+		{
+			this.createMarker(
+				new OpenLayers.LonLat(results[i].lon, results[i].lat).transform(new OpenLayers.Projection("EPSG:4326"), this.map.getProjectionObject()),
+				"<h6 class=\"result-heading\"><strong>"+htmlspecialchars(results[i].name)+"</strong> ("+htmlspecialchars(results[i].info ? results[i].info : "unknown")+"), <a href=\"javascript:map.setCenter(new OpenLayers.LonLat("+results[i].lon+", "+results[i].lat+").transform(map.displayProjection, map.getProjectionObject()), "+results[i].zoom+");\">[Zoom]</a></h6>"+makePermalinks(new OpenLayers.LonLat(results[i].lon, results[i].lat), results[i].zoom),
+				((markersvisible && typeof markersvisible[i] != "undefined" && markersvisible[i] != "0") || ((!markersvisible || typeof markersvisible[i] == "undefined") && i==0)),
+				(i==0 ? this.highlightIcon : this.defaultIcon).clone());
+		}
+
+		if(zoomback)
+			zoomback();
+		else
+		{
+			if(results.length == 0)
+				alert("No results.");
+			else if(results.length == 1)
+				this.map.setCenter(new OpenLayers.LonLat(results[0].lon, results[0].lat).transform(new OpenLayers.Projection("EPSG:4326"), this.map.getProjectionObject()), results[0].zoom);
+			else
+				this.map.zoomToExtent(this.getDataExtent());
+		}
+
+		this.lastSearch = query;
+		this.events.triggerEvent("lastSearchChange");
+
+		this.events.triggerEvent("searchSuccess");
 	}
 });
 
@@ -878,4 +922,12 @@ function makePermalinks(lonlat, zoom)
 		+ "<li><a href=\"http://maps.yahoo.com/broadband/#lat="+lonlat.lat+"&amp;lon="+lonlat.lon+"&amp;zoom="+zoom+"\">Yahoo Maps Permalink</a></li>"
 		+ "<li><a href=\"http://osmtools.de/osmlinks/?lat="+lonlat.lat+"&amp;lon="+lonlat.lon+"&amp;zoom="+zoom+"\">OpenStreetMap Links</a></li>"
 		+ "<li><a href=\"http://stable.toolserver.org/geohack/geohack.php?params="+lonlat.lat+"_N_"+lonlat.lon+"_E\">Wikimedia GeoHack</a></li></ul>";
+}
+
+function alert_r(data)
+{
+	var str = "";
+	for(var i in data)
+		str += i+": "+data[i]+"\n";
+	alert(str);
 }
