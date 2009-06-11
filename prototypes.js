@@ -49,8 +49,9 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 
 	updateSize : function()
 	{
-		OpenLayers.Map.prototype.updateSize.apply(this);
+		var ret = OpenLayers.Map.prototype.updateSize.apply(this, arguments);
 		this.events.triggerEvent("resize");
+		return ret;
 	},
 
 	/**
@@ -242,53 +243,11 @@ OpenLayers.Control.cdauth = { };
 */
 OpenLayers.Control.cdauth.LayerSwitcher = OpenLayers.Class(OpenLayers.Control.LayerSwitcher, {
 	loadContents : function() {
-		OpenLayers.Control.LayerSwitcher.prototype.loadContents.apply(this);
+		var ret = OpenLayers.Control.LayerSwitcher.prototype.loadContents.apply(this, arguments);
 		this.layersDiv.style.paddingRight = "0";
 		this.layersDiv.style.overflow = "auto";
 		this.map.events.register("resize", this, function(){this.layersDiv.style.maxHeight = (this.map.size.h-100)+"px"});
-	}
-});
-
-/**
- * Provides an add-marker click control to the map. Clicking on any point on the map will create a marker there with the coordinates and Permalinks.
- * Use the following code to add the control to the map.
- * var layerMarkers = new OpenLayers.Layer.cdauth.makers.LonLat("Markers");
- * map.addLayer(layerMarkers);
- * var click = new OpenLayers.Control.cdauth.MarkerClick(layerMarkers);
- * map.addControl(click);
- * click.activate();
-*/
-OpenLayers.Control.cdauth.MarkerClick = OpenLayers.Class(OpenLayers.Control, {
-	layerMarkers : false,
-	defaultHandlerOptions: {
-		'single': true,
-		'double': false,
-		'pixelTolerance': 0,
-		'stopSingle': false,
-		'stopDouble': false
-	},
-
-	/**
-	 * @param OpenLayers.Layer.cdauth.markers.LonLat layerMarkers The Layer that the markers should be added to.
-	*/
-	initialize: function(layerMarkers, options) {
-		this.layerMarkers = layerMarkers;
-		this.handlerOptions = OpenLayers.Util.extend(
-			{}, this.defaultHandlerOptions
-		);
-		OpenLayers.Control.prototype.initialize.apply(
-			this, arguments
-		);
-		this.handler = new OpenLayers.Handler.Click(
-			this, {
-				'click': this.trigger
-			}, this.handlerOptions
-		);
-	},
-
-	trigger: function(e) {
-		var lonlat = this.layerMarkers.map.getLonLatFromViewPortPx(e.xy);
-		this.layerMarkers.addLonLatMarker(lonlat);
+		return ret;
 	}
 });
 
@@ -554,6 +513,23 @@ if(OpenLayers.Layer.OpenTiles)
 }
 
 /**
+ * A FramedCloud that triggers an event after running setContentHTML().
+ * @event setContentHTML
+*/
+
+OpenLayers.Popup.FramedCloud.cdauth = new OpenLayers.Class(OpenLayers.Popup.FramedCloud, {
+	initialize: function() {
+		OpenLayers.Popup.FramedCloud.prototype.initialize.apply(this, arguments);
+		this.events.addEventType("setContentHTML");
+	},
+	setContentHTML: function() {
+		var ret = OpenLayers.Popup.FramedCloud.prototype.setContentHTML.apply(this, arguments);
+		this.events.triggerEvent("setContentHTML");
+		return ret;
+	}
+});
+
+/**
  * A Markers layer with a function to easily add a marker with a popup.
 */
 
@@ -568,7 +544,7 @@ OpenLayers.Layer.cdauth.markers.Markers = new OpenLayers.Class(OpenLayers.Layer.
 		feature.data.icon = icon ? icon : this.defaultIcon.clone();
 		if(popupContent)
 		{
-			feature.popupClass = OpenLayers.Popup.FramedCloud;
+			feature.popupClass = OpenLayers.Popup.FramedCloud.cdauth;
 			feature.data.popupContentHTML = popupContent;
 			feature.data.autoSize = true;
 		}
@@ -577,42 +553,38 @@ OpenLayers.Layer.cdauth.markers.Markers = new OpenLayers.Class(OpenLayers.Layer.
 		marker.events.addEventType("open");
 		if(popupContent)
 		{
-			var layer = this;
-			var markerClick = function (evt) {
-				if(this.popup == null)
-				{
-					this.popup = this.createPopup(true);
-					OpenLayers.Event.observe(this.popup.closeDiv, "click", OpenLayers.Function.bindAsEventListener(function(e)
-					{
-						this.popup.hide();
-						layer.events.triggerEvent("markersChanged");
-						this.marker.events.triggerEvent("close");
-						OpenLayers.Event.stop(e);
-					}, this));
+			feature.createPopup(true);
+			this.map.addPopup(feature.popup);
+			OpenLayers.Event.observe(feature.popup.closeDiv, "click", OpenLayers.Function.bindAsEventListener(function(e)
+			{
+				this.popup.hide();
+				layer.events.triggerEvent("markersChanged");
+				this.marker.events.triggerEvent("close");
+				OpenLayers.Event.stop(e);
+			}, feature));
 
-					layer.map.addPopup(this.popup);
-					this.popup.show();
-				}
-				else
-				{
-					this.popup.toggle();
-					this.marker.events.triggerEvent(this.popup.visible ? "close" : "open");
-				}
+			if(popupVisible)
+				feature.popup.show();
+			else
+				feature.popup.hide();
+
+			var layer = this;
+			marker.events.register("mousedown", feature, function (evt) {
+				this.popup.toggle();
+				this.marker.events.triggerEvent(this.popup.visible() ? "close" : "open");
 				OpenLayers.Event.stop(evt);
 				layer.events.triggerEvent("markersChanged");
-			};
-			marker.events.register("mousedown", feature, markerClick);
+			});
 		}
 		marker.cdauthFeature = feature;
 		this.addMarker(marker);
-		if(popupVisible)
-			marker.events.triggerEvent("mousedown");
 		return marker;
 	}
 });
 
 /**
  * A Markers layer for adding LonLat markers. These markers display their coordinates and list various Permalinks to other map services.
+ * Run addClickControl() for the functionality of creating a marker when clicking.
  * @event markerAdded
  * @event markerRemoved
 */
@@ -622,9 +594,15 @@ OpenLayers.Layer.cdauth.markers.LonLat = new OpenLayers.Class(OpenLayers.Layer.c
 	 * @param OpenLayers.Icon defaultIcon The icon to be used for the markers added by addLonLatMarker()
 	*/
 	initialize : function(name, options) {
-		OpenLayers.Layer.cdauth.markers.Markers.prototype.initialize.apply(this, [ name, options ]);
+		OpenLayers.Layer.cdauth.markers.Markers.prototype.initialize.apply(this, arguments);
 		this.events.addEventType("markerAdded");
 		this.events.addEventType("markerRemoved");
+	},
+	addClickControl : function() {
+		this.map.events.register("click", this, function(e){
+			var lonlat = this.map.getLonLatFromViewPortPx(e.xy);
+			this.addLonLatMarker(lonlat);
+		});
 	},
 	addLonLatMarker : function(lonlat, title, icon)
 	{
@@ -632,7 +610,7 @@ OpenLayers.Layer.cdauth.markers.LonLat = new OpenLayers.Class(OpenLayers.Layer.c
 
 		var lonlat_readable = lonlat.clone().transform(this.map.getProjectionObject(), this.map.displayProjection);
 		var marker = this.createMarker(lonlat, ".", true);
-		marker.events.registerPriority("close", this, function(evt) { this.removeMarker(marker); marker.cdauthFeature.popup.destroy(); this.events.triggerEvent("markerRemoved"); OpenLayers.Event.stop(evt); });
+		marker.events.register("close", this, function(evt) { var feature = marker.cdauthFeature; delete marker.cdauthFeature; this.removeMarker(marker); feature.destroyMarker(); feature.destroyPopup(); this.events.triggerEvent("markerRemoved"); OpenLayers.Event.stop(evt); });
 		this.map.events.register("zoomend", this, this.resetPopupContent);
 		this.resetPopupContent();
 		this.events.triggerEvent("markerAdded");
@@ -703,16 +681,31 @@ OpenLayers.Layer.cdauth.markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 
 		this.events.triggerEvent("searchBegin");
 
+		query.replace(/^\s+/, "").replace(/\s+$/, "");
 		var query_match;
-		if(query_match = query.match(/^\s*(-?\s*\d+([.,]\d+)?)\s*[,;]?\s*(-?\s*\d+([.,]\d+)?)\s*$/))
+		var query_urlPart;
+		if(query_match = query.match(/^(-?\s*\d+([.,]\d+)?)\s*[,;]?\s*(-?\s*\d+([.,]\d+)?)$/))
 		{ // Coordinates
 			results = [ {
 				zoom : this.map.getZoom(),
 				lon : query_match[3].replace(",", ".").replace(/\s+/, ""),
 				lat : query_match[1].replace(",", ".").replace(/\s+/, ""),
-				name : query,
 				info : "Coordinates"
 			} ];
+			results[0].name = results[0].lat+","+results[0].lon;
+			this.showResults(results, query, zoomback, markersvisible);
+		}
+		else if((query_match = query.match(/^http:\/\/.*\?(.*)$/)) && typeof (query_urlPart = decodeQueryString(query_match[1])).lon != "undefined" && typeof query_urlPart.lat != "undefined")
+		{ // OpenStreetMap Permalink
+			results = [ {
+				lon : query_urlPart.lon,
+				lat : query_urlPart.lat,
+				info : "Coordinates"
+			} ];
+			if(typeof query_urlPart.zoom == "undefined")
+				results[0].zoom = this.map.getZoom();
+			else
+				results[0].zoom = query_urlPart.zoom;
 			this.showResults(results, query, zoomback, markersvisible);
 		}
 		else
@@ -755,11 +748,26 @@ OpenLayers.Layer.cdauth.markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 	showResults : function(results, query, zoomback, markersvisible) {
 		for(var i=results.length-1; i>=0; i--)
 		{
-			this.createMarker(
+			var marker = this.createMarker(
 				new OpenLayers.LonLat(results[i].lon, results[i].lat).transform(new OpenLayers.Projection("EPSG:4326"), this.map.getProjectionObject()),
-				"<h6 class=\"result-heading\"><strong>"+htmlspecialchars(results[i].name)+"</strong> ("+htmlspecialchars(results[i].info ? results[i].info : "unknown")+"), <a href=\"javascript:map.setCenter(new OpenLayers.LonLat("+results[i].lon+", "+results[i].lat+").transform(map.displayProjection, map.getProjectionObject()), "+results[i].zoom+");\">[Zoom]</a></h6>"+makePermalinks(new OpenLayers.LonLat(results[i].lon, results[i].lat), results[i].zoom),
+				"<h6 class=\"result-heading\"><strong>"+htmlspecialchars(results[i].name)+"</strong> ("+htmlspecialchars(results[i].info ? results[i].info : "unknown")+"), <a href=\"#\">[Zoom]</a></h6>"+makePermalinks(new OpenLayers.LonLat(results[i].lon, results[i].lat), results[i].zoom),
 				((markersvisible && typeof markersvisible[i] != "undefined" && markersvisible[i] != "0") || ((!markersvisible || typeof markersvisible[i] == "undefined") && i==0)),
-				(i==0 ? this.highlightIcon : this.defaultIcon).clone());
+				(i==0 ? this.highlightIcon : this.defaultIcon).clone()
+			);
+
+			marker.cdauth = {
+				lonlat: new OpenLayers.LonLat(results[i].lon, results[i].lat),
+				zoom: results[i].zoom,
+				update: function(){
+					OpenLayers.Event.observe(this.cdauthFeature.popup.contentDiv.getElementsByTagName("a")[0], "click", OpenLayers.Function.bindAsEventListener(function(e) {
+						this.map.setCenter(this.cdauth.lonlat.transform(new OpenLayers.Projection("EPSG:4326"), this.map.getProjectionObject()), this.cdauth.zoom);
+						OpenLayers.Event.stop(e);
+					}, marker));
+				}
+			};
+
+			marker.cdauthFeature.popup.events.register("setContentHTML", marker, marker.cdauth.update);
+			marker.cdauthFeature.popup.events.triggerEvent("setContentHTML");
 		}
 
 		if(zoomback)
@@ -913,8 +921,8 @@ function htmlspecialchars(str)
 
 function makePermalinks(lonlat, zoom)
 {
-	return "<dl><dt>Longitude</dt><dd>"+Math.round(lonlat.lon*100000000)/100000000+"</dd>"
-		+ "<dt>Latitude</dt><dd>"+Math.round(lonlat.lat*100000000)/100000000+"</dd></dl>"
+	return "<dl><dt>Latitude</dt><dd>"+Math.round(lonlat.lat*100000000)/100000000+"</dd>"
+		+ "<dt>Longitude</dt><dd>"+Math.round(lonlat.lon*100000000)/100000000+"</dd></dl>"
 		+ "<ul><li><a href=\"http://www.openstreetmap.org/?lat="+lonlat.lat+"&amp;lon="+lonlat.lon+"&amp;zoom="+zoom+"\">OpenStreetMap Permalink</a></li>"
 		+ "<li><a href=\"http://data.giub.uni-bonn.de/openrouteservice/index.php?end="+lonlat.lon+","+lonlat.lat+"&amp;lat="+lonlat.lat+"&amp;lon="+lonlat.lon+"&amp;zoom="+zoom+"\">Get directions (OpenRouteService)</a></li>"
 		+ "<li><a href=\"http://www.openstreetmap.org/?mlat="+lonlat.lat+"&amp;mlon="+lonlat.lon+"&amp;zoom="+zoom+"\">OpenStreetMap Marker</a></li>"
