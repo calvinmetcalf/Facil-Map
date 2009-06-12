@@ -21,9 +21,9 @@
 
 	ini_set("display_errors", "Off");
 
-	$fh = fsockopen("gazetteer.openstreetmap.org", 80);
-	fwrite($fh, "GET /namefinder/search.xml?find=".rawurlencode(isset($_GET["find"]) ? $_GET["find"] : "")." HTTP/1.0\r\n");
-	fwrite($fh, "Host: gazetteer.openstreetmap.org\r\n");
+	$fh = fsockopen("openstreetbugs.schokokeks.org", 80);
+	fwrite($fh, "GET /api/0.1/getGPX?".$_SERVER["QUERY_STRING"]." HTTP/1.0\r\n");
+	fwrite($fh, "Host: openstreetbugs.schokokeks.org\r\n");
 	fwrite($fh, "User-Agent: ".rawurlencode("cdauth’s map"));
 	fwrite($fh, "X-Forwarded-For: ".$_SERVER["REMOTE_ADDR"]."\r\n");
 	foreach($_SERVER as $k=>$v)

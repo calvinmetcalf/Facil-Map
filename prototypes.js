@@ -25,10 +25,13 @@
 
 /**
  * A map with the default values needed for OpenStreetMap and other world maps.
- * @event resize
+ * If you plan to use the getQueryMethod() function, remember to set the visibility of your overlay layers _before_ adding them to the map.
+ * @event resize The map div has been resized.
+ * @event newHash The return value of getQueryObject() probably has changed.
 */
 
 OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
+	cdauthDefaultVisibility : { },
 	initialize : function(div, options)
 	{
 		OpenLayers.Map.prototype.initialize.apply(this, [ div, OpenLayers.Util.extend({
@@ -45,6 +48,11 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 			displayProjection: new OpenLayers.Projection("EPSG:4326")
 		}, options) ]);
 		this.events.addEventType("resize");
+		this.events.addEventType("newHash");
+
+		this.events.register("move", this, function(){ this.events.triggerEvent("newHash"); });
+		this.events.register("changebaselayer", this, function(){ this.events.triggerEvent("newHash"); });
+		this.events.register("changelayer", this, function(){ this.events.triggerEvent("newHash"); });
 	},
 
 	updateSize : function()
@@ -52,6 +60,14 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 		var ret = OpenLayers.Map.prototype.updateSize.apply(this, arguments);
 		this.events.triggerEvent("resize");
 		return ret;
+	},
+
+	addLayer : function(layer)
+	{
+		var ret = OpenLayers.Map.prototype.addLayer.apply(this, arguments);
+
+		if(!layer.isBaseLayer)
+			this.cdauthDefaultVisibility[layer.name] = layer.getVisibility();
 	},
 
 	/**
@@ -137,7 +153,7 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 	},
 
 	/**
-	 * Zoom to the specified query object.
+	 * Zoom to the specified query object. Remember to add your layers before running this method.
 	 * @param Object query Usually decodeQueryString(location.hash.replace(/^#/, ""))
 	 * @param OpenLayers.Layer.cdauth.markers.LonLat layerMarkers Optional, layer to add position markers to.
 	 * @param OpenLayers.Layer.cdauth.markers.GeoSearch layerGeoSearch Optional, to restore the GeoSearch.
@@ -165,6 +181,16 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 			this.updateOPNVLayer();
 		}
 
+		if(query.overlays)
+		{
+			for(var i in query.overlays)
+			{
+				var layers = this.getLayersByName(i);
+				for(var j=0; j<layers.length; j++)
+					layers[j].setVisibility(query.overlays[i] != "0");
+			}
+		}
+
 		if(layerMarkers)
 		{
 			layerMarkers.clearMarkers();
@@ -186,6 +212,8 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 	/**
 	 * Returns a Query object that you can pass to the zoomToQuery() function to restore the current view. Usually you save this to the location
 	 * hash part by calling location.hash = "#"+encodeQueryString(map.getQueryObject());
+	 * Only non-default settings will be added to this query object. Remember to set the visibility of your overlay layers _before_ adding
+	 * them to the map, as the default visibility value will be determined during adding it.
 	 * @param OpenLayers.Layer.cdauth.markers.LonLat layerMarkers Optional, to save the positions of the geographical markers.
 	 * @param OpenLayers.Layer.cdauth.markers.GeoSearch layerGeoSearch Optional, to save the current GeoSearch.
 	 * @return Object
@@ -205,8 +233,16 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 			mlon : { },
 			mlat : { },
 			mtitle : { },
-			smopen : { }
+			smopen : { },
+			overlays : { }
 		};
+
+		for(var i=0; i<this.layers.length; i++)
+		{ // Save overlay visibility
+			if(this.layers[i].isBaseLayer) continue;
+			if(this.layers[i].getVisibility() != this.cdauthDefaultVisibility[this.layers[i].name])
+				hashObject.overlays[this.layers[i].name] = this.layers[i].getVisibility() ? "1" : "0";
+		}
 
 		if(layerGeoSearch && layerGeoSearch.lastSearch)
 		{
@@ -531,6 +567,7 @@ OpenLayers.Popup.FramedCloud.cdauth = new OpenLayers.Class(OpenLayers.Popup.Fram
 
 /**
  * A Markers layer with a function to easily add a marker with a popup.
+ * @event markersChanged A marker popup has been opened or closed.
 */
 
 OpenLayers.Layer.cdauth.markers.Markers = new OpenLayers.Class(OpenLayers.Layer.Markers, {
@@ -539,7 +576,18 @@ OpenLayers.Layer.cdauth.markers.Markers = new OpenLayers.Class(OpenLayers.Layer.
 		this.events.addEventType("markersChanged");
 	},
 	defaultIcon : new OpenLayers.Icon('http://osm.cdauth.de/map/marker.png', new OpenLayers.Size(21,25), new OpenLayers.Pixel(-9, -25)),
-	createMarker : function(lonlat, popupContent, popupVisible, icon) {
+	/**
+	 * Creates a marker with a popup (OpenLayers.Popup.FramedCloud) on this layer. The visibility of the popup can be toggled by clicking
+	 * on the marker.
+	 * @param OpenLayers.LonLat lonlat The position of the marker.
+	 * @param String popupContent The HTML content of the popup.
+	 * @param boolean popupVisible Should the popup be visible initially?
+	 * @param OpenLayers.Icon Use this icon instead of the default icon.
+	 * @param boolean noPan Don’t move the map view to the marker.
+	 * @return The newly created OpenLayers.Marker object. It contains the additional property cdauthFeature, which is the OpenLayers.Feature
+	 * that connects the marker with the popup. The marker triggers the events “open” or “close” when changing the visibility of the popup.
+	*/
+	createMarker : function(lonlat, popupContent, popupVisible, icon, noPan) {
 		var feature = new OpenLayers.Feature(this, lonlat);
 		feature.data.icon = icon ? icon : this.defaultIcon.clone();
 		if(popupContent)
@@ -554,6 +602,7 @@ OpenLayers.Layer.cdauth.markers.Markers = new OpenLayers.Class(OpenLayers.Layer.
 		if(popupContent)
 		{
 			feature.createPopup(true);
+			feature.popup.panMapIfOutOfView = !noPan;
 			this.map.addPopup(feature.popup);
 			OpenLayers.Event.observe(feature.popup.closeDiv, "click", OpenLayers.Function.bindAsEventListener(function(e)
 			{
@@ -597,6 +646,9 @@ OpenLayers.Layer.cdauth.markers.LonLat = new OpenLayers.Class(OpenLayers.Layer.c
 		OpenLayers.Layer.cdauth.markers.Markers.prototype.initialize.apply(this, arguments);
 		this.events.addEventType("markerAdded");
 		this.events.addEventType("markerRemoved");
+
+		this.events.register("markerAdded", this, function(){ if(this.map) this.map.events.triggerEvent("newHash"); });
+		this.events.register("markerRemoved", this, function(){ if(this.map) this.map.events.triggerEvent("newHash"); });
 	},
 	addClickControl : function() {
 		this.map.events.register("click", this, function(e){
@@ -632,7 +684,6 @@ OpenLayers.Layer.cdauth.markers.LonLat = new OpenLayers.Class(OpenLayers.Layer.c
  * @event searchBegin
  * @event searchSuccess
  * @event searchFailure
- * @event markersChanged A marker has been opened or closed.
 */
 
 OpenLayers.Layer.cdauth.markers.GeoSearch = new OpenLayers.Class(OpenLayers.Layer.cdauth.markers.Markers, {
@@ -655,15 +706,18 @@ OpenLayers.Layer.cdauth.markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 		this.events.addEventType("searchBegin");
 		this.events.addEventType("searchSuccess");
 		this.events.addEventType("searchFailure");
+
+		this.events.register("lastSearchChange", this, function(){ if(this.map) this.map.events.triggerEvent("newHash"); });
+		this.events.register("markersChanged", this, function(){ if(this.map) this.map.events.triggerEvent("newHash"); });
 	},
 
 	/**
 	 * Use the NameFinder to search in OpenStreetMap data and add the search results as markers to this layer.
 	 * @param String query The search string.
-	 * @param Function zoomback This function will be run after adding the result markers. It can be used to zoom back, as OpenLayers moves the map to make added markers visible. If this is set, the alert box indicating that no results have been found will not be shown.
+	 * @param boolean zoomback Don’t zoom to the search result but keep the current view of the map. If this is set, no alert box will indicate that the search returned no results.
 	 * @param Array markersvisible Contains a boolean value (or a string representing a boolean) for each search result to indicate if a popup should be opened.
 	*/
-	geoSearch: function(query, zoomback, markersvisible)
+	geoSearch: function(query, dontzoom, markersvisible)
 	{
 		layer = this;
 
@@ -732,7 +786,7 @@ OpenLayers.Layer.cdauth.markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 							});
 						}
 
-						layer.showResults(results, query, zoomback, markersvisible);
+						layer.showResults(results, query, dontzoom, markersvisible);
 
 						return;
 					}
@@ -745,14 +799,15 @@ OpenLayers.Layer.cdauth.markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 			});
 		}
 	},
-	showResults : function(results, query, zoomback, markersvisible) {
+	showResults : function(results, query, dontzoom, markersvisible) {
 		for(var i=results.length-1; i>=0; i--)
 		{
 			var marker = this.createMarker(
 				new OpenLayers.LonLat(results[i].lon, results[i].lat).transform(new OpenLayers.Projection("EPSG:4326"), this.map.getProjectionObject()),
 				"<h6 class=\"result-heading\"><strong>"+htmlspecialchars(results[i].name)+"</strong> ("+htmlspecialchars(results[i].info ? results[i].info : "unknown")+"), <a href=\"#\">[Zoom]</a></h6>"+makePermalinks(new OpenLayers.LonLat(results[i].lon, results[i].lat), results[i].zoom),
 				((markersvisible && typeof markersvisible[i] != "undefined" && markersvisible[i] != "0") || ((!markersvisible || typeof markersvisible[i] == "undefined") && i==0)),
-				(i==0 ? this.highlightIcon : this.defaultIcon).clone()
+				(i==0 ? this.highlightIcon : this.defaultIcon).clone(),
+				dontzoom
 			);
 
 			marker.cdauth = {
@@ -770,9 +825,7 @@ OpenLayers.Layer.cdauth.markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 			marker.cdauthFeature.popup.events.triggerEvent("setContentHTML");
 		}
 
-		if(zoomback)
-			zoomback();
-		else
+		if(!dontzoom)
 		{
 			if(results.length == 0)
 				alert("No results.");
@@ -789,48 +842,123 @@ OpenLayers.Layer.cdauth.markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 	}
 });
 
-// TODO
+/**
+ * An OpenStreetBugs layer (currently read-only). Parses the GPX output from http://openstreetbugs.schokokeks.org/
+ * (see http://wiki.openstreetmap.org/wiki/User:Emka/new_OSB). http://openstreetbugs.appspot.com/ does not work as the GPX output
+ * does not provide bug IDs.
+ * @event markersUpdating The refresh() function has been called and an AJAX request has been started
+ * @event markersUpdated The AJAX response has successfully been retreived and new bugs have been added to the map.
+ * @event updateFailed There was a problem receiving the AJAX response.
+*/
+
 OpenLayers.Layer.cdauth.markers.OpenStreetBugs = new OpenLayers.Class(OpenLayers.Layer.Markers, {
-	/*function refresh_osb()
-	{
-		if (refresh_osb.call_count == undefined)
-			refresh_osb.call_count = 0;
-		else
-			++refresh_osb.call_count;
-
-		bounds = osb_map.getExtent().toArray();
-		b = shorter_coord(y2lat(bounds[1]));
-		t = shorter_coord(y2lat(bounds[3]));
-		l = shorter_coord(x2lon(bounds[0]));
-		r = shorter_coord(x2lon(bounds[2]));
-
-		refresh_sidebar();
-
-		var params = { "b": b, "t": t, "l": l, "r": r, "ucid": refresh_osb.call_count };
-		make_request("getBugs", params);
-	}
-
-function shorter_coord(coord)
-{
-	return Math.round(coord*100000)/100000;
-}
-
-function make_request(url, params)
-{
-	url = osb_server_path+url;
-	for (var name in params)
-	{
-		url += (url.indexOf("?") > -1) ? "&" : "?";
-		url += encodeURIComponent(name) + "=" + encodeURIComponent(params[name]);
-	}
-
-	var script = document.createElement("script");
-	script.src = url;
-	script.type = "text/javascript";
-	document.body.appendChild(script);
-}
-
+	iconError : new OpenLayers.Icon("http://openstreetbugs.appspot.com/icon_error.png", new OpenLayers.Size(22,22), new OpenLayers.Pixel(-11, -11)),
+	iconValid : new OpenLayers.Icon("http://openstreetbugs.appspot.com/icon_valid.png", new OpenLayers.Size(22,22), new OpenLayers.Pixel(-11, -11)),
+	osbugs : { },
+	osbURL : { },
+	/**
+	 * @param String osbURL The URL to use (usually a file on your webspace proxying http://openstreetbugs.schokokeks.org/api/0.1/getGPX
 	*/
+	initialize : function(name, osbURL, options)
+	{
+		OpenLayers.Layer.Markers.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({opacity: .7}, options) ]);
+		this.osbURL = osbURL;
+		this.events.addEventType("markersUpdating");
+		this.events.addEventType("markersUpdated");
+		this.events.addEventType("updateFailed");
+		this.events.register("visibilitychanged", this, this.refresh);
+	},
+	afterAdd : function()
+	{
+		var ret = OpenLayers.Layer.Markers.prototype.afterAdd.apply(this, arguments);
+		this.map.events.register("moveend", this, this.refresh);
+		this.refresh();
+		return ret;
+	},
+	addBugMarker : function(id, lonlat, html, status) {
+		if(this.osbugs[id]) return;
+
+		var feature = new OpenLayers.Feature(this, lonlat.clone().transform(new OpenLayers.Projection("EPSG:4326"), this.map.getProjectionObject()));
+		feature.closeBox = false;
+		feature.popupClass = OpenLayers.Popup.FramedCloud;
+		feature.data.icon = (status == 1 ? this.iconValid.clone() : this.iconError.clone())
+		feature.data.popupContentHTML = html;
+		feature.data.autoSize = true;
+		var marker = feature.createMarker();
+		marker.events.register("click", feature, function(evt)
+		{
+			this.cdauthClicked = !this.cdauthClicked;
+			if(this.cdauthClicked)
+			{
+				if(this.popup)
+					this.popup.show();
+				else
+					map.addPopup(this.createPopup());
+			}
+			else
+				this.popup.hide();
+			OpenLayers.Event.stop(evt);
+		});
+		marker.events.register("mouseover", feature, function(evt)
+		{
+			if(!this.cdauthClicked)
+			{
+				if(this.popup)
+					this.popup.show();
+				else
+					map.addPopup(this.createPopup());
+			}
+			OpenLayers.Event.stop(evt);
+		});
+		marker.events.register("mouseout", feature, function(evt)
+		{
+			if(!this.cdauthClicked)
+				this.popup.hide();
+			OpenLayers.Event.stop(evt);
+		});
+
+		this.osbugs[id] = feature;
+		this.addMarker(marker);
+	},
+	/**
+	 * Fetches the OpenStreetBugs of the currently visible map extent if this layer is visible and adds the bugs to the map. This is
+	 * automatically called when the map extent changes.
+	*/
+	refresh : function()
+	{
+		if(!this.getVisibility())
+			return;
+		var extent_obj = this.map.getExtent();
+		if(!extent_obj)
+			return;
+		var extent = extent_obj.transform(this.map.getProjectionObject(), new OpenLayers.Projection("EPSG:4326")).toArray();
+		for(var i=0; i<4; i++)
+			extent[i] = Math.round(extent[i]*100000)/100000;
+		var layer = this;
+		this.events.triggerEvent("markersUpdating");
+		OpenLayers.loadURL(this.osbURL, { "l" : extent[0], "b" : extent[1], "r" : extent[2], "t" : extent[3], "limit" : 500 }, null, function(request) {
+			if(request.responseXML)
+			{
+				var points = request.responseXML.getElementsByTagName("wpt");
+				for(var i=0; i<points.length; i++)
+				{
+					var desc_l = points[i].getElementsByTagName("desc");
+					if(desc_l.length < 1)
+						continue;
+					var closed_l = points[i].getElementsByTagName("closed");
+					if(closed_l.length < 1)
+						continue;
+					var id_l = points[i].getElementsByTagName("id");
+					if(id_l.length < 1 || !id_l[0].firstChild)
+						continue;
+					layer.addBugMarker(id_l[0].firstChild.data, new OpenLayers.LonLat(points[i].getAttribute("lon"), points[i].getAttribute("lat")), desc_l[0].textContent, closed_l[0].firstChild ? closed_l[0].firstChild.data : 0);
+				}
+				layer.events.triggerEvent("markersUpdated");
+			}
+			else
+				layer.events.triggerEvent("updateFailed");
+		}, function() { layer.events.triggerEvent("updateFailed"); });
+	}
 });
 
 /**
@@ -921,15 +1049,18 @@ function htmlspecialchars(str)
 
 function makePermalinks(lonlat, zoom)
 {
-	return "<dl><dt>Latitude</dt><dd>"+Math.round(lonlat.lat*100000000)/100000000+"</dd>"
-		+ "<dt>Longitude</dt><dd>"+Math.round(lonlat.lon*100000000)/100000000+"</dd></dl>"
-		+ "<ul><li><a href=\"http://www.openstreetmap.org/?lat="+lonlat.lat+"&amp;lon="+lonlat.lon+"&amp;zoom="+zoom+"\">OpenStreetMap Permalink</a></li>"
+	return "<dl>"
+		+ "<dt>Latitude</dt><dd>"+Math.round(lonlat.lat*100000000)/100000000+"</dd>"
+		+ "<dt>Longitude</dt><dd>"+Math.round(lonlat.lon*100000000)/100000000+"</dd>"
+		+ "</dl><ul>"
 		+ "<li><a href=\"http://data.giub.uni-bonn.de/openrouteservice/index.php?end="+lonlat.lon+","+lonlat.lat+"&amp;lat="+lonlat.lat+"&amp;lon="+lonlat.lon+"&amp;zoom="+zoom+"\">Get directions (OpenRouteService)</a></li>"
-		+ "<li><a href=\"http://www.openstreetmap.org/?mlat="+lonlat.lat+"&amp;mlon="+lonlat.lon+"&amp;zoom="+zoom+"\">OpenStreetMap Marker</a></li>"
-		+ "<li><a href=\"http://maps.google.com/?q="+lonlat.lat+","+lonlat.lon+"\">Google Maps Marker</a></li>"
+		+ "<li><a href=\"http://www.openstreetmap.org/?lat="+lonlat.lat+"&amp;lon="+lonlat.lon+"&amp;mlat="+lonlat.lat+"&amp;mlon="+lonlat.lon+"&amp;zoom="+zoom+"\">OpenStreetMap Permalink</a></li>"
+		+ "<li><a href=\"http://maps.google.com/?q="+lonlat.lat+","+lonlat.lon+"\">Google Maps Permalink</a></li>"
 		+ "<li><a href=\"http://maps.yahoo.com/broadband/#lat="+lonlat.lat+"&amp;lon="+lonlat.lon+"&amp;zoom="+zoom+"\">Yahoo Maps Permalink</a></li>"
 		+ "<li><a href=\"http://osmtools.de/osmlinks/?lat="+lonlat.lat+"&amp;lon="+lonlat.lon+"&amp;zoom="+zoom+"\">OpenStreetMap Links</a></li>"
-		+ "<li><a href=\"http://stable.toolserver.org/geohack/geohack.php?params="+lonlat.lat+"_N_"+lonlat.lon+"_E\">Wikimedia GeoHack</a></li></ul>";
+		+ "<li><a href=\"http://stable.toolserver.org/geohack/geohack.php?params="+lonlat.lat+"_N_"+lonlat.lon+"_E\">Wikimedia GeoHack</a></li>"
+		+ "<li><a href=\"http://openstreetbugs.org/?lat="+lonlat.lat+"&amp;lon="+lonlat.lon+"&amp;zoom="+zoom+"\">OpenStreetBugs</a></li>"
+		+ "</ul>";
 }
 
 function alert_r(data)
