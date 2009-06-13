@@ -943,7 +943,7 @@ OpenLayers.Layer.cdauth.markers.OpenStreetBugs = new OpenLayers.Class(OpenLayers
 				for(var i=0; i<points.length; i++)
 				{
 					var desc_l = points[i].getElementsByTagName("desc");
-					if(desc_l.length < 1)
+					if(desc_l.length < 1 || !desc_l[0].firstChild)
 						continue;
 					var closed_l = points[i].getElementsByTagName("closed");
 					if(closed_l.length < 1)
@@ -951,7 +951,7 @@ OpenLayers.Layer.cdauth.markers.OpenStreetBugs = new OpenLayers.Class(OpenLayers
 					var id_l = points[i].getElementsByTagName("id");
 					if(id_l.length < 1 || !id_l[0].firstChild)
 						continue;
-					layer.addBugMarker(id_l[0].firstChild.data, new OpenLayers.LonLat(points[i].getAttribute("lon"), points[i].getAttribute("lat")), desc_l[0].textContent, closed_l[0].firstChild ? closed_l[0].firstChild.data : 0);
+					layer.addBugMarker(id_l[0].firstChild.data, new OpenLayers.LonLat(points[i].getAttribute("lon"), points[i].getAttribute("lat")), desc_l[0].firstChild.data, closed_l[0].firstChild ? closed_l[0].firstChild.data : 0);
 				}
 				layer.events.triggerEvent("markersUpdated");
 			}
