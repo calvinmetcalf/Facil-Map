@@ -782,7 +782,7 @@ OpenLayers.Layer.cdauth.markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 								lon : named[i].getAttribute("lon"),
 								lat : named[i].getAttribute("lat"),
 								name : named[i].getAttribute("name"),
-								info : named[i].getAttribute("info"),
+								info : named[i].getAttribute("info")
 							});
 						}
 
