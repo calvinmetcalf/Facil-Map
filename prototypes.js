@@ -353,6 +353,8 @@ OpenLayers.Control.cdauth.LayerSwitcher = OpenLayers.Class(OpenLayers.Control.La
 			var layer = this.map.getLayersByName(spans[i].innerHTML)[0];
 			if(!layer) continue;
 
+			var append = [ ];
+
 			if(!layer.noZoomButton)
 			{
 				var a_zoom = document.createElement("a");
@@ -360,8 +362,8 @@ OpenLayers.Control.cdauth.LayerSwitcher = OpenLayers.Class(OpenLayers.Control.La
 				OpenLayers.Event.observe(a_zoom, "click", OpenLayers.Function.bindAsEventListener(function(){ var extent = this.getDataExtent(); if(extent) this.map.zoomToExtent(extent); return false; }, layer));
 				a_zoom.appendChild(document.createTextNode("[Zoom]"));
 
-				domInsertAfter(document.createTextNode(" "), spans[i]);
-				domInsertAfter(a_zoom, spans[i]);
+				append.push(document.createTextNode(" "));
+				append.push(a_zoom);
 			}
 
 			if(layer.removableInLayerSwitcher)
@@ -371,8 +373,17 @@ OpenLayers.Control.cdauth.LayerSwitcher = OpenLayers.Class(OpenLayers.Control.La
 				OpenLayers.Event.observe(a_remove, "click", OpenLayers.Function.bindAsEventListener(function(){ this.map.removeLayer(this); this.destroy(); return false; }, layer));
 				a_remove.appendChild(document.createTextNode("[Remove]"));
 
-				domInsertAfter(document.createTextNode(" "), spans[i]);
-				domInsertAfter(a_remove, spans[i]);
+				append.push(document.createTextNode(" "));
+				append.push(a_remove);
+			}
+
+			var nextSibling = spans[i].nextSibling;
+			for(var i=0; i<append.length; i++)
+			{
+				if(nextSibling)
+					spans[i].parentNode.insertBefore(append[i], nextSibling);
+				else
+					spans[i].parentNode.appendChild(append[i]);
 			}
 		}
 
