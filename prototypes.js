@@ -463,6 +463,26 @@ if(OpenLayers.Layer.OSM)
 		}
 	});
 
+	/**
+	 * OSM Reit- und Wanderkarte rendering of OSM foot- and bridle ways. See http://osmc.broadbox.de/.
+	 * Include http://www.openstreetmap.org/openlayers/OpenStreetMap.js for this to work.
+	*/
+	OpenLayers.Layer.cdauth.OSM.Wanderkarte = new OpenLayers.Class(OpenLayers.Layer.OSM, {
+		initialize: function(name, options) {
+			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://topo.geofabrik.de/trails/${z}/${x}/${y}.png", OpenLayers.Util.extend({minZoomLevel: 8, maxZoomLevel: 15, attribution: "Rendering by <a href=\"http://osmc.broadbox.de/\">OSMC Reit- und Wanderkarte</a>. Data by <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>"}, options) ]);
+		}
+	});
+
+	/**
+	 * Reit- und Wanderkarte relief rendering.
+	 * Include http://www.openstreetmap.org/openlayers/OpenStreetMap.js for this to work.
+	*/
+	OpenLayers.Layer.cdauth.other.Relief = new OpenLayers.Class(OpenLayers.Layer.OSM, {
+		initialize: function(name, options) {
+			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://topo.geofabrik.de/relief/${z}/${x}/${y}.png", OpenLayers.Util.extend({minZoomLevel: 8, maxZoomLevel: 15, attribution: "Rendering by <a href=\"http://osmc.broadbox.de/\">OSMC Reit- und Wanderkarte</a>. DEM by <a href='http://srtm.csi.cgiar.org'>CIAT</a>" }, options) ]);
+		}
+	});
+
 	if(OpenLayers.Layer.WMS)
 	{
 		OpenLayers.Layer.cdauth.OSM.OPNVKarte = { };
@@ -489,19 +509,6 @@ if(OpenLayers.Layer.OSM)
 			}
 		});
 	}
-}
-
-if(OpenLayers.Layer.OpenTiles)
-{
-	/**
-	 * OSM Reit- und Wanderkarte rendering of OSM foot- and bridle ways. See http://osmc.broadbox.de/.
-	 * Include http://www.openstreetmap.org/openlayers/OpenStreetMap.js  and http://opentiles.com/nop/opentiles.js for this to work.
-	*/
-	OpenLayers.Layer.cdauth.OSM.Wanderkarte = new OpenLayers.Class(OpenLayers.Layer.OpenTiles, {
-		initialize: function(name, options) {
-			OpenLayers.Layer.OpenTiles.prototype.initialize.apply(this, [ name, "http://opentiles.com/nop/get.php?", OpenLayers.Util.extend({numZoomLevels: 16, layername:'trails', attribution: "Rendering by <a href=\"http://opentiles.com/nop/\">OSMC Reit- und Wanderkarte</a>. Data by <a href=\"http://openstreetmap.org/\">OpenStreetMap</a>" }, options) ]);
-		}
-	});
 }
 
 if(OpenLayers.Layer.Google)
@@ -635,19 +642,6 @@ if(OpenLayers.Layer.XYZ)
 	OpenLayers.Layer.cdauth.other.OpenAerialMap = new OpenLayers.Class(OpenLayers.Layer.XYZ, {
 		initialize: function(name, options) {
 			OpenLayers.Layer.XYZ.prototype.initialize.apply(this, [ name, "http://tile.openaerialmap.org/tiles/1.0.0/openaerialmap-900913/${z}/${x}/${y}.png", OpenLayers.Util.extend({sphericalMercator: true}, options) ]);
-		}
-	});
-}
-
-if(OpenLayers.Layer.OpenTiles)
-{
-	/**
-	 * Reit- und Wanderkarte relief rendering.
-	 * Include http://opentiles.com/nop/opentiles.js for this to work.
-	*/
-	OpenLayers.Layer.cdauth.other.Relief = new OpenLayers.Class(OpenLayers.Layer.OpenTiles, {
-		initialize: function(name, options) {
-			OpenLayers.Layer.OpenTiles.prototype.initialize.apply(this, [ name, "http://opentiles.com/nop/get.php?", OpenLayers.Util.extend({numZoomLevels: 16, isBaseLayer:true, layername:'relief', attribution: "Rendering by <a href=\"http://opentiles.com/nop/\">OSMC Reit- und Wanderkarte</a>. DEM by <a href='http://srtm.csi.cgiar.org'>CIAT</a>" }, options) ]);
 		}
 	});
 }

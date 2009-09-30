@@ -75,7 +75,7 @@
 					$content_type = $m[1];
 			}
 
-			if(!$content_type || !in_array($content_type, array("application/x-gpx+xml", "application/gpx+xml", "text/xml", "application/xml", "application/x-osm+xml", "application/osm+xml")))
+			if(!$content_type || !in_array($content_type, array("application/x-gpx+xml", "application/gpx+xml", "text/xml", "application/xml", "application/x-osm+xml", "application/osm+xml", "application/vnd.google-earth.kml+xml")))
 				throw new Exception("Content-type unacceptable.");
 
 			foreach($headers as $header)
