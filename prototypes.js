@@ -153,7 +153,8 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 	},
 
 	/**
-	 * Zoom to the specified query object. Remember to add your layers before running this method.
+	 * Zoom to the specified query object. Remember to add your layers and to eventually set OpenLayers.Layer.cdauth.XML.proxy before running
+	 * this method.
 	 * @param Object query Usually decodeQueryString(location.hash.replace(/^#/, ""))
 	 * @param OpenLayers.Layer.cdauth.markers.LonLat layerMarkers Optional, layer to add position markers to.
 	 * @param OpenLayers.Layer.cdauth.markers.GeoSearch layerGeoSearch Optional, to restore the GeoSearch.
@@ -207,6 +208,54 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 
 		if(layerGeoSearch && query.search)
 			layerGeoSearch.geoSearch(query.search, search_may_zoom ? false : function(){map.setCenter(new OpenLayers.LonLat(query.lon, query.lat).transform(map.displayProjection, map.getProjectionObject()), query.zoom);}, query.smopen);
+
+		// Handle removable GPX layers
+		var xmlLayers = [ ];
+		for(var i=0; i<this.layers.length; i++)
+		{
+			if(!(this.layers[i] instanceof OpenLayers.Layer.cdauth.XML) || !this.layers[i].removableInLayerSwitcher)
+				continue;
+
+			var inside = false;
+			if(query.xml)
+			{
+				for(var j in query.xml)
+				{
+					if(query.xml[j] == this.layers[i].cdauthURL)
+					{
+						inside = true;
+						break;
+					}
+				}
+			}
+
+			if(!inside)
+			{
+				this.removeLayer(this.layers[i]);
+				this.layers[i].destroy();
+			}
+			else
+				xmlLayers.push(this.layers[i]);
+		}
+
+		if(query.xml)
+		{
+			for(var j in query.xml)
+			{
+				var inside = false;
+				for(var i=0; i<xmlLayers.length; i++)
+				{
+					if(query.xml[j] == xmlLayers[i].cdauthURL)
+					{
+						inside = true;
+						break;
+					}
+				}
+
+				if(!inside)
+					this.addLayer(new OpenLayers.Layer.cdauth.XML(null, query.xml[j], { removableInLayerSwitcher: true }));
+			}
+		}
 	},
 
 	/**
@@ -234,14 +283,19 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 			mlat : { },
 			mtitle : { },
 			smopen : { },
-			overlays : { }
+			overlays : { },
+			xml : { },
 		};
+
+		var xml_i = 0;
 
 		for(var i=0; i<this.layers.length; i++)
 		{ // Save overlay visibility
 			if(this.layers[i].isBaseLayer) continue;
 			if(this.layers[i].getVisibility() != this.cdauthDefaultVisibility[this.layers[i].name])
 				hashObject.overlays[this.layers[i].name] = this.layers[i].getVisibility() ? "1" : "0";
+			if(this.layers[i] instanceof OpenLayers.Layer.cdauth.XML && this.layers[i].removableInLayerSwitcher)
+				hashObject.xml[xml_i++] = this.layers[i].cdauthURL;
 		}
 
 		if(layerGeoSearch && layerGeoSearch.lastSearch)
@@ -276,6 +330,8 @@ OpenLayers.Control.cdauth = { };
 
 /**
  * A layer switcher that has a scroll bar if the height of the map is too small.
+ * Additionally, overlay layers that don’t have the “noZoomButton” property get a button that zooms to the data extent of the layer.
+ * Overlay layers that have the “removableInLayerSwitcher” property set get a button to remove the layer from the map.
 */
 OpenLayers.Control.cdauth.LayerSwitcher = OpenLayers.Class(OpenLayers.Control.LayerSwitcher, {
 	loadContents : function() {
@@ -283,6 +339,43 @@ OpenLayers.Control.cdauth.LayerSwitcher = OpenLayers.Class(OpenLayers.Control.La
 		this.layersDiv.style.paddingRight = "0";
 		this.layersDiv.style.overflow = "auto";
 		this.map.events.register("resize", this, function(){this.layersDiv.style.maxHeight = (this.map.size.h-100)+"px"});
+		return ret;
+	},
+
+	redraw : function() {
+		// Display “Zoom” and, if desired, “Remove” links for overlay layers.
+
+		var ret = OpenLayers.Control.LayerSwitcher.prototype.redraw.apply(this, arguments);
+
+		var spans = this.dataLayersDiv.getElementsByTagName("span");
+		for(var i=0; i<spans.length; i++)
+		{
+			var layer = this.map.getLayersByName(spans[i].innerHTML)[0];
+			if(!layer) continue;
+
+			if(!layer.noZoomButton)
+			{
+				var a_zoom = document.createElement("a");
+				a_zoom.href = "#";
+				OpenLayers.Event.observe(a_zoom, "click", OpenLayers.Function.bindAsEventListener(function(){ var extent = this.getDataExtent(); if(extent) this.map.zoomToExtent(extent); return false; }, layer));
+				a_zoom.appendChild(document.createTextNode("[Zoom]"));
+
+				domInsertAfter(document.createTextNode(" "), spans[i]);
+				domInsertAfter(a_zoom, spans[i]);
+			}
+
+			if(layer.removableInLayerSwitcher)
+			{
+				var a_remove = document.createElement("a");
+				a_remove.href = "#";
+				OpenLayers.Event.observe(a_remove, "click", OpenLayers.Function.bindAsEventListener(function(){ this.map.removeLayer(this); this.destroy(); return false; }, layer));
+				a_remove.appendChild(document.createTextNode("[Remove]"));
+
+				domInsertAfter(document.createTextNode(" "), spans[i]);
+				domInsertAfter(a_remove, spans[i]);
+			}
+		}
+
 		return ret;
 	}
 });
@@ -549,21 +642,114 @@ if(OpenLayers.Layer.OpenTiles)
 }
 
 /**
- * A FramedCloud that triggers an event after running setContentHTML().
- * @event setContentHTML
+ * Extends a FramedCloud with various useful features. An event is triggered during closing instead of passing the callback function
+ * to the initialize function. You may pass a DOM element for the popup content instead of HTML code.
+ * @event close
 */
 
 OpenLayers.Popup.FramedCloud.cdauth = new OpenLayers.Class(OpenLayers.Popup.FramedCloud, {
-	initialize: function() {
-		OpenLayers.Popup.FramedCloud.prototype.initialize.apply(this, arguments);
-		this.events.addEventType("setContentHTML");
+	contentDom: null,
+	initialize: function(id, lonlat, contentSize, contentDom, anchor, closeBox, closeBoxCallback) {
+		var closeCallback = function(){ if(closeBoxCallback) closeBoxCallback(); this.events.triggerEvent("close"); };
+		OpenLayers.Popup.FramedCloud.prototype.initialize.apply(this, [ id, lonlat, contentSize, null, anchor, closeBox, closeCallback ] );
+
+		this.events.addEventType("close");
+
+		this.setContentHTML(contentDom);
 	},
-	setContentHTML: function() {
-		var ret = OpenLayers.Popup.FramedCloud.prototype.setContentHTML.apply(this, arguments);
-		this.events.triggerEvent("setContentHTML");
-		return ret;
+	setContentHTML: function(contentDom) {
+		if(typeof contentDom == "object")
+		{
+			this.contentDom = contentDom;
+			this.contentHTML = null;
+		}
+		else if(contentDom != null)
+		{
+			this.contentDom = null;
+			this.contentHTML = contentDom;
+		}
+
+		if(this.contentHTML != null)
+			OpenLayers.Popup.FramedCloud.prototype.setContentHTML.apply(this, arguments);
+		else if(this.contentDiv != null && this.contentDom != null && this.contentDom != this.contentDiv.firstChild)
+		{
+			while(this.contentDiv.firstChild)
+				this.contentDiv.removeChild(this.contentDiv.firstChild);
+			this.contentDiv.appendChild(this.contentDom);
+
+			// Copied from OpenLayers.Popup.setContentHTML():
+			if (this.autoSize)
+			{
+                this.registerImageListeners();
+                this.updateSize();
+            }
+		}
+	},
+	destroy: function() {
+		this.contentDom = null;
+		OpenLayers.Popup.FramedCloud.prototype.destroy.apply(this, arguments);
 	}
 });
+
+/**
+ * Displays an XML file on the map (such as GPX, KML or OSM) using a proxy and with auto-determining of the format. The colour is
+ * randomly assigned. Set OpenLayers.Layer.cdauth.XML.proxy to your proxy URL (the URL will be appended using the “url” GET parameter).
+*/
+
+OpenLayers.Layer.cdauth.XML = new OpenLayers.Class(OpenLayers.Layer.GML, {
+	colourCounter : 1,
+	cdauthURL : null,
+	initialize : function(name, url, options) {
+		this.cdauthURL = url;
+
+		var query;
+		if(OpenLayers.Layer.cdauth.XML.proxy)
+			query = OpenLayers.Layer.cdauth.XML.proxy + (OpenLayers.Layer.cdauth.XML.proxy.match(/\?/) ? "&" : "?") + "url=" + encodeURIComponent(url);
+		else
+			query = url;
+
+		var colour;
+		switch((OpenLayers.Layer.cdauth.XML.prototype.colourCounter++)%4)
+		{
+			case 0: colour = "red"; break;
+			case 1: colour = "blue"; break;
+			case 2: colour = "green"; break;
+			case 3: colour = "black"; break;
+		}
+
+		OpenLayers.Layer.GML.prototype.initialize.apply(this, [ name ? name : url, query, OpenLayers.Util.extend({
+			style: {
+				strokeColor: colour,
+				strokeWidth: 3,
+				strokeOpacity: 0.5
+			},
+			projection: new OpenLayers.Projection("EPSG:4326")
+		}, options) ]);
+	},
+	requestSuccess: function(request) {
+		if(request.responseXML && request.responseXML.documentElement)
+		{
+			switch(request.responseXML.documentElement.tagName)
+			{
+				case "gpx": this.format = OpenLayers.Format.GPX; break;
+				case "osm": this.format = OpenLayers.Format.OSM; break;
+				case "kml": this.format = OpenLayers.Format.KML; break;
+			}
+		}
+		this.formatOptions = { extractAttributes: false };
+		try
+		{
+			var ret = OpenLayers.Layer.GML.prototype.requestSuccess.apply(this, arguments);
+			return ret;
+		}
+		catch(e)
+		{
+			alert("Error parsing file.");
+			this.events.triggerEvent("loadend");
+		}
+	}
+});
+OpenLayers.Layer.cdauth.XML.proxy = null;
 
 /**
  * A Markers layer with a function to easily add a marker with a popup.
@@ -580,7 +766,7 @@ OpenLayers.Layer.cdauth.markers.Markers = new OpenLayers.Class(OpenLayers.Layer.
 	 * Creates a marker with a popup (OpenLayers.Popup.FramedCloud) on this layer. The visibility of the popup can be toggled by clicking
 	 * on the marker.
 	 * @param OpenLayers.LonLat lonlat The position of the marker.
-	 * @param String popupContent The HTML content of the popup.
+	 * @param String|DOMElement popupContent The HTML content of the popup.
 	 * @param boolean popupVisible Should the popup be visible initially?
 	 * @param OpenLayers.Icon Use this icon instead of the default icon.
 	 * @param boolean noPan Don’t move the map view to the marker.
@@ -604,13 +790,12 @@ OpenLayers.Layer.cdauth.markers.Markers = new OpenLayers.Class(OpenLayers.Layer.
 			feature.createPopup(true);
 			feature.popup.panMapIfOutOfView = !noPan;
 			this.map.addPopup(feature.popup);
-			OpenLayers.Event.observe(feature.popup.closeDiv, "click", OpenLayers.Function.bindAsEventListener(function(e)
+			feature.popup.events.register("close", feature, function(e)
 			{
 				this.popup.hide();
 				layer.events.triggerEvent("markersChanged");
 				this.marker.events.triggerEvent("close");
-				OpenLayers.Event.stop(e);
-			}, feature));
+			});
 
 			if(popupVisible)
 				feature.popup.show();
@@ -620,7 +805,7 @@ OpenLayers.Layer.cdauth.markers.Markers = new OpenLayers.Class(OpenLayers.Layer.
 			var layer = this;
 			marker.events.register("mousedown", feature, function (evt) {
 				this.popup.toggle();
-				this.marker.events.triggerEvent(this.popup.visible() ? "close" : "open");
+				this.marker.events.triggerEvent(this.popup.visible() ? "open" : "close");
 				OpenLayers.Event.stop(evt);
 				layer.events.triggerEvent("markersChanged");
 			});
@@ -674,7 +859,18 @@ OpenLayers.Layer.cdauth.markers.LonLat = new OpenLayers.Class(OpenLayers.Layer.c
 	resetPopupContent : function()
 	{
 		for(var i=0; i<this.markers.length; i++)
-			this.markers[i].cdauthFeature.popup.setContentHTML((this.markers[i].cdauthTitle ? "<h6 class=\"marker-heading\">"+htmlspecialchars(this.markers[i].cdauthTitle)+"</h6>" : "")+makePermalinks(this.markers[i].lonlat.clone().transform(this.map.getProjectionObject(), this.map.displayProjection), this.map.getZoom()));
+		{
+			var content = document.createElement("div");
+			if(this.markers[i].cdauthTitle)
+			{
+				var heading = document.createElement("h6");
+				heading.className = "marker-heading";
+				heading.appendChild(document.createTextNode(this.markers[i].cdauthTitle));
+				content.appendChild(heading);
+			}
+			content.appendChild(makePermalinks(this.markers[i].lonlat.clone().transform(this.map.getProjectionObject(), this.map.displayProjection), this.map.getZoom()));
+			this.markers[i].cdauthFeature.popup.setContentHTML(content);
+		}
 	}
 });
 
@@ -714,7 +910,7 @@ OpenLayers.Layer.cdauth.markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 	/**
 	 * Use the NameFinder to search in OpenStreetMap data and add the search results as markers to this layer.
 	 * @param String query The search string.
-	 * @param boolean zoomback Don’t zoom to the search result but keep the current view of the map. If this is set, no alert box will indicate that the search returned no results.
+	 * @param boolean dontzoom Don’t zoom to the search result but keep the current view of the map. If this is set, no alert box will indicate that the search returned no results.
 	 * @param Array markersvisible Contains a boolean value (or a string representing a boolean) for each search result to indicate if a popup should be opened.
 	*/
 	geoSearch: function(query, dontzoom, markersvisible)
@@ -747,7 +943,7 @@ OpenLayers.Layer.cdauth.markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 				info : "Coordinates"
 			} ];
 			results[0].name = results[0].lat+","+results[0].lon;
-			this.showResults(results, query, zoomback, markersvisible);
+			this.showResults(results, query, dontzoom, markersvisible);
 		}
 		else if((query_match = query.match(/^http:\/\/.*\?(.*)$/)) && typeof (query_urlPart = decodeQueryString(query_match[1])).lon != "undefined" && typeof query_urlPart.lat != "undefined")
 		{ // OpenStreetMap Permalink
@@ -760,7 +956,7 @@ OpenLayers.Layer.cdauth.markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 				results[0].zoom = this.map.getZoom();
 			else
 				results[0].zoom = query_urlPart.zoom;
-			this.showResults(results, query, zoomback, markersvisible);
+			this.showResults(results, query, dontzoom, markersvisible);
 		}
 		else
 		{ // NameFinder
@@ -802,27 +998,41 @@ OpenLayers.Layer.cdauth.markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 	showResults : function(results, query, dontzoom, markersvisible) {
 		for(var i=results.length-1; i>=0; i--)
 		{
+			var layer = this;
+			var content = document.createElement("div");
+
+			var content_heading = document.createElement("result-heading");
+			var content_strong = document.createElement("strong");
+			if(results[i].name)
+			{
+				content_strong.appendChild(document.createTextNode(results[i].name));
+				content_heading.appendChild(content_strong);
+				content_heading.appendChild(document.createTextNode(" ("+(results[i].info ? results[i].info : "unknown")+"), "));
+			}
+			else
+			{
+				content_strong.appendChild(document.createTextNode(results[i].info ? results[i].info : "unknown"));
+				content_heading.appendChild(content_strong);
+			}
+
+			var content_zoom = document.createElement("a");
+			content_zoom.href = "#";
+			(function(i){
+				content_zoom.onclick = function() {
+					layer.map.setCenter(new OpenLayers.LonLat(results[i].lon, results[i].lat).transform(new OpenLayers.Projection("EPSG:4326"), layer.map.getProjectionObject()), results[i].zoom);
+				};
+			})(i);
+			content_zoom.appendChild(document.createTextNode("[Zoom]"));
+			content_heading.appendChild(content_zoom);
+			content.appendChild(content_heading);
+			content.appendChild(makePermalinks(new OpenLayers.LonLat(results[i].lon, results[i].lat), results[i].zoom));
 			var marker = this.createMarker(
 				new OpenLayers.LonLat(results[i].lon, results[i].lat).transform(new OpenLayers.Projection("EPSG:4326"), this.map.getProjectionObject()),
-				"<h6 class=\"result-heading\"><strong>"+htmlspecialchars(results[i].name)+"</strong> ("+htmlspecialchars(results[i].info ? results[i].info : "unknown")+"), <a href=\"#\">[Zoom]</a></h6>"+makePermalinks(new OpenLayers.LonLat(results[i].lon, results[i].lat), results[i].zoom),
+				content,
 				((markersvisible && typeof markersvisible[i] != "undefined" && markersvisible[i] != "0") || ((!markersvisible || typeof markersvisible[i] == "undefined") && i==0)),
 				(i==0 ? this.highlightIcon : this.defaultIcon).clone(),
 				dontzoom
 			);
-
-			marker.cdauth = {
-				lonlat: new OpenLayers.LonLat(results[i].lon, results[i].lat),
-				zoom: results[i].zoom,
-				update: function(){
-					OpenLayers.Event.observe(this.cdauthFeature.popup.contentDiv.getElementsByTagName("a")[0], "click", OpenLayers.Function.bindAsEventListener(function(e) {
-						this.map.setCenter(this.cdauth.lonlat.transform(new OpenLayers.Projection("EPSG:4326"), this.map.getProjectionObject()), this.cdauth.zoom);
-						OpenLayers.Event.stop(e);
-					}, marker));
-				}
-			};
-
-			marker.cdauthFeature.popup.events.register("setContentHTML", marker, marker.cdauth.update);
-			marker.cdauthFeature.popup.events.triggerEvent("setContentHTML");
 		}
 
 		if(!dontzoom)
@@ -861,7 +1071,7 @@ OpenLayers.Layer.cdauth.markers.OpenStreetBugs = new OpenLayers.Class(OpenLayers
 	*/
 	initialize : function(name, osbURL, options)
 	{
-		OpenLayers.Layer.Markers.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({opacity: .7}, options) ]);
+		OpenLayers.Layer.Markers.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({opacity: .7, noZoomButton: true}, options) ]);
 		this.osbURL = osbURL;
 		this.events.addEventType("markersUpdating");
 		this.events.addEventType("markersUpdated");
@@ -1044,23 +1254,61 @@ function htmlspecialchars(str)
  * Returns HTML code with Permalinks to various Map services at the specified position with the specified zoom level.
  * @param OpenLayers.LonLat lonlat
  * @param Number zoom
- * @return String
+ * @return DOMElement
 */
 
 function makePermalinks(lonlat, zoom)
 {
-	return "<dl>"
-		+ "<dt>Latitude</dt><dd>"+Math.round(lonlat.lat*100000000)/100000000+"</dd>"
-		+ "<dt>Longitude</dt><dd>"+Math.round(lonlat.lon*100000000)/100000000+"</dd>"
-		+ "</dl><ul>"
-		+ "<li><a href=\"http://data.giub.uni-bonn.de/openrouteservice/index.php?end="+lonlat.lon+","+lonlat.lat+"&amp;lat="+lonlat.lat+"&amp;lon="+lonlat.lon+"&amp;zoom="+zoom+"\">Get directions (OpenRouteService)</a></li>"
-		+ "<li><a href=\"http://www.openstreetmap.org/?lat="+lonlat.lat+"&amp;lon="+lonlat.lon+"&amp;mlat="+lonlat.lat+"&amp;mlon="+lonlat.lon+"&amp;zoom="+zoom+"\">OpenStreetMap Permalink</a></li>"
-		+ "<li><a href=\"http://maps.google.com/?q="+lonlat.lat+","+lonlat.lon+"\">Google Maps Permalink</a></li>"
-		+ "<li><a href=\"http://maps.yahoo.com/broadband/#lat="+lonlat.lat+"&amp;lon="+lonlat.lon+"&amp;zoom="+zoom+"\">Yahoo Maps Permalink</a></li>"
-		+ "<li><a href=\"http://osmtools.de/osmlinks/?lat="+lonlat.lat+"&amp;lon="+lonlat.lon+"&amp;zoom="+zoom+"\">OpenStreetMap Links</a></li>"
-		+ "<li><a href=\"http://stable.toolserver.org/geohack/geohack.php?params="+lonlat.lat+"_N_"+lonlat.lon+"_E\">Wikimedia GeoHack</a></li>"
-		+ "<li><a href=\"http://openstreetbugs.org/?lat="+lonlat.lat+"&amp;lon="+lonlat.lon+"&amp;zoom="+zoom+"\">OpenStreetBugs</a></li>"
-		+ "</ul>";
+	var div = document.createElement("div");
+	var makeEntry = function(href, text)
+	{
+		var li = document.createElement("li");
+		var link = document.createElement("a");
+		link.href = href;
+		link.appendChild(document.createTextNode(text));
+		li.appendChild(link);
+		return li;
+	};
+
+	var dl = document.createElement("dl");
+	var el;
+	el = document.createElement("dt");
+	el.appendChild(document.createTextNode("Latitude"));
+	dl.appendChild(el);
+	el = document.createElement("dd");
+	el.appendChild(document.createTextNode(Math.round(lonlat.lat*100000000)/100000000));
+	dl.appendChild(el);
+	el = document.createElement("dt");
+	el.appendChild(document.createTextNode("Longitude"));
+	dl.appendChild(el);
+	el = document.createElement("dd");
+	el.appendChild(document.createTextNode(Math.round(lonlat.lon*100000000)/100000000));
+	dl.appendChild(el);
+	div.appendChild(dl);
+
+	var ul = document.createElement("ul");
+	ul.appendChild(makeEntry("http://data.giub.uni-bonn.de/openrouteservice/index.php?end="+lonlat.lon+","+lonlat.lat+"&lat="+lonlat.lat+"&lon="+lonlat.lon+"&zoom="+zoom, "Get directions (OpenRouteService)"));
+	ul.appendChild(makeEntry("http://www.openstreetmap.org/?lat="+lonlat.lat+"&lon="+lonlat.lon+"&mlat="+lonlat.lat+"&mlon="+lonlat.lon+"&zoom="+zoom, "OpenStreetMap Permalink"));
+	ul.appendChild(makeEntry("http://maps.google.com/?q="+lonlat.lat+","+lonlat.lon, "Google Maps Permalink"));
+	ul.appendChild(makeEntry("http://maps.yahoo.com/broadband/#lat="+lonlat.lat+"&lon="+lonlat.lon+"&zoom="+zoom, "Yahoo Maps Permalink"));
+	ul.appendChild(makeEntry("http://osmtools.de/osmlinks/?lat="+lonlat.lat+"&lon="+lonlat.lon+"&zoom="+zoom, "OpenStreetMap Links"));
+	ul.appendChild(makeEntry("http://stable.toolserver.org/geohack/geohack.php?params="+lonlat.lat+"_N_"+lonlat.lon+"_E", "Wikimedia GeoHack"));
+	ul.appendChild(makeEntry("http://openstreetbugs.org/?lat="+lonlat.lat+"&lon="+lonlat.lon+"&zoom="+zoom, "OpenStreetBugs"));
+	div.appendChild(ul);
+
+	return div;
+}
+
+/**
+ * Inserts the DOM node “node” after the node “after”.
+*/
+
+function domInsertAfter(node, after)
+{
+	if(after.nextSibling)
+		after.parentNode.insertBefore(node, after.nextSibling);
+	else
+		after.parentNode.appendChild(node);
 }
 
 function alert_r(data)
