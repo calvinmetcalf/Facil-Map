@@ -378,12 +378,12 @@ OpenLayers.Control.cdauth.LayerSwitcher = OpenLayers.Class(OpenLayers.Control.La
 			}
 
 			var nextSibling = spans[i].nextSibling;
-			for(var i=0; i<append.length; i++)
+			for(var j=0; j<append.length; j++)
 			{
 				if(nextSibling)
-					spans[i].parentNode.insertBefore(append[i], nextSibling);
+					spans[i].parentNode.insertBefore(append[j], nextSibling);
 				else
-					spans[i].parentNode.appendChild(append[i]);
+					spans[i].parentNode.appendChild(append[j]);
 			}
 		}
 
@@ -637,7 +637,7 @@ if(OpenLayers.Layer.Yahoo)
 if(OpenLayers.Layer.XYZ)
 {
 	/**
-	 * OpenAerialMap (http://openaerialmap.org/). You may have to use the current unstable version of OpenLayers for this to be supported.
+	 * OpenAerialMap (http://openaerialmap.org/).
 	*/
 	OpenLayers.Layer.cdauth.other.OpenAerialMap = new OpenLayers.Class(OpenLayers.Layer.XYZ, {
 		initialize: function(name, options) {
