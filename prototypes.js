@@ -430,9 +430,9 @@ if(OpenLayers.Layer.OSM)
 				[
 					name,
 					[
-						"http://a.matt.sandbox.cloudmade.com/123/3/256/",
-						"http://b.matt.sandbox.cloudmade.com/123/3/256/",
-						"http://c.matt.sandbox.cloudmade.com/123/3/256/"
+						"http://a.matt.sandbox.cloudmade.com/123/3/256/${z}/${x}/${y}.png",
+						"http://b.matt.sandbox.cloudmade.com/123/3/256/${z}/${x}/${y}.png",
+						"http://c.matt.sandbox.cloudmade.com/123/3/256/${z}/${x}/${y}.png"
 					],
 					OpenLayers.Util.extend({
 						numZoomLevels: 19,
@@ -449,7 +449,7 @@ if(OpenLayers.Layer.OSM)
 	*/
 	OpenLayers.Layer.cdauth.OSM.OpenStreetBrowser = new OpenLayers.Class(OpenLayers.Layer.OSM, {
 		initialize: function(name, options) {
-			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://openstreetbrowser.org/tiles/base/", OpenLayers.Util.extend({numZoomLevels: 19}, options) ]);
+			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://openstreetbrowser.org/tiles/base/${z}/${x}/${y}.png", OpenLayers.Util.extend({numZoomLevels: 19}, options) ]);
 		}
 	});
 
@@ -459,7 +459,7 @@ if(OpenLayers.Layer.OSM)
 	*/
 	OpenLayers.Layer.cdauth.OSM.OpenPisteMap = new OpenLayers.Class(OpenLayers.Layer.OSM, {
 		initialize: function(name, options) {
-			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://openpistemap.org/tiles/contours/", OpenLayers.Util.extend({numZoomLevels: 18}, options) ]);
+			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://openpistemap.org/tiles/contours/${z}/${x}/${y}.png", OpenLayers.Util.extend({numZoomLevels: 18}, options) ]);
 		}
 	});
 
@@ -494,7 +494,7 @@ if(OpenLayers.Layer.OSM)
 		*/
 		OpenLayers.Layer.cdauth.OSM.OPNVKarte.Low = new OpenLayers.Class(OpenLayers.Layer.OSM, {
 			initialize: function(name, options) {
-				OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://xn--pnvkarte-m4a.de/tiles/", OpenLayers.Util.extend({numZoomLevels: 19, displayInLayerSwitcher: false}, options) ]);
+				OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://xn--pnvkarte-m4a.de/tiles/${z}/${x}/${y}.png", OpenLayers.Util.extend({numZoomLevels: 19, displayInLayerSwitcher: false}, options) ]);
 			}
 		});
 
