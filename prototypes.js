@@ -115,7 +115,7 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 		if(OpenLayers.Layer.cdauth.other.OpenAerialMap)
 			this.addLayer(new OpenLayers.Layer.cdauth.other.OpenAerialMap("OpenAerialMap"));
 		if(OpenLayers.Layer.cdauth.other.Relief)
-			this.addLayer(new OpenLayers.Layer.cdauth.other.Relief("Relief"));
+			this.addLayer(new OpenLayers.Layer.cdauth.other.Relief("Relief", { visibility: false }));
 	},
 
 	/**
@@ -295,7 +295,7 @@ OpenLayers.Control.cdauth = { };
 
 /**
  * A layer switcher that has a scroll bar if the height of the map is too small.
- * Additionally, overlay layers that don’t have the “noZoomButton” property get a button that zooms to the data extent of the layer.
+ * Additionally, overlay layers that have the “zoomableInLayerSwitcher” property get a button that zooms to the data extent of the layer.
  * Overlay layers that have the “removableInLayerSwitcher” property set get a button to remove the layer from the map.
 */
 OpenLayers.Control.cdauth.LayerSwitcher = OpenLayers.Class(OpenLayers.Control.LayerSwitcher, {
@@ -320,7 +320,7 @@ OpenLayers.Control.cdauth.LayerSwitcher = OpenLayers.Class(OpenLayers.Control.La
 
 			var append = [ ];
 
-			if(!layer.noZoomButton)
+			if(layer.zoomableInLayerSwitcher)
 			{
 				var a_zoom = document.createElement("a");
 				a_zoom.href = "#";
@@ -439,22 +439,25 @@ if(OpenLayers.Layer.OSM)
 	});
 
 	/**
-	 * Reit- und Wanderkarte relief rendering.
-	 * Include http://www.openstreetmap.org/openlayers/OpenStreetMap.js for this to work.
-	*/
-	OpenLayers.Layer.cdauth.other.Relief = new OpenLayers.Class(OpenLayers.Layer.OSM, {
-		initialize: function(name, options) {
-			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://topo.geofabrik.de/relief/${z}/${x}/${y}.png", OpenLayers.Util.extend({minZoomLevel: 8, maxZoomLevel: 15, attribution: "Rendering by <a href=\"http://osmc.broadbox.de/\">OSMC Reit- und Wanderkarte</a>. DEM by <a href='http://srtm.csi.cgiar.org'>CIAT</a>" }, options) ]);
-		}
-	});
-
-	/**
 	 * OpenStreetMap data rendering by ÖPNV-Karte (PSV map).
 	 * Include http://www.openstreetmap.org/openlayers/OpenStreetMap.js for this to work.
 	*/
 	OpenLayers.Layer.cdauth.OSM.OPNVKarte = new OpenLayers.Class(OpenLayers.Layer.OSM, {
 		initialize: function(name, options) {
 			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://tile.xn--pnvkarte-m4a.de/tilegen/${z}/${x}/${y}.png", OpenLayers.Util.extend({numZoomLevels: 19}, options) ]);
+		}
+	});
+}
+
+if(OpenLayers.Layer.WMS)
+{
+	/**
+	 * Relief rendering from Kartografie Universität Bonn / OpenRouteService
+	*/
+
+	OpenLayers.Layer.cdauth.other.Relief = new OpenLayers.Class(OpenLayers.Layer.WMS, {
+		initialize: function(name, options) {
+			OpenLayers.Layer.WMS.prototype.initialize.apply(this, [ name, "http://services.giub.uni-bonn.de/hillshade?", {layers: 'europe_wms:hs_srtm_europa',srs: 'EPSG:900913', format: 'image/JPEG', transparent: 'true' }, OpenLayers.Util.extend({attribution: "Relief CC-by-SA by <a href=\"http://openrouteservice.org/\">Kartografie Universität Bonn</a>", opacity: 0.2 }, options) ]);
 		}
 	});
 }
@@ -711,7 +714,7 @@ OpenLayers.Layer.cdauth.XML.proxy = null;
 
 OpenLayers.Layer.cdauth.markers.Markers = new OpenLayers.Class(OpenLayers.Layer.Markers, {
 	initialize : function(name, options) {
-		OpenLayers.Layer.Markers.prototype.initialize.apply(this, [ name, options ]);
+		OpenLayers.Layer.Markers.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({zoomableInLayerSwitcher: true}, options) ]);
 		this.events.addEventType("markersChanged");
 	},
 	defaultIcon : new OpenLayers.Icon('http://osm.cdauth.de/map/marker.png', new OpenLayers.Size(21,25), new OpenLayers.Pixel(-9, -25)),
@@ -1024,7 +1027,7 @@ OpenLayers.Layer.cdauth.markers.OpenStreetBugs = new OpenLayers.Class(OpenLayers
 	*/
 	initialize : function(name, osbURL, options)
 	{
-		OpenLayers.Layer.Markers.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({opacity: .7, noZoomButton: true}, options) ]);
+		OpenLayers.Layer.Markers.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({opacity: .7, zoomableInLayerSwitcher: false}, options) ]);
 		this.osbURL = osbURL;
 		this.events.addEventType("markersUpdating");
 		this.events.addEventType("markersUpdated");
