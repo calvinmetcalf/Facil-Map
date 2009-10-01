@@ -89,14 +89,8 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 			this.addLayer(new OpenLayers.Layer.cdauth.OSM.Wanderkarte("Reit- und Wanderkarte"));
 		if(OpenLayers.Layer.cdauth.OSM.OpenPisteMap)
 			this.addLayer(new OpenLayers.Layer.cdauth.OSM.OpenPisteMap("OpenPisteMap"));
-
 		if(OpenLayers.Layer.cdauth.OSM.OPNVKarte)
-		{
-			var psvMapLow,psvMapHigh;
-			this.addLayer(psvMapLow = new OpenLayers.Layer.cdauth.OSM.OPNVKarte.Low("ÖPNV-Karte"));
-			this.addLayer(psvMapHigh = new OpenLayers.Layer.cdauth.OSM.OPNVKarte.High("ÖPNV-Karte"));
-			this.addOPNVEventHandler(psvMapLow, psvMapHigh);
-		}
+			this.addLayer(new OpenLayers.Layer.cdauth.OSM.OPNVKarte("ÖPNV-Karte"));
 
 		if(OpenLayers.Layer.cdauth.Google.Maps)
 			this.addLayer(new OpenLayers.Layer.cdauth.Google.Maps("Google Streets"));
@@ -122,34 +116,6 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 			this.addLayer(new OpenLayers.Layer.cdauth.other.OpenAerialMap("OpenAerialMap"));
 		if(OpenLayers.Layer.cdauth.other.Relief)
 			this.addLayer(new OpenLayers.Layer.cdauth.other.Relief("Relief"));
-	},
-
-	/**
-	 * Adds an event handler to the “zoomend” event of the map to ensure that always the right ÖPNV-Karte layer is visible on the map
-	 * and its layer switcher. Adds a function updateOPNVLayer() to the map object.
-	 * @param OpenLayers.Layer.cdauth.OSM.OPNVKarte.Low layerLow Your low zoom level ÖPNV-Karte layer instance.
-	 * @param OpenLayers.Layer.cdauth.OSM.OPNVKarte.High layerHigh Your high zoom level ÖPNV-Karte layer instance.
-	*/
-	addOPNVEventHandler : function(layerLow, layerHigh)
-	{
-		this.updateOPNVLayer = function() {
-			if(this.getZoom() >= 14)
-			{
-				layerLow.addOptions({displayInLayerSwitcher: false});
-				layerHigh.addOptions({displayInLayerSwitcher: true});
-				if(this.baseLayer == layerLow)
-					this.setBaseLayer(layerHigh);
-			}
-			else
-			{
-				layerLow.addOptions({displayInLayerSwitcher: true});
-				layerHigh.addOptions({displayInLayerSwitcher: false});
-				if(this.baseLayer == layerHigh)
-					this.setBaseLayer(layerLow);
-			}
-		};
-		this.updateOPNVLayer();
-		this.events.register("zoomend", this, this.updateOPNVLayer);
 	},
 
 	/**
@@ -179,7 +145,6 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 			var matching_layers = this.getLayersByName(query.layer);
 			if(matching_layers.length > 0)
 				this.setBaseLayer(matching_layers[0]);
-			this.updateOPNVLayer();
 		}
 
 		if(query.overlays)
@@ -483,32 +448,15 @@ if(OpenLayers.Layer.OSM)
 		}
 	});
 
-	if(OpenLayers.Layer.WMS)
-	{
-		OpenLayers.Layer.cdauth.OSM.OPNVKarte = { };
-
-		/**
-		 * OpenStreetMap data rendering by ÖPNV-Karte (PSV map) for low zoom levels (< 14). Add both the low and the high zoom level layers to your map
-		 * and run OpenLayers.Map.cdauth.addOPNVEventHandler() for the right layer to be visible.
-		 * Include http://www.openstreetmap.org/openlayers/OpenStreetMap.js for this to work.
-		*/
-		OpenLayers.Layer.cdauth.OSM.OPNVKarte.Low = new OpenLayers.Class(OpenLayers.Layer.OSM, {
-			initialize: function(name, options) {
-				OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://xn--pnvkarte-m4a.de/tiles/${z}/${x}/${y}.png", OpenLayers.Util.extend({numZoomLevels: 19, displayInLayerSwitcher: false}, options) ]);
-			}
-		});
-
-		/**
-		 * OpenStreetMap data rendering by ÖPNV-Karte (PSV map) for high zoom levels (>= 14). Add both the low and the high zoom level layers to your map
-		 * and run OpenLayers.Map.cdauth.addOPNVEventHandler() for the right layer to be visible.
-		 * Include http://www.openstreetmap.org/openlayers/OpenStreetMap.js for this to work.
-		*/
-		OpenLayers.Layer.cdauth.OSM.OPNVKarte.High = new OpenLayers.Class(OpenLayers.Layer.WMS, {
-			initialize: function(name, options) {
-				OpenLayers.Layer.WMS.prototype.initialize.apply(this, [ name, "http://xn--pnvkarte-m4a.de/cgi-bin/mapnikserv.py?", {map: '/opt/mapnik/test.xml', mode: 'view', format: 'image/png256'}, OpenLayers.Util.extend({numZoomLevels: 19, singleTile: true, projection: new OpenLayers.Projection("EPSG:900913"), displayInLayerSwitcher: false}, options) ]);
-			}
-		});
-	}
+	/**
+	 * OpenStreetMap data rendering by ÖPNV-Karte (PSV map).
+	 * Include http://www.openstreetmap.org/openlayers/OpenStreetMap.js for this to work.
+	*/
+	OpenLayers.Layer.cdauth.OSM.OPNVKarte = new OpenLayers.Class(OpenLayers.Layer.OSM, {
+		initialize: function(name, options) {
+			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://tile.xn--pnvkarte-m4a.de/tilegen/${z}/${x}/${y}.png", OpenLayers.Util.extend({numZoomLevels: 19}, options) ]);
+		}
+	});
 }
 
 if(OpenLayers.Layer.Google)
