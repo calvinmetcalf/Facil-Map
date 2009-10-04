@@ -679,7 +679,8 @@ OpenLayers.Layer.cdauth.XML = new OpenLayers.Class(OpenLayers.Layer.GML, {
 				strokeWidth: 3,
 				strokeOpacity: 0.5
 			},
-			projection: new OpenLayers.Projection("EPSG:4326")
+			projection: new OpenLayers.Projection("EPSG:4326"),
+			zoomableInLayerSwitcher: true
 		}, options) ]);
 	},
 	requestSuccess: function(request) {
