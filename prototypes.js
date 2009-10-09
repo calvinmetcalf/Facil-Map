@@ -39,7 +39,10 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 				new OpenLayers.Control.Navigation(),
 				new OpenLayers.Control.PanZoomBar(),
 				new OpenLayers.Control.cdauth.LayerSwitcher(),
-				new OpenLayers.Control.Attribution() ],
+				new OpenLayers.Control.Attribution(),
+				new OpenLayers.Control.KeyboardDefaults(),
+				new OpenLayers.Control.MousePosition(),
+				new OpenLayers.Control.ScaleLine() ],
 			maxExtent: new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34),
 			maxResolution: 156543.0399,
 			numZoomLevels: 19,
@@ -606,7 +609,7 @@ if(OpenLayers.Layer.XYZ)
 OpenLayers.Popup.FramedCloud.cdauth = new OpenLayers.Class(OpenLayers.Popup.FramedCloud, {
 	contentDom: null,
 	initialize: function(id, lonlat, contentSize, contentDom, anchor, closeBox, closeBoxCallback) {
-		var closeCallback = function(){ if(closeBoxCallback) closeBoxCallback(); this.events.triggerEvent("close"); };
+		var closeCallback = function(e){ if(closeBoxCallback) closeBoxCallback(); OpenLayers.Event.stop(e); this.events.triggerEvent("close"); };
 		OpenLayers.Popup.FramedCloud.prototype.initialize.apply(this, [ id, lonlat, contentSize, null, anchor, closeBox, closeCallback ] );
 
 		this.events.addEventType("close");
@@ -750,6 +753,7 @@ OpenLayers.Layer.cdauth.markers.Markers = new OpenLayers.Class(OpenLayers.Layer.
 			feature.popup.events.register("close", feature, function(e)
 			{
 				this.popup.hide();
+				OpenLayers.Event.stop(e);
 				layer.events.triggerEvent("markersChanged");
 				this.marker.events.triggerEvent("close");
 			});
@@ -760,10 +764,10 @@ OpenLayers.Layer.cdauth.markers.Markers = new OpenLayers.Class(OpenLayers.Layer.
 				feature.popup.hide();
 
 			var layer = this;
-			marker.events.register("mousedown", feature, function (evt) {
+			marker.events.register("click", feature, function(e) {
 				this.popup.toggle();
+				OpenLayers.Event.stop(e);
 				this.marker.events.triggerEvent(this.popup.visible() ? "open" : "close");
-				OpenLayers.Event.stop(evt);
 				layer.events.triggerEvent("markersChanged");
 			});
 		}
