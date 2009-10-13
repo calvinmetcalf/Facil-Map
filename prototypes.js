@@ -1133,6 +1133,24 @@ OpenLayers.Layer.cdauth.markers.OpenStreetBugs = new OpenLayers.Class(OpenLayers
 });
 
 /**
+ * decodeURIComponent() throws an exception if the string contains invalid constructions (such as a % sign not followed by a 2-digits hexadecimal number). This function returns the original string in case of an error.
+ * @param String str
+ * @return String
+*/
+
+function decodeURIComponentTolerantly(str)
+{
+	try
+	{
+		return decodeURIComponent(str);
+	}
+	catch(e)
+	{
+		return str;
+	}
+}
+
+/**
  * Decodes a URL query string (the part after the ?).
  * @param String str
  * @return Object
@@ -1156,7 +1174,7 @@ function decodeQueryString(str)
 			var cur_el = obj;
 			for(var j=0; j<arr_indexes.length; j++)
 			{
-				var cur_key = decodeURIComponent(arr_indexes[j]);
+				var cur_key = decodeURIComponentTolerantly(arr_indexes[j]);
 				if(cur_key.length == 0)
 				{
 					cur_key = 0;
@@ -1164,7 +1182,7 @@ function decodeQueryString(str)
 						cur_key++;
 				}
 				if(j == arr_indexes.length-1)
-					cur_el[cur_key] = decodeURIComponent(str_split[i].substr(equal_sign+1));
+					cur_el[cur_key] = decodeURIComponentTolerantly(str_split[i].substr(equal_sign+1));
 				else
 				{
 					if(!cur_el[cur_key] || typeof cur_el[cur_key] != "object")
@@ -1174,7 +1192,7 @@ function decodeQueryString(str)
 			}
 		}
 		else
-			obj[decodeURIComponent(key)] = decodeURIComponent(str_split[i].substr(equal_sign+1));
+			obj[decodeURIComponentTolerantly(key)] = decodeURIComponentTolerantly(str_split[i].substr(equal_sign+1));
 	}
 	return obj;
 }
