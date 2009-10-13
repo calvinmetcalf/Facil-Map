@@ -608,6 +608,7 @@ if(OpenLayers.Layer.XYZ)
 
 OpenLayers.Popup.FramedCloud.cdauth = new OpenLayers.Class(OpenLayers.Popup.FramedCloud, {
 	contentDom: null,
+	autoSize: true,
 	initialize: function(id, lonlat, contentSize, contentDom, anchor, closeBox, closeBoxCallback) {
 		var closeCallback = function(e){ if(closeBoxCallback) closeBoxCallback(); OpenLayers.Event.stop(e); this.events.triggerEvent("close"); };
 		OpenLayers.Popup.FramedCloud.prototype.initialize.apply(this, [ id, lonlat, contentSize, null, anchor, closeBox, closeCallback ] );
@@ -713,6 +714,7 @@ OpenLayers.Layer.cdauth.XML.proxy = null;
 
 /**
  * A Markers layer with a function to easily add a marker with a popup.
+ * When the layer is hidden, the popups are hidden as well. They open again when the layer is made visible again.
  * @event markersChanged A marker popup has been opened or closed.
 */
 
@@ -720,8 +722,29 @@ OpenLayers.Layer.cdauth.markers.Markers = new OpenLayers.Class(OpenLayers.Layer.
 	initialize : function(name, options) {
 		OpenLayers.Layer.Markers.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({zoomableInLayerSwitcher: true}, options) ]);
 		this.events.addEventType("markersChanged");
+
+		this.events.register("visibilitychanged", this, function() {
+			if(this.getVisibility())
+			{ // Layer has been made visible: re-open popups that were hidden during the last hiding
+				for(var i=0; i<this.openPopupsOnShow.length; i++)
+					this.openPopupsOnShow[i].cdauthFeature.popup.show();
+				this.openPopupsOnShow = [ ];
+			}
+			else
+			{ // Hide all popups and save the visible ones
+				for(var i=0; i<this.markers.length; i++)
+				{
+					if(this.markers[i].cdauthFeature.popup.visible())
+					{
+						this.openPopupsOnShow.push(this.markers[i]);
+						this.markers[i].cdauthFeature.popup.hide();
+					}
+				}
+			}
+		});
 	},
 	defaultIcon : new OpenLayers.Icon('http://osm.cdauth.de/map/marker.png', new OpenLayers.Size(21,25), new OpenLayers.Pixel(-9, -25)),
+	openPopupsOnShow : [ ],
 	/**
 	 * Creates a marker with a popup (OpenLayers.Popup.FramedCloud) on this layer. The visibility of the popup can be toggled by clicking
 	 * on the marker.
@@ -740,7 +763,6 @@ OpenLayers.Layer.cdauth.markers.Markers = new OpenLayers.Class(OpenLayers.Layer.
 		{
 			feature.popupClass = OpenLayers.Popup.FramedCloud.cdauth;
 			feature.data.popupContentHTML = popupContent;
-			feature.data.autoSize = true;
 		}
 		var marker = feature.createMarker();
 		marker.events.addEventType("close");
@@ -895,7 +917,11 @@ OpenLayers.Layer.cdauth.markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 		query.replace(/^\s+/, "").replace(/\s+$/, "");
 		var query_match;
 		var query_urlPart;
-		if(query_match = query.match(/^(-?\s*\d+([.,]\d+)?)\s*[,;]?\s*(-?\s*\d+([.,]\d+)?)$/))
+		if(query_match = query.match(/^http:\/\/(www\.)?osm\.org\/go\/([A-Za-z0-9_@]+)$/))
+		{ // Coordinates, shortlink
+
+		}
+		else if(query_match = query.match(/^(-?\s*\d+([.,]\d+)?)\s*[,;]?\s*(-?\s*\d+([.,]\d+)?)$/))
 		{ // Coordinates
 			results = [ {
 				zoom : this.map.getZoom(),
@@ -1010,125 +1036,6 @@ OpenLayers.Layer.cdauth.markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 		this.events.triggerEvent("lastSearchChange");
 
 		this.events.triggerEvent("searchSuccess");
-	}
-});
-
-/**
- * An OpenStreetBugs layer (currently read-only). Parses the GPX output from http://openstreetbugs.schokokeks.org/
- * (see http://wiki.openstreetmap.org/wiki/User:Emka/new_OSB). http://openstreetbugs.appspot.com/ does not work as the GPX output
- * does not provide bug IDs.
- * @event markersUpdating The refresh() function has been called and an AJAX request has been started
- * @event markersUpdated The AJAX response has successfully been retreived and new bugs have been added to the map.
- * @event updateFailed There was a problem receiving the AJAX response.
-*/
-
-OpenLayers.Layer.cdauth.markers.OpenStreetBugs = new OpenLayers.Class(OpenLayers.Layer.Markers, {
-	iconError : new OpenLayers.Icon("http://openstreetbugs.appspot.com/icon_error.png", new OpenLayers.Size(22,22), new OpenLayers.Pixel(-11, -11)),
-	iconValid : new OpenLayers.Icon("http://openstreetbugs.appspot.com/icon_valid.png", new OpenLayers.Size(22,22), new OpenLayers.Pixel(-11, -11)),
-	osbugs : { },
-	osbURL : { },
-	/**
-	 * @param String osbURL The URL to use (usually a file on your webspace proxying http://openstreetbugs.schokokeks.org/api/0.1/getGPX
-	*/
-	initialize : function(name, osbURL, options)
-	{
-		OpenLayers.Layer.Markers.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({opacity: .7, zoomableInLayerSwitcher: false}, options) ]);
-		this.osbURL = osbURL;
-		this.events.addEventType("markersUpdating");
-		this.events.addEventType("markersUpdated");
-		this.events.addEventType("updateFailed");
-		this.events.register("visibilitychanged", this, this.refresh);
-	},
-	afterAdd : function()
-	{
-		var ret = OpenLayers.Layer.Markers.prototype.afterAdd.apply(this, arguments);
-		this.map.events.register("moveend", this, this.refresh);
-		this.refresh();
-		return ret;
-	},
-	addBugMarker : function(id, lonlat, html, status) {
-		if(this.osbugs[id]) return;
-
-		var feature = new OpenLayers.Feature(this, lonlat.clone().transform(new OpenLayers.Projection("EPSG:4326"), this.map.getProjectionObject()));
-		feature.closeBox = false;
-		feature.popupClass = OpenLayers.Popup.FramedCloud;
-		feature.data.icon = (status == 1 ? this.iconValid.clone() : this.iconError.clone())
-		feature.data.popupContentHTML = html;
-		feature.data.autoSize = true;
-		var marker = feature.createMarker();
-		marker.events.register("click", feature, function(evt)
-		{
-			this.cdauthClicked = !this.cdauthClicked;
-			if(this.cdauthClicked)
-			{
-				if(this.popup)
-					this.popup.show();
-				else
-					map.addPopup(this.createPopup());
-			}
-			else
-				this.popup.hide();
-			OpenLayers.Event.stop(evt);
-		});
-		marker.events.register("mouseover", feature, function(evt)
-		{
-			if(!this.cdauthClicked)
-			{
-				if(this.popup)
-					this.popup.show();
-				else
-					map.addPopup(this.createPopup());
-			}
-			OpenLayers.Event.stop(evt);
-		});
-		marker.events.register("mouseout", feature, function(evt)
-		{
-			if(!this.cdauthClicked)
-				this.popup.hide();
-			OpenLayers.Event.stop(evt);
-		});
-
-		this.osbugs[id] = feature;
-		this.addMarker(marker);
-	},
-	/**
-	 * Fetches the OpenStreetBugs of the currently visible map extent if this layer is visible and adds the bugs to the map. This is
-	 * automatically called when the map extent changes.
-	*/
-	refresh : function()
-	{
-		if(!this.getVisibility())
-			return;
-		var extent_obj = this.map.getExtent();
-		if(!extent_obj)
-			return;
-		var extent = extent_obj.transform(this.map.getProjectionObject(), new OpenLayers.Projection("EPSG:4326")).toArray();
-		for(var i=0; i<4; i++)
-			extent[i] = Math.round(extent[i]*100000)/100000;
-		var layer = this;
-		this.events.triggerEvent("markersUpdating");
-		OpenLayers.loadURL(this.osbURL, { "l" : extent[0], "b" : extent[1], "r" : extent[2], "t" : extent[3], "limit" : 500 }, null, function(request) {
-			if(request.responseXML)
-			{
-				var points = request.responseXML.getElementsByTagName("wpt");
-				for(var i=0; i<points.length; i++)
-				{
-					var desc_l = points[i].getElementsByTagName("desc");
-					if(desc_l.length < 1 || !desc_l[0].firstChild)
-						continue;
-					var closed_l = points[i].getElementsByTagName("closed");
-					if(closed_l.length < 1)
-						continue;
-					var id_l = points[i].getElementsByTagName("id");
-					if(id_l.length < 1 || !id_l[0].firstChild)
-						continue;
-					layer.addBugMarker(id_l[0].firstChild.data, new OpenLayers.LonLat(points[i].getAttribute("lon"), points[i].getAttribute("lat")), desc_l[0].firstChild.data, closed_l[0].firstChild ? closed_l[0].firstChild.data : 0);
-				}
-				layer.events.triggerEvent("markersUpdated");
-			}
-			else
-				layer.events.triggerEvent("updateFailed");
-		}, function() { layer.events.triggerEvent("updateFailed"); });
 	}
 });
 
@@ -1289,6 +1196,88 @@ function domInsertAfter(node, after)
 	else
 		after.parentNode.appendChild(node);
 }
+
+/*function makeShortCode(lat, lon, zoom) {
+	char_array = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_@";
+    var x = Math.round((lon + 180.0) * ((1 << 30) / 90.0));
+    var y = Math.round((lat +  90.0) * ((1 << 30) / 45.0));
+    // hack around the fact that JS apparently only allows 53-bit integers?!?
+    // note that, although this reduces the accuracy of the process, it's fine for
+    // z18 so we don't need to care for now.
+    var c1 = 0, c2 = 0;
+    for (var i = 31; i > 16; --i)
+	{
+		c1 = (c1 << 1) | ((x >> i) & 1);
+		c1 = (c1 << 1) | ((y >> i) & 1);
+    }
+    for (var i = 16; i > 1; --i)
+	{
+		c2 = (c2 << 1) | ((x >> i) & 1);
+		c2 = (c2 << 1) | ((y >> i) & 1);
+    }
+    var str = "";
+    for (var i = 0; i < Math.ceil((zoom + 8) / 3.0) && i < 5; ++i)
+	{
+		digit = (c1 >> (24 - 6 * i)) & 0x3f;
+		str += char_array.charAt(digit);
+    }
+    for (var i = 5; i < Math.ceil((zoom + 8) / 3.0); ++i)
+	{
+		digit = (c2 >> (24 - 6 * (i - 5))) & 0x3f;
+		str += char_array.charAt(digit);
+    }
+    for (var i = 0; i < ((zoom + 8) % 3); ++i)
+	{
+		str += "-";
+    }
+	alert("c1: "+c1+"\nc2: "+c2+"x: "+x+"\ny: "+y);
+    return str;
+}
+
+function decodeShortLink(encoded)
+{
+	var char_array = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_@";
+
+	var lon,lat,zoom;
+
+	var m = encoded.match(/^([A-Za-z0-9_@]+)/);
+	if(!m) return false;
+	zoom = m[1].length*2+encoded.length-11;
+
+	var c1 = 0;
+	var c2 = 0;
+	for(var i=0,j=54; i<m[1].length; i++,j-=6)
+	{
+		var bits = char_array.indexOf(m[1].charAt(i));
+		if(j <= 30)
+			c1 |= bits >>> (30-j);
+		else if(j > 30)
+			c1 |= bits << (j-30);
+		if(j < 30)
+			c2 |= (bits & (0x3fffffff >>> j)) << j;
+	}
+
+	// Works correctly until here.
+
+	var x = 0;
+	var y = 0;
+
+	for(var i=1,j=29; i<16; i++)
+	{
+		x |= ((c2 >> j--) & 1) << i;
+		y |= ((c2 >> j--) & 1) << i;
+	}
+	for(var i=17,j=29; i<31; i++)
+	{
+		x |= ((c1 >> j--) & 1) << i;
+		y |= ((c1 >> j--) & 1) << i;
+	}
+
+	lon = x/((1<<30)/90.0)-180.0;
+	lat = y/((1<<30)/45.0)-90.0;
+
+	alert("Lon: "+lon+"\nLat: "+lat+"\nZoom: "+zoom+"\nc1: "+c1+"\nc2: "+c2+"\nx: "+x+"\ny: "+y);
+}*/
 
 function alert_r(data)
 {
