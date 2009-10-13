@@ -833,6 +833,8 @@ OpenLayers.Layer.cdauth.markers.LonLat = new OpenLayers.Class(OpenLayers.Layer.c
 */
 
 OpenLayers.Control.cdauth.createMarker = OpenLayers.Class(OpenLayers.Control, {
+	title : "Create a marker",
+
 	/**
 	 * @var OpenLayers.Layer.cdauth.markers.LonLat
 	*/
