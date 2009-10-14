@@ -40,7 +40,7 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 				new OpenLayers.Control.PanZoomBar(),
 				new OpenLayers.Control.cdauth.LayerSwitcher(),
 				new OpenLayers.Control.Attribution(),
-				new OpenLayers.Control.KeyboardDefaults(),
+				new OpenLayers.Control.cdauth.KeyboardDefaults(),
 				new OpenLayers.Control.MousePosition(),
 				new OpenLayers.Control.ScaleLine() ],
 			maxExtent: new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34),
@@ -297,6 +297,19 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 });
 
 OpenLayers.Control.cdauth = { };
+
+/**
+ * Disables the keyboard control when the focus is on a form field that is controlled by the keyboard (such as an input field).
+ * See bug http://trac.openlayers.org/ticket/1027
+*/
+OpenLayers.Control.cdauth.KeyboardDefaults = OpenLayers.Class(OpenLayers.Control.KeyboardDefaults, {
+	defaultKeyPress : function(evt) {
+		if(evt.target && evt.target.nodeName && (evt.target.nodeName.toLowerCase() == "input" && evt.target.type.toLowerCase() != "checkbox" && evt.target.type.toLowerCase() != "button" && evt.target.type.toLowerCase() != "submit" && evt.target.type.toLowerCase() != "clear" || evt.target.tagName.toLowerCase() == "textarea" || evt.target.tagName.toLowerCase() == "select"))
+			return true;
+		OpenLayers.Control.KeyboardDefaults.prototype.defaultKeyPress.apply(this, [ evt ]);
+	},
+	CLASS_NAME : "OpenLayers.Control.cdauth.KeyboardDefaults"
+});
 
 /**
  * A layer switcher that has a scroll bar if the height of the map is too small.
