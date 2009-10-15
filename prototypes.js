@@ -252,7 +252,7 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 			mtitle : { },
 			smopen : { },
 			overlays : { },
-			xml : { },
+			xml : { }
 		};
 
 		var xml_i = 0;
