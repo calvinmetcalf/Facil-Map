@@ -343,7 +343,7 @@ OpenLayers.Control.cdauth.LayerSwitcher = OpenLayers.Class(OpenLayers.Control.La
 				var a_zoom = document.createElement("a");
 				a_zoom.href = "#";
 				OpenLayers.Event.observe(a_zoom, "click", OpenLayers.Function.bindAsEventListener(function(){ var extent = this.getDataExtent(); if(extent) this.map.zoomToExtent(extent); return false; }, layer));
-				a_zoom.appendChild(document.createTextNode("[Zoom]"));
+				a_zoom.appendChild(document.createTextNode(OpenLayers.i18n("[Zoom]")));
 
 				append.push(document.createTextNode(" "));
 				append.push(a_zoom);
@@ -354,7 +354,7 @@ OpenLayers.Control.cdauth.LayerSwitcher = OpenLayers.Class(OpenLayers.Control.La
 				var a_remove = document.createElement("a");
 				a_remove.href = "#";
 				OpenLayers.Event.observe(a_remove, "click", OpenLayers.Function.bindAsEventListener(function(){ this.map.removeLayer(this); this.destroy(); return false; }, layer));
-				a_remove.appendChild(document.createTextNode("[Remove]"));
+				a_remove.appendChild(document.createTextNode(OpenLayers.i18n("[Remove]")));
 
 				append.push(document.createTextNode(" "));
 				append.push(a_remove);
@@ -427,7 +427,7 @@ if(OpenLayers.Layer.OSM)
 					],
 					OpenLayers.Util.extend({
 						numZoomLevels: 19,
-						attribution: "Rendering by <a href=\"http://www.cloudmade.com/\">CloudMade</a>. Data by <a href=\"http://openstreetmap.org/\">OpenStreetMap</a>"
+						attribution: OpenLayers.i18n("Rendering by <a href=\"http://www.cloudmade.com/\">CloudMade</a>. Data by <a href=\"http://openstreetmap.org/\">OpenStreetMap</a>")
 					}, options)
 				]
 			);
@@ -488,7 +488,7 @@ if(OpenLayers.Layer.WMS)
 
 	OpenLayers.Layer.cdauth.other.Relief = new OpenLayers.Class(OpenLayers.Layer.WMS, {
 		initialize: function(name, options) {
-			OpenLayers.Layer.WMS.prototype.initialize.apply(this, [ name, "http://services.giub.uni-bonn.de/hillshade?", {layers: 'europe_wms:hs_srtm_europa',srs: 'EPSG:900913', format: 'image/JPEG', transparent: 'true' }, OpenLayers.Util.extend({attribution: "Relief CC-by-SA by <a href=\"http://openrouteservice.org/\">Kartografie Universität Bonn</a>", opacity: 0.2 }, options) ]);
+			OpenLayers.Layer.WMS.prototype.initialize.apply(this, [ name, "http://services.giub.uni-bonn.de/hillshade?", {layers: 'europe_wms:hs_srtm_europa',srs: 'EPSG:900913', format: 'image/JPEG', transparent: 'true' }, OpenLayers.Util.extend({attribution: OpenLayers.i18n("Relief CC-by-SA by <a href=\"http://openrouteservice.org/\">Kartografie Universität Bonn</a>"), opacity: 0.2 }, options) ]);
 		},
 		CLASS_NAME : "OpenLayers.Layer.cdauth.other.Relief"
 	});
@@ -846,8 +846,6 @@ OpenLayers.Layer.cdauth.markers.LonLat = new OpenLayers.Class(OpenLayers.Layer.c
 */
 
 OpenLayers.Control.cdauth.createMarker = OpenLayers.Class(OpenLayers.Control, {
-	title : "Create a marker",
-
 	/**
 	 * @var OpenLayers.Layer.cdauth.markers.LonLat
 	*/
@@ -858,6 +856,7 @@ OpenLayers.Control.cdauth.createMarker = OpenLayers.Class(OpenLayers.Control, {
 	*/
 	initialize: function(cdauthLayer, options) {
 		this.cdauthLayer = cdauthLayer;
+		this.title = OpenLayers.i18n("Create a marker");
 
 		OpenLayers.Control.prototype.initialize.apply(this, [ options ]);
 	},
@@ -957,7 +956,7 @@ OpenLayers.Layer.cdauth.markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 				zoom : this.map.getZoom(),
 				lon : query_match[3].replace(",", ".").replace(/\s+/, ""),
 				lat : query_match[1].replace(",", ".").replace(/\s+/, ""),
-				info : "Coordinates"
+				info : OpenLayers.i18n("Coordinates")
 			} ];
 			results[0].name = results[0].lat+","+results[0].lon;
 			this.showResults(results, query, dontzoom, markersvisible);
@@ -967,7 +966,7 @@ OpenLayers.Layer.cdauth.markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 			results = [ {
 				lon : query_urlPart.lon,
 				lat : query_urlPart.lat,
-				info : "Coordinates"
+				info : OpenLayers.i18n("Coordinates")
 			} ];
 			if(typeof query_urlPart.zoom == "undefined")
 				results[0].zoom = this.map.getZoom();
@@ -1024,11 +1023,11 @@ OpenLayers.Layer.cdauth.markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 			{
 				content_strong.appendChild(document.createTextNode(results[i].name));
 				content_heading.appendChild(content_strong);
-				content_heading.appendChild(document.createTextNode(" ("+(results[i].info ? results[i].info : "unknown")+"), "));
+				content_heading.appendChild(document.createTextNode(" ("+(results[i].info ? results[i].info : OpenLayers.i18n("unknown"))+"), "));
 			}
 			else
 			{
-				content_strong.appendChild(document.createTextNode(results[i].info ? results[i].info : "unknown"));
+				content_strong.appendChild(document.createTextNode(results[i].info ? results[i].info : OpenLayers.i18n("unknown")));
 				content_heading.appendChild(content_strong);
 			}
 
@@ -1039,7 +1038,7 @@ OpenLayers.Layer.cdauth.markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 					layer.map.setCenter(new OpenLayers.LonLat(results[i].lon, results[i].lat).transform(new OpenLayers.Projection("EPSG:4326"), layer.map.getProjectionObject()), results[i].zoom);
 				};
 			})(i);
-			content_zoom.appendChild(document.createTextNode("[Zoom]"));
+			content_zoom.appendChild(document.createTextNode(OpenLayers.i18n("[Zoom]")));
 			content_heading.appendChild(content_zoom);
 			content.appendChild(content_heading);
 			content.appendChild(makePermalinks(new OpenLayers.LonLat(results[i].lon, results[i].lat), results[i].zoom));
@@ -1055,7 +1054,7 @@ OpenLayers.Layer.cdauth.markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 		if(!dontzoom)
 		{
 			if(results.length == 0)
-				alert("No results.");
+				alert(OpenLayers.i18n("No results."));
 			else if(results.length == 1)
 				this.map.setCenter(new OpenLayers.LonLat(results[0].lon, results[0].lat).transform(new OpenLayers.Projection("EPSG:4326"), this.map.getProjectionObject()), results[0].zoom);
 			else
@@ -1125,13 +1124,32 @@ OpenLayers.Layer.cdauth.XML = new OpenLayers.Class(OpenLayers.Layer.GML, {
 		}
 		catch(e)
 		{
-			alert("Error parsing file.");
+			alert(OpenLayers.i18n("Error parsing file."));
 			this.events.triggerEvent("loadend");
 		}
 	},
 	CLASS_NAME : "OpenLayers.Layer.cdauth.XML"
 });
 OpenLayers.Layer.cdauth.XML.proxy = null;
+
+/**
+ * Necessary improvement to the translate function: Fall back to default language if translated string is not
+ * available (see http://trac.openlayers.org/ticket/2308).
+*/
+
+OpenLayers.i18n = OpenLayers.Lang.translate = function(key, context) {
+	var message = OpenLayers.Lang[OpenLayers.Lang.getCode()][key];
+	if(!message)
+	{
+		if(OpenLayers.Lang[OpenLayers.Lang.defaultCode][key])
+			message = OpenLayers.Lang[OpenLayers.Lang.defaultCode][key];
+		else
+			message = key;
+	}
+	if(context)
+		message = OpenLayers.String.format(message, context);
+	return message;
+};
 
 /**
  * decodeURIComponent() throws an exception if the string contains invalid constructions (such as a % sign not followed by a 2-digits hexadecimal number). This function returns the original string in case of an error.
@@ -1245,7 +1263,7 @@ function makePermalinks(lonlat, zoom)
 		var li = document.createElement("li");
 		var link = document.createElement("a");
 		link.href = href;
-		link.appendChild(document.createTextNode(text));
+		link.appendChild(document.createTextNode(OpenLayers.i18n(text)));
 		li.appendChild(link);
 		return li;
 	};
@@ -1253,13 +1271,13 @@ function makePermalinks(lonlat, zoom)
 	var dl = document.createElement("dl");
 	var el;
 	el = document.createElement("dt");
-	el.appendChild(document.createTextNode("Latitude"));
+	el.appendChild(document.createTextNode(OpenLayers.i18n("Latitude")));
 	dl.appendChild(el);
 	el = document.createElement("dd");
 	el.appendChild(document.createTextNode(Math.round(lonlat.lat*100000000)/100000000));
 	dl.appendChild(el);
 	el = document.createElement("dt");
-	el.appendChild(document.createTextNode("Longitude"));
+	el.appendChild(document.createTextNode(OpenLayers.i18n("Longitude")));
 	dl.appendChild(el);
 	el = document.createElement("dd");
 	el.appendChild(document.createTextNode(Math.round(lonlat.lon*100000000)/100000000));
@@ -1273,7 +1291,6 @@ function makePermalinks(lonlat, zoom)
 	ul.appendChild(makeEntry("http://maps.yahoo.com/broadband/#lat="+lonlat.lat+"&lon="+lonlat.lon+"&zoom="+zoom, "Yahoo Maps Permalink"));
 	ul.appendChild(makeEntry("http://osmtools.de/osmlinks/?lat="+lonlat.lat+"&lon="+lonlat.lon+"&zoom="+zoom, "OpenStreetMap Links"));
 	ul.appendChild(makeEntry("http://stable.toolserver.org/geohack/geohack.php?params="+lonlat.lat+"_N_"+lonlat.lon+"_E", "Wikimedia GeoHack"));
-	ul.appendChild(makeEntry("http://openstreetbugs.org/?lat="+lonlat.lat+"&lon="+lonlat.lon+"&zoom="+zoom, "OpenStreetBugs"));
 	div.appendChild(ul);
 
 	return div;
@@ -1380,3 +1397,43 @@ function alert_r(data)
 		str += i+": "+data[i]+"\n";
 	alert(str);
 }
+
+OpenLayers.Lang.en = OpenLayers.Util.extend(OpenLayers.Lang.en, {
+	"[Zoom]" : "[Zoom]",
+	"[Remove]" : "[Remove]",
+	"Rendering by <a href=\"http://www.cloudmade.com/\">CloudMade</a>. Data by <a href=\"http://openstreetmap.org/\">OpenStreetMap</a>" : "Rendering by <a href=\"http://www.cloudmade.com/\">CloudMade</a>. Data by <a href=\"http://openstreetmap.org/\">OpenStreetMap</a>",
+	"Relief CC-by-SA by <a href=\"http://openrouteservice.org/\">Kartografie Universität Bonn</a>" : "Relief CC-by-SA by <a href=\"http://openrouteservice.org/\">Kartografie Universität Bonn</a>",
+	"Create a marker" : "Create a marker",
+	"Coordinates" : "Coordinates",
+	"unknown" : "unknown",
+	"No results." : "No results.",
+	"Error parsing file." : "Error parsing file.",
+	"Latitude" : "Latitude",
+	"Longitude" : "Longitude",
+	"Get directions (OpenRouteService)" : "Get directions (OpenRouteService)",
+	"OpenStreetMap Permalink" : "OpenStreetMap Permalink",
+	"Google Maps Permalink" : "Google Maps Permalink",
+	"Yahoo Maps Permalink" : "Yahoo Maps Permalink",
+	"OpenStreetMap Links" : "OpenStreetMap Links",
+	"Wikimedia GeoHack" : "Wikimedia GeoHack"
+});
+
+OpenLayers.Lang.de = OpenLayers.Util.extend(OpenLayers.Lang.de, {
+	"[Zoom]" : "[Zoom]",
+	"[Remove]" : "[Entfernen]",
+	"Rendering by <a href=\"http://www.cloudmade.com/\">CloudMade</a>. Data by <a href=\"http://openstreetmap.org/\">OpenStreetMap</a>" : "Darstellung von <a href=\"http://www.cloudmade.com/\">CloudMade</a>. Daten von <a href=\"http://openstreetmap.org/\">OpenStreetMap</a>",
+	"Relief CC-by-SA by <a href=\"http://openrouteservice.org/\">Kartografie Universität Bonn</a>" : "Reliefdarstellung CC-by-SA von der <a href=\"http://openrouteservice.org/\">Kartografie Universität Bonn</a>",
+	"Create a marker" : "Marker anlegen",
+	"Coordinates" : "Koordinaten",
+	"unknown" : "unbekannt",
+	"No results." : "Kein Ergebnis.",
+	"Error parsing file." : "Fehler beim Parsen der Datei.",
+	"Latitude" : "Breite",
+	"Longitude" : "Länge",
+	"Get directions (OpenRouteService)" : "Route berechnen (OpenRouteService)",
+	"OpenStreetMap Permalink" : "OpenStreetMap Permalink",
+	"Google Maps Permalink" : "Google Maps Permalink",
+	"Yahoo Maps Permalink" : "Yahoo Maps Permalink",
+	"OpenStreetMap Links" : "OpenStreetMap Links",
+	"Wikimedia GeoHack" : "Wikimedia GeoHack"
+});
