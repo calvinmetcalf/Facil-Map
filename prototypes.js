@@ -24,6 +24,67 @@
 */
 
 /**
+ * Necessary improvement to the translate function: Fall back to default language if translated string is not
+ * available (see http://trac.openlayers.org/ticket/2308).
+*/
+
+OpenLayers.i18n = OpenLayers.Lang.translate = function(key, context) {
+	var message = OpenLayers.Lang[OpenLayers.Lang.getCode()][key];
+	if(!message)
+	{
+		if(OpenLayers.Lang[OpenLayers.Lang.defaultCode][key])
+			message = OpenLayers.Lang[OpenLayers.Lang.defaultCode][key];
+		else
+			message = key;
+	}
+	if(context)
+		message = OpenLayers.String.format(message, context);
+	return message;
+};
+
+OpenLayers.Lang.en = OpenLayers.Util.extend(OpenLayers.Lang.en, {
+	"[Zoom]" : "[Zoom]",
+	"[Remove]" : "[Remove]",
+	"Rendering CC-by-SA by <a href=\"http://www.cloudmade.com/\">CloudMade</a>. Data CC-by-SA by <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>" : "Rendering CC-by-SA by <a href=\"http://www.cloudmade.com/\">CloudMade</a>. Data CC-by-SA by <a href=\"http://openstreetmap.org/\">OpenStreetMap</a>",
+	"Rendering CC-by-SA by <a href=\"http://www.mapsurfer.net/\">MapSurfer</a>. Data CC-by-SA by <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>" : "Rendering CC-by-SA by <a href=\"http://www.mapsurfer.net/\">MapSurfer</a>. Data CC-by-SA by <a href=\"http://openstreetmap.org/\">OpenStreetMap</a>",
+	"Relief CC-by-SA by <a href=\"http://openrouteservice.org/\">Kartografie Universität Bonn</a>" : "Relief CC-by-SA by <a href=\"http://openrouteservice.org/\">Kartografie Universität Bonn</a>",
+	"Create a marker" : "Create a marker",
+	"Coordinates" : "Coordinates",
+	"unknown" : "unknown",
+	"No results." : "No results.",
+	"Error parsing file." : "Error parsing file.",
+	"Latitude" : "Latitude",
+	"Longitude" : "Longitude",
+	"Get directions (OpenRouteService)" : "Get directions (OpenRouteService)",
+	"OpenStreetMap Permalink" : "OpenStreetMap Permalink",
+	"Google Maps Permalink" : "Google Maps Permalink",
+	"Yahoo Maps Permalink" : "Yahoo Maps Permalink",
+	"OpenStreetMap Links" : "OpenStreetMap Links",
+	"Wikimedia GeoHack" : "Wikimedia GeoHack"
+});
+
+OpenLayers.Lang.de = OpenLayers.Util.extend(OpenLayers.Lang.de, {
+	"[Zoom]" : "[Zoom]",
+	"[Remove]" : "[Entfernen]",
+	"Rendering CC-by-SA by <a href=\"http://www.cloudmade.com/\">CloudMade</a>. Data CC-by-SA by <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>" : "Darstellung von <a href=\"http://www.cloudmade.com/\">CloudMade</a>. Daten von <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a> (CC-by-SA)",
+	"Rendering CC-by-SA by <a href=\"http://www.mapsurfer.net/\">MapSurfer</a>. Data CC-by-SA by <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>" : "Darstellung von <a href=\"http://www.mapsurfer.net/\">MapSurfer</a>. Daten von <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a> (CC-by-SA)",
+	"Relief CC-by-SA by <a href=\"http://openrouteservice.org/\">Kartografie Universität Bonn</a>" : "Reliefdarstellung CC-by-SA von der <a href=\"http://openrouteservice.org/\">Kartografie Universität Bonn</a>",
+	"Create a marker" : "Marker anlegen",
+	"Coordinates" : "Koordinaten",
+	"unknown" : "unbekannt",
+	"No results." : "Kein Ergebnis.",
+	"Error parsing file." : "Fehler beim Parsen der Datei.",
+	"Latitude" : "Breite",
+	"Longitude" : "Länge",
+	"Get directions (OpenRouteService)" : "Route berechnen (OpenRouteService)",
+	"OpenStreetMap Permalink" : "OpenStreetMap Permalink",
+	"Google Maps Permalink" : "Google Maps Permalink",
+	"Yahoo Maps Permalink" : "Yahoo Maps Permalink",
+	"OpenStreetMap Links" : "OpenStreetMap Links",
+	"Wikimedia GeoHack" : "Wikimedia GeoHack"
+});
+
+/**
  * A map with the default values needed for OpenStreetMap and other world maps.
  * If you plan to use the getQueryMethod() function, remember to set the visibility of your overlay layers _before_ adding them to the map.
  * @event resize The map div has been resized.
@@ -94,6 +155,13 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 			this.addLayer(new OpenLayers.Layer.cdauth.OSM.OpenPisteMap("OpenPisteMap"));
 		if(OpenLayers.Layer.cdauth.OSM.OPNVKarte)
 			this.addLayer(new OpenLayers.Layer.cdauth.OSM.OPNVKarte("ÖPNV-Karte"));
+		if(OpenLayers.Layer.cdauth.OSM.MapSurfer)
+		{
+			if(OpenLayers.Layer.cdauth.OSM.MapSurfer.Road)
+				this.addLayer(new OpenLayers.Layer.cdauth.OSM.MapSurfer.Road("MapSurfer Road"));
+			if(OpenLayers.Layer.cdauth.OSM.MapSurfer.Topographic)
+				this.addLayer(new OpenLayers.Layer.cdauth.OSM.MapSurfer.Topographic("MapSurfer Topographic"));
+		}
 
 		if(OpenLayers.Layer.cdauth.Google.Maps)
 			this.addLayer(new OpenLayers.Layer.cdauth.Google.Maps("Google Streets"));
@@ -386,33 +454,41 @@ OpenLayers.Layer.cdauth = {
 
 if(OpenLayers.Layer.OSM)
 {
-	/**
-	 * Mapnik rendering from openstreetmap.org.
-	 * Include http://www.openstreetmap.org/openlayers/OpenStreetMap.js for this to work.
-	*/
-	OpenLayers.Layer.cdauth.OSM.Mapnik = OpenLayers.Class(OpenLayers.Layer.OSM.Mapnik, {
-		CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.Mapnik"
-	});
+	if(OpenLayers.Layer.OSM.Mapnik)
+	{
+		/**
+		* Mapnik rendering from openstreetmap.org.
+		* Include http://www.openstreetmap.org/openlayers/OpenStreetMap.js for this to work.
+		*/
+		OpenLayers.Layer.cdauth.OSM.Mapnik = OpenLayers.Class(OpenLayers.Layer.OSM.Mapnik, {
+			CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.Mapnik"
+		});
+	}
 
-	/**
-	 * Osmarender rendering from openstreetmap.org.
-	 * Include http://www.openstreetmap.org/openlayers/OpenStreetMap.js for this to work.
-	*/
-	OpenLayers.Layer.cdauth.OSM.Osmarender = OpenLayers.Class(OpenLayers.Layer.OSM.Osmarender, {
-		CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.Osmarender"
-	});
+	if(OpenLayers.Layer.OSM.Osmarender)
+	{
+		/**
+		* Osmarender rendering from openstreetmap.org.
+		* Include http://www.openstreetmap.org/openlayers/OpenStreetMap.js for this to work.
+		*/
+		OpenLayers.Layer.cdauth.OSM.Osmarender = OpenLayers.Class(OpenLayers.Layer.OSM.Osmarender, {
+			CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.Osmarender"
+		});
+	}
 
-	/**
-	 * CycleMap rendering from openstreetmap.org.
-	 * Include http://www.openstreetmap.org/openlayers/OpenStreetMap.js for this to work.
-	*/
-	OpenLayers.Layer.cdauth.OSM.CycleMap = OpenLayers.Class(OpenLayers.Layer.OSM.CycleMap, {
-		CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.CycleMap"
-	});
+	if(OpenLayers.Layer.OSM.CycleMap)
+	{
+		/**
+		* CycleMap rendering from openstreetmap.org.
+		* Include http://www.openstreetmap.org/openlayers/OpenStreetMap.js for this to work.
+		*/
+		OpenLayers.Layer.cdauth.OSM.CycleMap = OpenLayers.Class(OpenLayers.Layer.OSM.CycleMap, {
+			CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.CycleMap"
+		});
+	}
 
 	/**
 	 * Minutely Mapnik rendering of OpenStreetMap data by CloudMade. See http://matt.sandbox.cloudmade.com/.
-	 * Include http://www.openstreetmap.org/openlayers/OpenStreetMap.js for this to work.
 	*/
 	OpenLayers.Layer.cdauth.OSM.MinutelyMapnik = OpenLayers.Class(OpenLayers.Layer.OSM, {
 		initialize: function(name, options) {
@@ -427,7 +503,7 @@ if(OpenLayers.Layer.OSM)
 					],
 					OpenLayers.Util.extend({
 						numZoomLevels: 19,
-						attribution: OpenLayers.i18n("Rendering by <a href=\"http://www.cloudmade.com/\">CloudMade</a>. Data by <a href=\"http://openstreetmap.org/\">OpenStreetMap</a>")
+						attribution: OpenLayers.i18n("Rendering CC-by-SA by <a href=\"http://www.cloudmade.com/\">CloudMade</a>. Data CC-by-SA by <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>")
 					}, options)
 				]
 			);
@@ -437,7 +513,6 @@ if(OpenLayers.Layer.OSM)
 
 	/**
 	 * OpenStreetBrowser rendering of OpenStreetMap data. See http://openstreetbrowser.org/.
-	 * Include http://www.openstreetmap.org/openlayers/OpenStreetMap.js for this to work.
 	*/
 	OpenLayers.Layer.cdauth.OSM.OpenStreetBrowser = new OpenLayers.Class(OpenLayers.Layer.OSM, {
 		initialize: function(name, options) {
@@ -448,7 +523,6 @@ if(OpenLayers.Layer.OSM)
 
 	/**
 	 * OpenPisteMap rendering of OpenStreetMap data. See http://openpistemap.org/.
-	 * Include http://www.openstreetmap.org/openlayers/OpenStreetMap.js for this to work.
 	*/
 	OpenLayers.Layer.cdauth.OSM.OpenPisteMap = new OpenLayers.Class(OpenLayers.Layer.OSM, {
 		initialize: function(name, options) {
@@ -459,7 +533,6 @@ if(OpenLayers.Layer.OSM)
 
 	/**
 	 * OSM Reit- und Wanderkarte rendering of OSM foot- and bridle ways. See http://osmc.broadbox.de/.
-	 * Include http://www.openstreetmap.org/openlayers/OpenStreetMap.js for this to work.
 	*/
 	OpenLayers.Layer.cdauth.OSM.Wanderkarte = new OpenLayers.Class(OpenLayers.Layer.OSM, {
 		initialize: function(name, options) {
@@ -470,7 +543,6 @@ if(OpenLayers.Layer.OSM)
 
 	/**
 	 * OpenStreetMap data rendering by ÖPNV-Karte (PSV map).
-	 * Include http://www.openstreetmap.org/openlayers/OpenStreetMap.js for this to work.
 	*/
 	OpenLayers.Layer.cdauth.OSM.OPNVKarte = new OpenLayers.Class(OpenLayers.Layer.OSM, {
 		initialize: function(name, options) {
@@ -478,7 +550,36 @@ if(OpenLayers.Layer.OSM)
 		},
 		CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.OPNVKarte"
 	});
+
+	/**
+	 * Parent class for MapSurfer (http://www.mapsurfer.net/) renderings.
+	*/
+	OpenLayers.Layer.cdauth.OSM.MapSurfer = new OpenLayers.Class(OpenLayers.Layer.OSM, {
+		attribution : OpenLayers.i18n("Rendering CC-by-SA by <a href=\"http://www.mapsurfer.net/\">MapSurfer</a>. Data CC-by-SA by <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>"),
+		CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.MapSurfer"
+	});
+
+	/**
+	 * MapSurfer road map.
+	*/
+	OpenLayers.Layer.cdauth.OSM.MapSurfer.Road = new OpenLayers.Class(OpenLayers.Layer.cdauth.OSM.MapSurfer, {
+		initialize : function(name, options) {
+			OpenLayers.Layer.cdauth.OSM.MapSurfer.prototype.initialize.apply(this, [ name, "http://tiles1.mapsurfer.net/tms_r.ashx?x=${x}&y=${y}&z=${z}", options ]);
+		},
+		CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.MapSurfer.Road"
+	});
+
+	/**
+	 * MapSurfer topographic map.
+	*/
+	OpenLayers.Layer.cdauth.OSM.MapSurfer.Topographic = new OpenLayers.Class(OpenLayers.Layer.cdauth.OSM.MapSurfer, {
+		initialize : function(name, options) {
+			OpenLayers.Layer.cdauth.OSM.MapSurfer.prototype.initialize.apply(this, [ name, "http://tiles2.mapsurfer.net/tms_t.ashx?x=${x}&y=${y}&z=${z}", options ]);
+		},
+		CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.MapSurfer.Topographic"
+	});
 }
+
 
 if(OpenLayers.Layer.WMS)
 {
@@ -851,12 +952,13 @@ OpenLayers.Control.cdauth.createMarker = OpenLayers.Class(OpenLayers.Control, {
 	*/
 	cdauthLayer : null,
 
+	title : OpenLayers.i18n("Create a marker"),
+
 	/**
 	 * @var OpenLayers.Layer.cdauth.markers.LonLat cdauthLayer
 	*/
 	initialize: function(cdauthLayer, options) {
 		this.cdauthLayer = cdauthLayer;
-		this.title = OpenLayers.i18n("Create a marker");
 
 		OpenLayers.Control.prototype.initialize.apply(this, [ options ]);
 	},
@@ -1133,25 +1235,6 @@ OpenLayers.Layer.cdauth.XML = new OpenLayers.Class(OpenLayers.Layer.GML, {
 OpenLayers.Layer.cdauth.XML.proxy = null;
 
 /**
- * Necessary improvement to the translate function: Fall back to default language if translated string is not
- * available (see http://trac.openlayers.org/ticket/2308).
-*/
-
-OpenLayers.i18n = OpenLayers.Lang.translate = function(key, context) {
-	var message = OpenLayers.Lang[OpenLayers.Lang.getCode()][key];
-	if(!message)
-	{
-		if(OpenLayers.Lang[OpenLayers.Lang.defaultCode][key])
-			message = OpenLayers.Lang[OpenLayers.Lang.defaultCode][key];
-		else
-			message = key;
-	}
-	if(context)
-		message = OpenLayers.String.format(message, context);
-	return message;
-};
-
-/**
  * decodeURIComponent() throws an exception if the string contains invalid constructions (such as a % sign not followed by a 2-digits hexadecimal number). This function returns the original string in case of an error.
  * @param String str
  * @return String
@@ -1397,43 +1480,3 @@ function alert_r(data)
 		str += i+": "+data[i]+"\n";
 	alert(str);
 }
-
-OpenLayers.Lang.en = OpenLayers.Util.extend(OpenLayers.Lang.en, {
-	"[Zoom]" : "[Zoom]",
-	"[Remove]" : "[Remove]",
-	"Rendering by <a href=\"http://www.cloudmade.com/\">CloudMade</a>. Data by <a href=\"http://openstreetmap.org/\">OpenStreetMap</a>" : "Rendering by <a href=\"http://www.cloudmade.com/\">CloudMade</a>. Data by <a href=\"http://openstreetmap.org/\">OpenStreetMap</a>",
-	"Relief CC-by-SA by <a href=\"http://openrouteservice.org/\">Kartografie Universität Bonn</a>" : "Relief CC-by-SA by <a href=\"http://openrouteservice.org/\">Kartografie Universität Bonn</a>",
-	"Create a marker" : "Create a marker",
-	"Coordinates" : "Coordinates",
-	"unknown" : "unknown",
-	"No results." : "No results.",
-	"Error parsing file." : "Error parsing file.",
-	"Latitude" : "Latitude",
-	"Longitude" : "Longitude",
-	"Get directions (OpenRouteService)" : "Get directions (OpenRouteService)",
-	"OpenStreetMap Permalink" : "OpenStreetMap Permalink",
-	"Google Maps Permalink" : "Google Maps Permalink",
-	"Yahoo Maps Permalink" : "Yahoo Maps Permalink",
-	"OpenStreetMap Links" : "OpenStreetMap Links",
-	"Wikimedia GeoHack" : "Wikimedia GeoHack"
-});
-
-OpenLayers.Lang.de = OpenLayers.Util.extend(OpenLayers.Lang.de, {
-	"[Zoom]" : "[Zoom]",
-	"[Remove]" : "[Entfernen]",
-	"Rendering by <a href=\"http://www.cloudmade.com/\">CloudMade</a>. Data by <a href=\"http://openstreetmap.org/\">OpenStreetMap</a>" : "Darstellung von <a href=\"http://www.cloudmade.com/\">CloudMade</a>. Daten von <a href=\"http://openstreetmap.org/\">OpenStreetMap</a>",
-	"Relief CC-by-SA by <a href=\"http://openrouteservice.org/\">Kartografie Universität Bonn</a>" : "Reliefdarstellung CC-by-SA von der <a href=\"http://openrouteservice.org/\">Kartografie Universität Bonn</a>",
-	"Create a marker" : "Marker anlegen",
-	"Coordinates" : "Koordinaten",
-	"unknown" : "unbekannt",
-	"No results." : "Kein Ergebnis.",
-	"Error parsing file." : "Fehler beim Parsen der Datei.",
-	"Latitude" : "Breite",
-	"Longitude" : "Länge",
-	"Get directions (OpenRouteService)" : "Route berechnen (OpenRouteService)",
-	"OpenStreetMap Permalink" : "OpenStreetMap Permalink",
-	"Google Maps Permalink" : "Google Maps Permalink",
-	"Yahoo Maps Permalink" : "Yahoo Maps Permalink",
-	"OpenStreetMap Links" : "OpenStreetMap Links",
-	"Wikimedia GeoHack" : "Wikimedia GeoHack"
-});
