@@ -968,7 +968,7 @@ OpenLayers.Layer.cdauth.markers.LonLat = new OpenLayers.Class(OpenLayers.Layer.c
  * Add an instance of this to your map using OpenLayers.Map.cdauth.addControl() and activate() it.
 */
 
-OpenLayers.Control.cdauth.createMarker = OpenLayers.Class(OpenLayers.Control, {
+OpenLayers.Control.cdauth.CreateMarker = OpenLayers.Class(OpenLayers.Control, {
 	/**
 	 * @var OpenLayers.Layer.cdauth.markers.LonLat
 	*/
@@ -1007,7 +1007,7 @@ OpenLayers.Control.cdauth.createMarker = OpenLayers.Class(OpenLayers.Control, {
 		this.cdauthLayer.addLonLatMarker(lonlat);
 	},
 
-	CLASS_NAME: "OpenLayers.Control.cdauth.createMarker"
+	CLASS_NAME: "OpenLayers.Control.cdauth.CreateMarker"
 });
 
 /**
