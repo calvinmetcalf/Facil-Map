@@ -97,7 +97,7 @@ OpenLayers.Lang.de = OpenLayers.Util.extend(OpenLayers.Lang.de, {
 /**
  * A map with the default values needed for OpenStreetMap and other world maps.
  * If you plan to use the getQueryMethod() function, remember to set the visibility of your overlay layers _before_ adding them to the map.
- * @event resize The map div has been resized.
+ * @event mapResize The map div has been resized.
  * @event newHash The return value of getQueryObject() probably has changed.
 */
 
@@ -121,7 +121,7 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 			projection: new OpenLayers.Projection("EPSG:4326"),
 			displayProjection: new OpenLayers.Projection("EPSG:4326")
 		}, options) ]);
-		this.events.addEventType("resize");
+		this.events.addEventType("mapResize");
 		this.events.addEventType("newHash");
 
 		this.events.register("move", this, function(){ this.events.triggerEvent("newHash"); });
@@ -132,7 +132,7 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 	updateSize : function()
 	{
 		var ret = OpenLayers.Map.prototype.updateSize.apply(this, arguments);
-		this.events.triggerEvent("resize");
+		this.events.triggerEvent("mapResize");
 		return ret;
 	},
 
@@ -399,7 +399,7 @@ OpenLayers.Control.cdauth.LayerSwitcher = OpenLayers.Class(OpenLayers.Control.La
 		var ret = OpenLayers.Control.LayerSwitcher.prototype.loadContents.apply(this, arguments);
 		this.layersDiv.style.paddingRight = "0";
 		this.layersDiv.style.overflow = "auto";
-		this.map.events.register("resize", this, function(){this.layersDiv.style.maxHeight = (this.map.size.h-100)+"px"});
+		this.map.events.register("mapResize", this, function(){this.layersDiv.style.maxHeight = (this.map.size.h-100)+"px"});
 		return ret;
 	},
 
@@ -617,7 +617,7 @@ if(OpenLayers.Layer.WMS)
 	});
 }
 
-if(OpenLayers.Layer.Google)
+if(OpenLayers.Layer.Google && typeof GMap2 != "undefined")
 {
 	/**
 	 * Google Streets (http://maps.google.com/)
@@ -707,7 +707,7 @@ if(OpenLayers.Layer.Google)
 	}
 }
 
-if(OpenLayers.Layer.Yahoo)
+if(OpenLayers.Layer.Yahoo && typeof YMap != "undefined")
 {
 	/**
 	 * Yahoo Streets (http://maps.yahoo.com/)
