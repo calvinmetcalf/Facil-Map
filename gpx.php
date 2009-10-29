@@ -19,6 +19,10 @@
 	or svn://svn.cdauth.de/tools/osm/map/.
 */
 
+	/**
+	 * Proxy for GPX, KML, OSM and GML files.
+	*/
+
 	ini_set("display_errors", "Off");
 
 	try

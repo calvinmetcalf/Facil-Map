@@ -1021,17 +1021,20 @@ OpenLayers.Control.cdauth.CreateMarker = OpenLayers.Class(OpenLayers.Control, {
 OpenLayers.Layer.cdauth.markers.GeoSearch = new OpenLayers.Class(OpenLayers.Layer.cdauth.markers.Markers, {
 	lastSearch : false,
 	nameFinderURL : false,
+	nameFinder2URL : false,
 	defaultIcon : false,
 	highlighIcon : false,
 
 	/**
 	 * @param String nameFinderURL http://gazetteer.openstreetmap.org/namefinder/search.xml (search=%s will be appended). To work around the same origin policy, pass a wrapper that lives on your webspace.
+	 * @param String nameFinder2URL http://data.giub.uni-bonn.de/openrouteservice/php/OpenLSLUS_Geocode.php Will be used if the normal namefinder does not find anything
 	 * @param OpenLayers.Icon defaultIcon The default icon to use for the search result markers.
 	 * @param OpenLayers.Icon highlightIcon The marker icon to use for the first search result.
 	*/
-	initialize: function(name, nameFinderURL, defaultIcon, highlightIcon, options) {
+	initialize: function(name, nameFinderURL, nameFinder2URL, defaultIcon, highlightIcon, options) {
 		OpenLayers.Layer.cdauth.markers.Markers.prototype.initialize.apply(this, [ name, options ]);
 		this.nameFinderURL = nameFinderURL;
+		this.nameFinder2URL = nameFinder2URL;
 		this.defaultIcon = defaultIcon;
 		this.highlightIcon = highlightIcon;
 		this.events.addEventType("lastSearchChange");
@@ -1101,38 +1104,134 @@ OpenLayers.Layer.cdauth.markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 		else
 		{ // NameFinder
 			var layer = this;
-			OpenLayers.loadURL(this.nameFinderURL, { "find": query }, null, function(request) {
-				if(request.responseXML)
-				{
-					var searchresults = request.responseXML.getElementsByTagName("searchresults");
-					if(searchresults.length > 0)
-					{
-						var named = searchresults[0].childNodes;
-						var results = [ ];
-						for(var i=0; i<named.length; i++)
-						{
-							if(named[i].nodeType != 1) continue;
 
-							results.push({
-								zoom : named[i].getAttribute("zoom"),
-								lon : named[i].getAttribute("lon"),
-								lat : named[i].getAttribute("lat"),
-								name : named[i].getAttribute("name"),
-								info : named[i].getAttribute("info")
-							});
+			var results1,results2;
+
+			OpenLayers.Request.GET({
+				url : this.nameFinderURL,
+				params : { "find": query },
+				success : function(request) {
+					if(request.responseXML)
+					{
+						var searchresults = request.responseXML.getElementsByTagName("searchresults");
+						if(searchresults.length > 0)
+						{
+							var results = [ ];
+							if(searchresults[0].getAttribute("findplace") == null || searchresults[0].getAttribute("findplace") == "" || searchresults[0].getAttribute("foundnearplace") == "yes")
+							{
+								var named = searchresults[0].childNodes;
+								for(var i=0; i<named.length; i++)
+								{
+									if(named[i].nodeType != 1) continue;
+
+									results.push({
+										zoom : named[i].getAttribute("zoom"),
+										lon : named[i].getAttribute("lon"),
+										lat : named[i].getAttribute("lat"),
+										name : named[i].getAttribute("name"),
+										info : named[i].getAttribute("info")
+									});
+								}
+							}
+
+							if(results.length > 0)
+							{
+								results1 = results;
+								layer.showResults(results, query, dontzoom, markersvisible);
+								return;
+							}
+						}
+					}
+
+					results1 = [ ];
+					if(results2)
+						layer.showResults(results2, query, dontzoom, markersvisible);
+				},
+				failure : function() {
+					results1 = [ ];
+					if(results2)
+						layer.showResults(results2, query, dontzoom, markersvisible);
+				}
+			});
+
+			if(!this.nameFinder2URL)
+				results2 = [ ];
+			else
+			{
+				OpenLayers.Request.POST({
+					url : this.nameFinder2URL,
+					data : OpenLayers.Util.getParameterString({ "FreeFormAdress" : query, "MaxResponse" : 50 }),
+					headers : { "Content-type" : "application/x-www-form-urlencoded" },
+					success : function(request) {
+						if(results1 && results1.length > 0)
+							return;
+						if(request.responseXML)
+						{
+							var searchresults = request.responseXML.getElementsByTagName("xls:GeocodedAddress");
+							var results = [ ];
+							for(var i=0; i<searchresults.length; i++)
+							{
+								var accuracy = searchresults[i].getElementsByTagName("xls:GeocodeMatchCode");
+								if(accuracy.length >= 1 && accuracy[0].getAttribute("accuracy") < 0.6)
+									continue;
+								var pos = searchresults[i].getElementsByTagName("gml:pos");
+								if(pos.length < 1) continue;
+								pos = pos[0].firstChild.data.split(" ");
+
+								// FIXME: The determination of the name is not very proper
+								var desc = [ ];
+								var desc_street = searchresults[i].getElementsByTagName("xls:Street");
+								if(desc_street.length >= 1 && desc_street[0].getAttribute("officialName"))
+									desc.push(desc_street[0].getAttribute("officialName"));
+								var desc_number = searchresults[i].getElementsByTagName("xls:Building");
+								if(desc_number.length >= 1 && desc_number[0].getAttribute("number"))
+									desc.push(desc_number[0].getAttribute("number"));
+								var desc_postalcode = searchresults[i].getElementsByTagName("xls:PostalCode");
+								if(desc_postalcode.length >= 1)
+									desc.push(desc_postalcode[0].firstChild.data);
+								var desc_place = searchresults[i].getElementsByTagName("xls:Place");
+								for(var j=0; j<desc_place.length; j++)
+								{
+									if(desc_place[j].getAttribute("type") == "Municipality")
+									{
+										desc.push(desc_place[j].firstChild.data);
+										break;
+									}
+								}
+								for(var j=0; j<desc_place.length; j++)
+								{
+									if(desc_place[j].getAttribute("type") == "CountrySubdivision")
+									{
+										desc.push(desc_place[j].firstChild.data);
+										break;
+									}
+								}
+
+								results.push({
+									zoom : 16,
+									lon : pos[0],
+									lat : pos[1],
+									name : desc.join(" ")
+								});
+							}
+
+							results2 = results;
+							if(results1 && results1.length == 0)
+								layer.showResults(results, query, dontzoom, markersvisible);
+							return;
 						}
 
-						layer.showResults(results, query, dontzoom, markersvisible);
-
-						return;
+						results2 = [ ];
+						if(results1 && results1.length == 0)
+							alert(OpenLayers.i18n("No results."));
+					},
+					failure : function() {
+						results2 = [ ];
+						if(results1 && results1.length == 0)
+							alert(OpenLayers.i18n("No results."));
 					}
-				}
-				layer.events.triggerEvent("searchFailure");
-				alert("Search failed.");
-			}, function() {
-				layer.events.triggerEvent("searchFailure");
-				alert("Search failed.");
-			});
+				});
+			}
 		}
 	},
 	showResults : function(results, query, dontzoom, markersvisible) {

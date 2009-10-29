@@ -20,17 +20,35 @@
 */
 
 	/**
-	 * Proxy for http://gazetteer.openstreetmap.org/namefinder/search.xml. Redirects the find GET parameter there.
+	 * Proxy for http://data.giub.uni-bonn.de/openrouteservice/php/OpenLSLUS_Geocode.php. Redirects the POST request there.
 	*/
 
 	ini_set("display_errors", "Off");
 
-	$fh = fsockopen("gazetteer.openstreetmap.org", 80);
-	fwrite($fh, "GET /namefinder/search.xml?find=".rawurlencode(isset($_GET["find"]) ? $_GET["find"] : "")." HTTP/1.0\r\n");
-	fwrite($fh, "Host: gazetteer.openstreetmap.org\r\n");
+	function arrayToQuery(&$array, &$query, $prefix="")
+	{
+		foreach($array as $k=>$v)
+		{
+			$k = (strlen($prefix) > 0 ? $prefix."[".rawurlencode($k)."]" : rawurlencode($k));
+			if(is_array($v))
+				arrayToQuery(&$query, $k);
+			else
+				$query[] = $k."=".urlencode($v);
+		}
+	}
+
+	$request = array();
+	arrayToQuery(&$_POST, &$request);
+	$request = implode("&", $request);
+
+	$fh = fsockopen("data.giub.uni-bonn.de", 80);
+	fwrite($fh, "POST /openrouteservice/php/OpenLSLUS_Geocode.php HTTP/1.0\r\n");
+	fwrite($fh, "Host: data.giub.uni-bonn.de\r\n");
 	fwrite($fh, "User-Agent: ".rawurlencode("cdauth’s map")."\r\n");
 	fwrite($fh, "X-Forwarded-For: ".$_SERVER["REMOTE_ADDR"]."\r\n");
 	fwrite($fh, "Connection: close\r\n");
+	fwrite($fh, "Content-type: application/x-www-form-urlencoded\r\n");
+	fwrite($fh, "Content-length: ".strlen($request)."\r\n");
 	foreach($_SERVER as $k=>$v)
 	{
 		if(substr($k, 0, 5) != "HTTP_" || $k == "HTTP_HOST" || $k == "HTTP_KEEP_ALIVE" || $k == "HTTP_CONNECTION")
@@ -45,6 +63,7 @@
 		fwrite($fh, $k.": ".$v."\r\n");
 	}
 	fwrite($fh, "\r\n");
+	fwrite($fh, $request);
 
 	while(($line = fgets($fh)) !== false)
 	{
