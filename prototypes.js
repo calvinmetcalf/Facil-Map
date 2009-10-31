@@ -401,6 +401,7 @@ OpenLayers.Control.cdauth.LayerSwitcher = OpenLayers.Class(OpenLayers.Control.La
 		this.layersDiv.style.width = "19em";
 		this.layersDiv.style.overflow = "auto";
 		this.minimizeDiv.style.right = "20px";
+		this.maximizeDiv.style.right = "0";
 		this.map.events.register("mapResize", this, this.onMapResize);
 		return ret;
 	},
