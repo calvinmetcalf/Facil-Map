@@ -397,16 +397,23 @@ OpenLayers.Control.cdauth.KeyboardDefaults = OpenLayers.Class(OpenLayers.Control
 OpenLayers.Control.cdauth.LayerSwitcher = OpenLayers.Class(OpenLayers.Control.LayerSwitcher, {
 	loadContents : function() {
 		var ret = OpenLayers.Control.LayerSwitcher.prototype.loadContents.apply(this, arguments);
-		this.layersDiv.style.paddingRight = "0";
+		this.layersDiv.style.padding = ".5em";
+		this.layersDiv.style.width = "19em";
 		this.layersDiv.style.overflow = "auto";
-		this.map.events.register("mapResize", this, function(){this.layersDiv.style.maxHeight = (this.map.size.h-100)+"px"});
+		this.minimizeDiv.style.right = "20px";
+		this.map.events.register("mapResize", this, this.onMapResize);
 		return ret;
+	},
+
+	onMapResize : function() {
+		this.layersDiv.style.maxHeight = (this.map.size.h-100)+"px";
 	},
 
 	redraw : function() {
 		// Display “Zoom” and, if desired, “Remove” links for overlay layers.
 
 		var ret = OpenLayers.Control.LayerSwitcher.prototype.redraw.apply(this, arguments);
+		this.onMapResize();
 
 		var spans = this.dataLayersDiv.getElementsByTagName("span");
 		for(var i=0; i<spans.length; i++)
@@ -449,10 +456,9 @@ OpenLayers.Control.cdauth.LayerSwitcher = OpenLayers.Class(OpenLayers.Control.La
 		}
 
 		return ret;
-	}
+	},
 
-	// FIXME: With the following the default stylesheet does not work anymore
-	//CLASS_NAME : "OpenLayers.Control.cdauth.LayerSwitcher"
+	CLASS_NAME : "OpenLayers.Control.cdauth.LayerSwitcher"
 });
 
 OpenLayers.Layer.cdauth = {
