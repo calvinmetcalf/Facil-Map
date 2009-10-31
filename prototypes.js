@@ -402,8 +402,8 @@ OpenLayers.Control.cdauth.LayerSwitcher = OpenLayers.Class(OpenLayers.Control.La
 		this.layersDiv.style.overflow = "auto";
 
 		// The following settings are _sometimes_ set automatically by OpenLayers, but I cannot find out where...
-		this.layersDiv.style.top = "25px";
-		this.layersDiv.style.right = "0";
+		this.div.style.top = "25px";
+		this.div.style.right = "0";
 		this.minimizeDiv.style.right = "20px";
 		this.maximizeDiv.style.top = "5px";
 		this.maximizeDiv.style.right = "0";
