@@ -449,9 +449,10 @@ OpenLayers.Control.cdauth.LayerSwitcher = OpenLayers.Class(OpenLayers.Control.La
 		}
 
 		return ret;
-	},
+	}
 
-	CLASS_NAME : "OpenLayers.Control.cdauth.LayerSwitcher"
+	// FIXME: With the following the default stylesheet does not work anymore
+	//CLASS_NAME : "OpenLayers.Control.cdauth.LayerSwitcher"
 });
 
 OpenLayers.Layer.cdauth = {
