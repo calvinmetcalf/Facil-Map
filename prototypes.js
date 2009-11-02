@@ -1308,14 +1308,9 @@ OpenLayers.Layer.cdauth.markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 OpenLayers.Layer.cdauth.XML = new OpenLayers.Class(OpenLayers.Layer.GML, {
 	colourCounter : 1,
 	cdauthURL : null,
+	relations : { },
 	initialize : function(name, url, options) {
 		this.cdauthURL = url;
-
-		var query;
-		if(OpenLayers.Layer.cdauth.XML.proxy)
-			query = OpenLayers.Layer.cdauth.XML.proxy + (OpenLayers.Layer.cdauth.XML.proxy.match(/\?/) ? "&" : "?") + "url=" + encodeURIComponent(url);
-		else
-			query = url;
 
 		var colour;
 		switch((OpenLayers.Layer.cdauth.XML.prototype.colourCounter++)%4)
@@ -1326,7 +1321,7 @@ OpenLayers.Layer.cdauth.XML = new OpenLayers.Class(OpenLayers.Layer.GML, {
 			case 3: colour = "black"; break;
 		}
 
-		OpenLayers.Layer.GML.prototype.initialize.apply(this, [ name ? name : url, query, OpenLayers.Util.extend({
+		OpenLayers.Layer.GML.prototype.initialize.apply(this, [ name ? name : url, this.proxyURL(url), OpenLayers.Util.extend({
 			style: {
 				strokeColor: colour,
 				strokeWidth: 3,
@@ -1335,6 +1330,27 @@ OpenLayers.Layer.cdauth.XML = new OpenLayers.Class(OpenLayers.Layer.GML, {
 			projection: new OpenLayers.Projection("EPSG:4326"),
 			zoomableInLayerSwitcher: true
 		}, options) ]);
+	},
+	proxyURL : function(url)
+	{
+		if(OpenLayers.Layer.cdauth.XML.proxy)
+			return OpenLayers.Layer.cdauth.XML.proxy + (OpenLayers.Layer.cdauth.XML.proxy.match(/\?/) ? "&" : "?") + "url=" + encodeURIComponent(url);
+		else
+			return url;
+	},
+	loadGML : function(url) {
+		if(!url)
+			OpenLayers.Layer.GML.prototype.loadGML.apply(this, [ ]);
+		else
+		{
+			this.events.triggerEvent("loadstart");
+			OpenLayers.Request.GET({
+				url: url,
+				success: this.requestSuccess,
+				failure: this.requestFailure,
+				scope: this
+			});
+		}
 	},
 	requestSuccess: function(request) {
 		if(request.responseXML && request.responseXML.documentElement)
@@ -1349,18 +1365,35 @@ OpenLayers.Layer.cdauth.XML = new OpenLayers.Class(OpenLayers.Layer.GML, {
 		this.formatOptions = { extractAttributes: false };
 		try
 		{
-			var ret = OpenLayers.Layer.GML.prototype.requestSuccess.apply(this, arguments);
-			return ret;
+			OpenLayers.Layer.GML.prototype.requestSuccess.apply(this, arguments);
 		}
 		catch(e)
 		{
 			alert(OpenLayers.i18n("Error parsing file."));
 			this.events.triggerEvent("loadend");
 		}
+
+		if(OpenLayers.Layer.cdauth.XML.relationURL && this.format == OpenLayers.Format.OSM && request.responseXML)
+		{
+			var relations = request.responseXML.getElementsByTagName("relation");
+			for(var i=0; i<relations.length; i++)
+			{
+				var id = relations[i].getAttribute("id");
+				if(this.relations[id])
+					continue;
+				this.relations[id] = true;
+
+				var url = this.proxyURL(OpenLayers.Layer.cdauth.XML.relationURL.replace("${url}", id));
+				if(url == this.url)
+					continue;
+				this.loadGML(url);
+			}
+		}
 	},
 	CLASS_NAME : "OpenLayers.Layer.cdauth.XML"
 });
 OpenLayers.Layer.cdauth.XML.proxy = null;
+OpenLayers.Layer.cdauth.XML.relationURL = null;
 
 /**
  * decodeURIComponent() throws an exception if the string contains invalid constructions (such as a % sign not followed by a 2-digits hexadecimal number). This function returns the original string in case of an error.
