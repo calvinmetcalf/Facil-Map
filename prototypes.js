@@ -756,22 +756,6 @@ if(OpenLayers.Layer.Yahoo && typeof YMap != "undefined")
 	}
 }
 
-if(OpenLayers.Layer.XYZ)
-{
-	/**
-	 * OpenAerialMap (http://openaerialmap.org/).
-	*/
-
-	// OpenAerialMap is currently offline
-
-	/*OpenLayers.Layer.cdauth.other.OpenAerialMap = new OpenLayers.Class(OpenLayers.Layer.XYZ, {
-		initialize: function(name, options) {
-			OpenLayers.Layer.XYZ.prototype.initialize.apply(this, [ name, "http://tile.openaerialmap.org/tiles/1.0.0/openaerialmap-900913/${z}/${x}/${y}.png", OpenLayers.Util.extend({sphericalMercator: true}, options) ]);
-		},
-		CLASS_NAME : "OpenLayers.Layer.cdauth.other.OpenAerialMap"
-	});*/
-}
-
 /**
  * Extends a FramedCloud with various useful features. An event is triggered during closing instead of passing the callback function
  * to the initialize function. You may pass a DOM element for the popup content instead of HTML code.
@@ -984,7 +968,7 @@ OpenLayers.Control.cdauth.CreateMarker = OpenLayers.Class(OpenLayers.Control, {
 	title : OpenLayers.i18n("Create a marker"),
 
 	/**
-	 * @var OpenLayers.Layer.cdauth.markers.LonLat cdauthLayer
+	 * @param OpenLayers.Layer.cdauth.markers.LonLat cdauthLayer
 	*/
 	initialize: function(cdauthLayer, options) {
 		this.cdauthLayer = cdauthLayer;
@@ -1303,6 +1287,7 @@ OpenLayers.Layer.cdauth.markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 /**
  * Displays an XML file on the map (such as GPX, KML or OSM) using a proxy and with auto-determining of the format. The colour is
  * randomly assigned. Set OpenLayers.Layer.cdauth.XML.proxy to your proxy URL (the URL will be appended using the “url” GET parameter).
+ * If you set OpenLayers.Layer.cdauth.XML.relationURL, OSM sub-relations will be loaded in additional requests.
 */
 
 OpenLayers.Layer.cdauth.XML = new OpenLayers.Class(OpenLayers.Layer.GML, {
@@ -1383,7 +1368,7 @@ OpenLayers.Layer.cdauth.XML = new OpenLayers.Class(OpenLayers.Layer.GML, {
 					continue;
 				this.relations[id] = true;
 
-				var url = this.proxyURL(OpenLayers.Layer.cdauth.XML.relationURL.replace("${url}", id));
+				var url = this.proxyURL(OpenLayers.String.format(OpenLayers.Layer.cdauth.XML.relationURL, {"id": id}));
 				if(url == this.url)
 					continue;
 				this.loadGML(url);
@@ -1392,7 +1377,16 @@ OpenLayers.Layer.cdauth.XML = new OpenLayers.Class(OpenLayers.Layer.GML, {
 	},
 	CLASS_NAME : "OpenLayers.Layer.cdauth.XML"
 });
+/**
+ * Set this to a local proxy for XML files. The GET parameter “url” will be appended to this URL with the URL of the XML file.
+ * @var String
+*/
 OpenLayers.Layer.cdauth.XML.proxy = null;
+/**
+ * Set this to the XML URL that shall be loaded for relations referenced in OSM files. “${id}" will be replaced by the ID of the relation.
+ * Use the real URL here, not that of your proxy. Usually you set this to "http://www.openstreetmap.org/api/0.6/relation/${id}/full".
+ * @var String
+*/
 OpenLayers.Layer.cdauth.XML.relationURL = null;
 
 /**
