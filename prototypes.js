@@ -144,10 +144,7 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 			this.cdauthDefaultVisibility[layer.name] = layer.getVisibility();
 	},
 
-	/**
-	 * Adds all available layers from this library to your map.
-	*/
-	addAllAvailableLayers : function()
+	addAllAvailableOSMLayers : function()
 	{
 		if(OpenLayers.Layer.cdauth.OSM.Mapnik)
 			this.addLayer(new OpenLayers.Layer.cdauth.OSM.Mapnik("Mapnik"));
@@ -172,7 +169,10 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 			this.addLayer(new OpenLayers.Layer.cdauth.OSM.OPNVKarte("ÖPNV-Karte"));
 		if(OpenLayers.Layer.cdauth.OSM.MinutelyMapnik)
 			this.addLayer(new OpenLayers.Layer.cdauth.OSM.MinutelyMapnik("Minutely Mapnik"));
+	},
 
+	addAllAvailableGoogleLayers : function()
+	{
 		if(OpenLayers.Layer.cdauth.Google.Maps)
 			this.addLayer(new OpenLayers.Layer.cdauth.Google.Maps("Google Streets"));
 		if(OpenLayers.Layer.cdauth.Google.MapsSatellite)
@@ -185,16 +185,27 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 			this.addLayer(new OpenLayers.Layer.cdauth.Google.MapMaker("Google MapMaker"));
 		if(OpenLayers.Layer.cdauth.Google.MapMakerHybrid)
 			this.addLayer(new OpenLayers.Layer.cdauth.Google.MapMakerHybrid("Google MapMaker Hybrid"));
+	},
 
+	addAllAvailableYahooLayers : function()
+	{
 		if(OpenLayers.Layer.cdauth.Yahoo.Maps)
 			this.addLayer(new OpenLayers.Layer.cdauth.Yahoo.Maps("Yahoo Street"));
 		if(OpenLayers.Layer.cdauth.Yahoo.Satellite)
 			this.addLayer(new OpenLayers.Layer.cdauth.Yahoo.Satellite("Yahoo Satellite"));
 		if(OpenLayers.Layer.cdauth.Yahoo.Hybrid)
 			this.addLayer(new OpenLayers.Layer.cdauth.Yahoo.Hybrid("Yahoo Hybrid"));
+	},
 
-		if(OpenLayers.Layer.cdauth.other.OpenAerialMap)
-			this.addLayer(new OpenLayers.Layer.cdauth.other.OpenAerialMap("OpenAerialMap"));
+	/**
+	 * Adds all available layers from this library to your map.
+	*/
+	addAllAvailableLayers : function()
+	{
+		this.addAllAvailableOSMLayers();
+		this.addAllAvailableGoogleLayers();
+		this.addAllAvailableYahooLayers();
+
 		if(OpenLayers.Layer.cdauth.other.Relief)
 			this.addLayer(new OpenLayers.Layer.cdauth.other.Relief("Relief", { visibility: false }));
 	},
