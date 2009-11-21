@@ -1557,10 +1557,19 @@ function domInsertAfter(node, after)
 		after.parentNode.appendChild(node);
 }
 
-/*function makeShortCode(lat, lon, zoom) {
-	char_array = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_@";
-    var x = Math.round((lon + 180.0) * ((1 << 30) / 90.0));
-    var y = Math.round((lat +  90.0) * ((1 << 30) / 45.0));
+var shortLinkCharArray = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_@";
+
+/**
+ * Creates the relevant string of an OSM Shortlink. Copied from http://www.openstreetmap.org/javascripts/site.js, function makeShortCode().
+ * @param OpenLayers.LonLat lonlat Coordinates in WGS-84
+ * @param Number zoom
+ * @return String
+*/
+
+function encodeShortLink(lonlat, zoom)
+{
+    var x = Math.round((lonlat.lon + 180.0) * ((1 << 30) / 90.0));
+    var y = Math.round((lonlat.lat +  90.0) * ((1 << 30) / 45.0));
     // hack around the fact that JS apparently only allows 53-bit integers?!?
     // note that, although this reduces the accuracy of the process, it's fine for
     // z18 so we don't need to care for now.
@@ -1575,29 +1584,33 @@ function domInsertAfter(node, after)
 		c2 = (c2 << 1) | ((x >> i) & 1);
 		c2 = (c2 << 1) | ((y >> i) & 1);
     }
+
     var str = "";
     for (var i = 0; i < Math.ceil((zoom + 8) / 3.0) && i < 5; ++i)
 	{
 		digit = (c1 >> (24 - 6 * i)) & 0x3f;
-		str += char_array.charAt(digit);
+		str += shortLinkCharArray.charAt(digit);
     }
     for (var i = 5; i < Math.ceil((zoom + 8) / 3.0); ++i)
 	{
 		digit = (c2 >> (24 - 6 * (i - 5))) & 0x3f;
-		str += char_array.charAt(digit);
+		str += shortLinkCharArray.charAt(digit);
     }
     for (var i = 0; i < ((zoom + 8) % 3); ++i)
 	{
 		str += "-";
     }
-	alert("c1: "+c1+"\nc2: "+c2+"x: "+x+"\ny: "+y);
     return str;
 }
 
+/**
+ * Decodes a string from encodeShortLink().
+ * @param String encoded
+ * @return Object (lonlat: OpenLayers.LonLat, zoom: Number)
+*/
+
 function decodeShortLink(encoded)
 {
-	var char_array = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_@";
-
 	var lon,lat,zoom;
 
 	var m = encoded.match(/^([A-Za-z0-9_@]+)/);
@@ -1608,7 +1621,7 @@ function decodeShortLink(encoded)
 	var c2 = 0;
 	for(var i=0,j=54; i<m[1].length; i++,j-=6)
 	{
-		var bits = char_array.indexOf(m[1].charAt(i));
+		var bits = shortLinkCharArray.indexOf(m[1].charAt(i));
 		if(j <= 30)
 			c1 |= bits >>> (30-j);
 		else if(j > 30)
@@ -1617,27 +1630,31 @@ function decodeShortLink(encoded)
 			c2 |= (bits & (0x3fffffff >>> j)) << j;
 	}
 
-	// Works correctly until here.
-
 	var x = 0;
 	var y = 0;
 
-	for(var i=1,j=29; i<16; i++)
+	for(var j=29; j>0;)
 	{
-		x |= ((c2 >> j--) & 1) << i;
-		y |= ((c2 >> j--) & 1) << i;
+		x = (x << 1) | ((c1 >> j--) & 1);
+		y = (y << 1) | ((c1 >> j--) & 1);
 	}
-	for(var i=17,j=29; i<31; i++)
+	for(var j=29; j>0;)
 	{
-		x |= ((c1 >> j--) & 1) << i;
-		y |= ((c1 >> j--) & 1) << i;
+		x = (x << 1) | ((c2 >> j--) & 1);
+		y = (y << 1) | ((c2 >> j--) & 1);
 	}
 
-	lon = x/((1<<30)/90.0)-180.0;
-	lat = y/((1<<30)/45.0)-90.0;
+	x *= 4; // We can’t do <<= 2 here as x and y may be greater than 2³¹ and then the value would become negative
+	y *= 4;
 
-	alert("Lon: "+lon+"\nLat: "+lat+"\nZoom: "+zoom+"\nc1: "+c1+"\nc2: "+c2+"\nx: "+x+"\ny: "+y);
-}*/
+	lon = x*90.0/(1<<30)-180.0;
+	lat = y*45.0/(1<<30)-90.0;
+
+	return {
+		lonlat : new OpenLayers.LonLat(lon, lat),
+		zoom : zoom
+	};
+}
 
 function alert_r(data)
 {
