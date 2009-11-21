@@ -62,6 +62,7 @@ OpenLayers.Lang.en = OpenLayers.Util.extend(OpenLayers.Lang.en, {
 	"Longitude" : "Longitude",
 	"Get directions (OpenRouteService)" : "Get directions (OpenRouteService)",
 	"OpenStreetMap Permalink" : "OpenStreetMap Permalink",
+	"OpenStreetMap Shortlink" : "OpenStreetMap Shortlink",
 	"Google Maps Permalink" : "Google Maps Permalink",
 	"Yahoo Maps Permalink" : "Yahoo Maps Permalink",
 	"OpenStreetMap Links" : "OpenStreetMap Links",
@@ -88,6 +89,7 @@ OpenLayers.Lang.de = OpenLayers.Util.extend(OpenLayers.Lang.de, {
 	"Longitude" : "Länge",
 	"Get directions (OpenRouteService)" : "Route berechnen (OpenRouteService)",
 	"OpenStreetMap Permalink" : "OpenStreetMap Permalink",
+	"OpenStreetMap Shortlink" : "OpenStreetMap Shortlink",
 	"Google Maps Permalink" : "Google Maps Permalink",
 	"Yahoo Maps Permalink" : "Yahoo Maps Permalink",
 	"OpenStreetMap Links" : "OpenStreetMap Links",
@@ -1075,9 +1077,17 @@ OpenLayers.Layer.cdauth.markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 		query.replace(/^\s+/, "").replace(/\s+$/, "");
 		var query_match;
 		var query_urlPart;
-		if(query_match = query.match(/^http:\/\/(www\.)?osm\.org\/go\/([A-Za-z0-9_@]+)$/))
+		if(query_match = query.match(/^http:\/\/(www\.)?osm\.org\/go\/([-A-Za-z0-9_@]+)/))
 		{ // Coordinates, shortlink
-
+			var shortlink = decodeShortLink(query_match[2]);
+			results = [ {
+				zoom : shortlink.zoom,
+				lon : shortlink.lonlat.lon,
+				lat : shortlink.lonlat.lat,
+				info : OpenLayers.i18n("Coordinates"),
+				name : shortlink.lonlat.lat + ", " + shortlink.lonlat.lon
+			} ];
+			this.showResults(results, query, dontzoom, markersvisible);
 		}
 		else if(query_match = query.match(/^(-?\s*\d+([.,]\d+)?)\s*[,;]?\s*(-?\s*\d+([.,]\d+)?)$/))
 		{ // Coordinates
@@ -1535,7 +1545,8 @@ function makePermalinks(lonlat, zoom)
 
 	var ul = document.createElement("ul");
 	ul.appendChild(makeEntry("http://data.giub.uni-bonn.de/openrouteservice/index.php?end="+lonlat.lon+","+lonlat.lat+"&lat="+lonlat.lat+"&lon="+lonlat.lon+"&zoom="+zoom, "Get directions (OpenRouteService)"));
-	ul.appendChild(makeEntry("http://www.openstreetmap.org/?lat="+lonlat.lat+"&lon="+lonlat.lon+"&mlat="+lonlat.lat+"&mlon="+lonlat.lon+"&zoom="+zoom, "OpenStreetMap Permalink"));
+	ul.appendChild(makeEntry("http://www.openstreetmap.org/?mlat="+lonlat.lat+"&mlon="+lonlat.lon+"&zoom="+zoom, "OpenStreetMap Permalink"));
+	ul.appendChild(makeEntry("http://osm.org/go/"+encodeShortLink(lonlat, zoom)+"?m", "OpenStreetMap Shortlink"));
 	ul.appendChild(makeEntry("http://maps.google.com/?q="+lonlat.lat+","+lonlat.lon, "Google Maps Permalink"));
 	ul.appendChild(makeEntry("http://maps.yahoo.com/broadband/#lat="+lonlat.lat+"&lon="+lonlat.lon+"&zoom="+zoom, "Yahoo Maps Permalink"));
 	ul.appendChild(makeEntry("http://osmtools.de/osmlinks/?lat="+lonlat.lat+"&lon="+lonlat.lon+"&zoom="+zoom, "OpenStreetMap Links"));
@@ -1555,6 +1566,105 @@ function domInsertAfter(node, after)
 		after.parentNode.insertBefore(node, after.nextSibling);
 	else
 		after.parentNode.appendChild(node);
+}
+
+var shortLinkCharArray = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_@";
+
+/**
+ * Creates the relevant string of an OSM Shortlink. Copied from http://www.openstreetmap.org/javascripts/site.js, function makeShortCode().
+ * @param OpenLayers.LonLat lonlat Coordinates in WGS-84
+ * @param Number zoom
+ * @return String
+*/
+
+function encodeShortLink(lonlat, zoom)
+{
+    var x = Math.round((lonlat.lon + 180.0) * ((1 << 30) / 90.0));
+    var y = Math.round((lonlat.lat +  90.0) * ((1 << 30) / 45.0));
+    // hack around the fact that JS apparently only allows 53-bit integers?!?
+    // note that, although this reduces the accuracy of the process, it's fine for
+    // z18 so we don't need to care for now.
+    var c1 = 0, c2 = 0;
+    for (var i = 31; i > 16; --i)
+	{
+		c1 = (c1 << 1) | ((x >> i) & 1);
+		c1 = (c1 << 1) | ((y >> i) & 1);
+    }
+    for (var i = 16; i > 1; --i)
+	{
+		c2 = (c2 << 1) | ((x >> i) & 1);
+		c2 = (c2 << 1) | ((y >> i) & 1);
+    }
+
+    var str = "";
+    for (var i = 0; i < Math.ceil((zoom + 8) / 3.0) && i < 5; ++i)
+	{
+		digit = (c1 >> (24 - 6 * i)) & 0x3f;
+		str += shortLinkCharArray.charAt(digit);
+    }
+    for (var i = 5; i < Math.ceil((zoom + 8) / 3.0); ++i)
+	{
+		digit = (c2 >> (24 - 6 * (i - 5))) & 0x3f;
+		str += shortLinkCharArray.charAt(digit);
+    }
+    for (var i = 0; i < ((zoom + 8) % 3); ++i)
+	{
+		str += "-";
+    }
+    return str;
+}
+
+/**
+ * Decodes a string from encodeShortLink().
+ * @param String encoded
+ * @return Object (lonlat: OpenLayers.LonLat, zoom: Number)
+*/
+
+function decodeShortLink(encoded)
+{
+	var lon,lat,zoom;
+
+	var m = encoded.match(/^([A-Za-z0-9_@]+)/);
+	if(!m) return false;
+	zoom = m[1].length*2+encoded.length-11;
+
+	var c1 = 0;
+	var c2 = 0;
+	for(var i=0,j=54; i<m[1].length; i++,j-=6)
+	{
+		var bits = shortLinkCharArray.indexOf(m[1].charAt(i));
+		if(j <= 30)
+			c1 |= bits >>> (30-j);
+		else if(j > 30)
+			c1 |= bits << (j-30);
+		if(j < 30)
+			c2 |= (bits & (0x3fffffff >>> j)) << j;
+	}
+
+	var x = 0;
+	var y = 0;
+
+	for(var j=29; j>0;)
+	{
+		x = (x << 1) | ((c1 >> j--) & 1);
+		y = (y << 1) | ((c1 >> j--) & 1);
+	}
+	for(var j=29; j>0;)
+	{
+		x = (x << 1) | ((c2 >> j--) & 1);
+		y = (y << 1) | ((c2 >> j--) & 1);
+	}
+
+	x *= 4; // We can’t do <<= 2 here as x and y may be greater than 2³¹ and then the value would become negative
+	y *= 4;
+
+	lon = x*90.0/(1<<30)-180.0;
+	lat = y*45.0/(1<<30)-90.0;
+
+	return {
+		lonlat : new OpenLayers.LonLat(lon, lat),
+		zoom : zoom
+	};
 }
 
 function alert_r(data)
