@@ -62,7 +62,6 @@ OpenLayers.Lang.en = OpenLayers.Util.extend(OpenLayers.Lang.en, {
 	"Longitude" : "Longitude",
 	"Get directions (OpenRouteService)" : "Get directions (OpenRouteService)",
 	"OpenStreetMap Permalink" : "OpenStreetMap Permalink",
-	"OpenStreetMap Shortlink" : "OpenStreetMap Shortlink",
 	"Google Maps Permalink" : "Google Maps Permalink",
 	"Yahoo Maps Permalink" : "Yahoo Maps Permalink",
 	"OpenStreetMap Links" : "OpenStreetMap Links",
@@ -89,7 +88,6 @@ OpenLayers.Lang.de = OpenLayers.Util.extend(OpenLayers.Lang.de, {
 	"Longitude" : "Länge",
 	"Get directions (OpenRouteService)" : "Route berechnen (OpenRouteService)",
 	"OpenStreetMap Permalink" : "OpenStreetMap Permalink",
-	"OpenStreetMap Shortlink" : "OpenStreetMap Shortlink",
 	"Google Maps Permalink" : "Google Maps Permalink",
 	"Yahoo Maps Permalink" : "Yahoo Maps Permalink",
 	"OpenStreetMap Links" : "OpenStreetMap Links",
@@ -386,6 +384,58 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 
 	CLASS_NAME : "OpenLayers.Map.cdauth"
 });
+
+OpenLayers.Tile.Image.maxConcurrentRequests = 1;
+OpenLayers.Tile.Image.queue = [ ];
+OpenLayers.Tile.Image.currentlyLoading = 0;
+
+OpenLayers.Tile.Image.prototype.actuallyPositionImage = OpenLayers.Tile.Image.prototype.positionImage;
+OpenLayers.Tile.Image.prototype.positionImage = function()
+{
+	if(this.layer == null) return;
+
+	this.events.register("loadend", this, function() {
+		if(OpenLayers.Tile.Image.queue.length > 0)
+		{
+			var nextTile;
+			while(true)
+			{
+				if(OpenLayers.Tile.Image.queue.length == 0)
+					break;
+				nextTile = OpenLayers.Tile.Image.queue.shift();
+				if(nextTile.layer == null || !nextTile.layer.getVisibility())
+					continue;
+				nextTile.actuallyPositionImage();
+				return true;
+			}
+		}
+		OpenLayers.Tile.Image.currentlyLoading--;
+	});
+
+	if(OpenLayers.Tile.Image.currentlyLoading > 0 && OpenLayers.Tile.Image.currentlyLoading >= OpenLayers.Tile.Image.maxConcurrentRequests)
+		OpenLayers.Tile.Image.queue.push(this);
+	else if(this.layer.getVisibility())
+	{
+		OpenLayers.Tile.Image.currentlyLoading++;
+		this.actuallyPositionImage();
+	}
+};
+
+OpenLayers.Layer.Grid.prototype.setVisibility = OpenLayers.Layer.XYZ.prototype.setVisibility = OpenLayers.Layer.OSM.prototype.setVisibility = function(visibility) {
+	OpenLayers.Layer.HTTPRequest.prototype.setVisibility.apply(this, arguments);
+
+	if(this.grid == null || visibility)
+		return;
+
+	for(var i=0; i<this.grid.length; i++)
+	{
+		for(var j=0; j<this.grid[i].length; j++)
+		{
+			if(this.grid[i][j] && this.grid[i][j].isLoading)
+				this.grid[i][j].clear();
+		}
+	}
+};
 
 OpenLayers.Control.cdauth = { };
 
@@ -1077,17 +1127,9 @@ OpenLayers.Layer.cdauth.markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 		query.replace(/^\s+/, "").replace(/\s+$/, "");
 		var query_match;
 		var query_urlPart;
-		if(query_match = query.match(/^http:\/\/(www\.)?osm\.org\/go\/([-A-Za-z0-9_@]+)/))
+		if(query_match = query.match(/^http:\/\/(www\.)?osm\.org\/go\/([A-Za-z0-9_@]+)$/))
 		{ // Coordinates, shortlink
-			var shortlink = decodeShortLink(query_match[2]);
-			results = [ {
-				zoom : shortlink.zoom,
-				lon : shortlink.lonlat.lon,
-				lat : shortlink.lonlat.lat,
-				info : OpenLayers.i18n("Coordinates"),
-				name : shortlink.lonlat.lat + ", " + shortlink.lonlat.lon
-			} ];
-			this.showResults(results, query, dontzoom, markersvisible);
+
 		}
 		else if(query_match = query.match(/^(-?\s*\d+([.,]\d+)?)\s*[,;]?\s*(-?\s*\d+([.,]\d+)?)$/))
 		{ // Coordinates
@@ -1545,8 +1587,7 @@ function makePermalinks(lonlat, zoom)
 
 	var ul = document.createElement("ul");
 	ul.appendChild(makeEntry("http://data.giub.uni-bonn.de/openrouteservice/index.php?end="+lonlat.lon+","+lonlat.lat+"&lat="+lonlat.lat+"&lon="+lonlat.lon+"&zoom="+zoom, "Get directions (OpenRouteService)"));
-	ul.appendChild(makeEntry("http://www.openstreetmap.org/?mlat="+lonlat.lat+"&mlon="+lonlat.lon+"&zoom="+zoom, "OpenStreetMap Permalink"));
-	ul.appendChild(makeEntry("http://osm.org/go/"+encodeShortLink(lonlat, zoom)+"?m", "OpenStreetMap Shortlink"));
+	ul.appendChild(makeEntry("http://www.openstreetmap.org/?lat="+lonlat.lat+"&lon="+lonlat.lon+"&mlat="+lonlat.lat+"&mlon="+lonlat.lon+"&zoom="+zoom, "OpenStreetMap Permalink"));
 	ul.appendChild(makeEntry("http://maps.google.com/?q="+lonlat.lat+","+lonlat.lon, "Google Maps Permalink"));
 	ul.appendChild(makeEntry("http://maps.yahoo.com/broadband/#lat="+lonlat.lat+"&lon="+lonlat.lon+"&zoom="+zoom, "Yahoo Maps Permalink"));
 	ul.appendChild(makeEntry("http://osmtools.de/osmlinks/?lat="+lonlat.lat+"&lon="+lonlat.lon+"&zoom="+zoom, "OpenStreetMap Links"));
