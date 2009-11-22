@@ -80,7 +80,8 @@ OpenLayers.Lang.en = OpenLayers.Util.extend(OpenLayers.Lang.en, {
 	"Yahoo Street" : "Yahoo Street",
 	"Yahoo Satellite" : "Yahoo Satellite",
 	"Yahoo Hybrid" : "Yahoo Hybrid",
-	"Relief" : "Relief"
+	"Relief" : "Relief",
+	"Coordinate grid" : "Coordinate grid"
 });
 
 OpenLayers.Lang.de = OpenLayers.Util.extend(OpenLayers.Lang.de, {
@@ -121,7 +122,8 @@ OpenLayers.Lang.de = OpenLayers.Util.extend(OpenLayers.Lang.de, {
 	"Yahoo Street" : "Yahoo Karte",
 	"Yahoo Satellite" : "Yahoo Satellit",
 	"Yahoo Hybrid" : "Yahoo Hybrid",
-	"Relief" : "Relief"
+	"Relief" : "Relief",
+	"Coordinate grid" : "Koordinatensystem"
 });
 
 /**
@@ -1446,7 +1448,6 @@ OpenLayers.Layer.cdauth.Markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 	CLASS_NAME : "OpenLayers.Layer.cdauth.Markers.GeoSearch"
 });
 
-
 /**
  * Displays an XML file on the map (such as GPX, KML or OSM) using a proxy and with auto-determining of the format. The colour is
  * randomly assigned. Set OpenLayers.Layer.cdauth.XML.proxy to your proxy URL (the URL will be appended using the “url” GET parameter).
@@ -1719,6 +1720,130 @@ OpenLayers.Control.cdauth.GeoLocation = new OpenLayers.Class(OpenLayers.Control,
 		});
 	},
 	CLASS_NAME : "OpenLayers.Control.cdauth.GeoLocation"
+});
+
+/**
+ * A coordinate grid on the map. Draws coordinate lines on the map in a scale that maxHorizontalLines and maxVerticalLines aren’t exceeded.
+*/
+OpenLayers.Layer.cdauth.CoordinateGrid = new OpenLayers.Class(OpenLayers.Layer.Vector, {
+	/**
+	 * The maximum number of horizontal coordinate lines on the viewport.
+	 * @var Number
+	*/
+	maxHorizontalLines : 6,
+
+	/**
+	 * The maximum number of vertical coordinate lines on the viewport. If set to null, is automatically calculated from the viewport aspect ratio.
+	 * @var Number
+	*/
+	maxVerticalLines : null,
+
+	/**
+	 * The line style of normal coordinate lines.
+	 * @var OpenLayers.Feature.Vector.style
+	*/
+	styleMapNormal : { stroke: true, stokeWidth: 1, strokeColor: "black", strokeOpacity: 0.2 },
+
+	/**
+	 * The line style of an important coordinate line, such as a number dividable by 10.
+	 * @var OpenLayers.Feature.Vector.style
+	*/
+	styleMapHighlight : { stroke: true, stokeWidth: 2, strokeColor: "black", strokeOpacity: 0.5 },
+
+	horizontalLines : { },
+	verticalLines : { },
+
+	initialize : function(name, options) {
+		if(typeof name == "undefined")
+			name = OpenLayers.i18n("Coordinate grid");
+		options = OpenLayers.Util.extend(options, { projection : new OpenLayers.Projection("EPSG:4326"), zoomableInLayerSwitcher : true });
+		OpenLayers.Layer.Vector.prototype.initialize.apply(this, [ name, options ]);
+	},
+	setMap : function() {
+		OpenLayers.Layer.Vector.prototype.setMap.apply(this, arguments);
+
+		this.map.events.register("moveend", this, this.drawGrid);
+		this.map.events.register("mapResize", this, this.drawGrid);
+	},
+	drawGrid : function() {
+		if(!this.map || !this.map.getExtent()) return;
+
+		var extent = this.map.getExtent().transform(this.map.getProjectionObject(), this.projection);
+		var maxExtent = this.map.maxExtent.clone().transform(this.map.getProjectionObject(), this.projection);
+
+		var addFeatures = [ ];
+		var destroyFeatures = [ ];
+
+		// Display horizontal grid
+		var horizontalDistance = (extent.top-extent.bottom)/this.maxHorizontalLines;
+		var horizontalDivisor = Math.pow(10, Math.ceil(Math.log(horizontalDistance)/Math.LN10));
+		if(5*(extent.top-extent.bottom)/horizontalDivisor <= this.maxHorizontalLines)
+			horizontalDivisor /= 5;
+		else if(2*(extent.top-extent.bottom)/horizontalDivisor <= this.maxHorizontalLines)
+			horizontalDivisor /= 2;
+
+		for(var i in this.horizontalLines)
+		{
+			if(this.horizontalLines[i] == null)
+				continue;
+			var r = i/horizontalDivisor;
+			if(Math.floor(r) != r)
+			{
+				destroyFeatures.push(this.horizontalLines[i]);
+				this.horizontalLines[i] = null;
+			}
+		}
+
+		for(var coordinate = Math.ceil(extent.bottom/horizontalDivisor)*horizontalDivisor; coordinate < extent.top; coordinate += horizontalDivisor)
+		{
+			if(this.horizontalLines[coordinate])
+				continue;
+			this.horizontalLines[coordinate] = new OpenLayers.Feature.Vector(
+				new OpenLayers.Geometry.LineString([ new OpenLayers.Geometry.Point(maxExtent.left, coordinate).transform(this.projection, this.map.getProjectionObject()), new OpenLayers.Geometry.Point(maxExtent.right, coordinate).transform(this.projection, this.map.getProjectionObject()) ]),
+				null,
+				(coordinate/horizontalDivisor % 5 == 0) ? this.styleMapHighlight : this.styleMapNormal
+			);
+			addFeatures.push(this.horizontalLines[coordinate]);
+		}
+
+		// Display vertical grid
+		var maxVerticalLines = (this.maxVerticalLines != null ? this.maxVerticalLines : Math.round(this.maxHorizontalLines * this.map.size.w / this.map.size.h));
+		var verticalDistance = (extent.right-extent.left)/maxVerticalLines;
+		var verticalDivisor = Math.pow(10, Math.ceil(Math.log(verticalDistance)/Math.LN10));
+		if(5*(extent.right-extent.left)/verticalDivisor <= maxVerticalLines)
+			verticalDivisor /= 5;
+		else if(2*(extent.right-extent.left)/verticalDivisor <= maxVerticalLines)
+			verticalDivisor /= 2;
+
+		for(var i in this.verticalLines)
+		{
+			if(this.verticalLines[i] == null)
+				continue;
+			var r = i/verticalDivisor;
+			if(Math.floor(r) != r)
+			{
+				destroyFeatures.push(this.verticalLines[i]);
+				this.verticalLines[i] = null;
+			}
+		}
+
+		for(var coordinate = Math.ceil(extent.left/verticalDivisor)*verticalDivisor; coordinate < extent.right; coordinate += verticalDivisor)
+		{
+			if(this.verticalLines[coordinate])
+				continue;
+			this.verticalLines[coordinate] = new OpenLayers.Feature.Vector(
+				new OpenLayers.Geometry.LineString([ new OpenLayers.Geometry.Point(coordinate, maxExtent.top).transform(this.projection, this.map.getProjectionObject()), new OpenLayers.Geometry.Point(coordinate, maxExtent.bottom).transform(this.projection, this.map.getProjectionObject()) ]),
+				null,
+				(coordinate/verticalDivisor % 5 == 0) ? this.styleMapHighlight : this.styleMapNormal
+			);
+			addFeatures.push(this.verticalLines[coordinate]);
+		}
+
+		if(destroyFeatures.length > 0)
+			this.destroyFeatures(destroyFeatures);
+		if(addFeatures.length > 0)
+			this.addFeatures(addFeatures);
+	}
 });
 
 /**
