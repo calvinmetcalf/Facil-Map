@@ -142,61 +142,64 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 	{
 		var ret = OpenLayers.Map.prototype.addLayer.apply(this, arguments);
 
+		if(layer.shortName == null)
+			layer.shortName = layer.name;
+
 		if(!layer.isBaseLayer)
-			this.cdauthDefaultVisibility[layer.name] = layer.getVisibility();
+			this.cdauthDefaultVisibility[layer.shortName] = layer.getVisibility();
 	},
 
 	addAllAvailableOSMLayers : function()
 	{
 		if(OpenLayers.Layer.cdauth.OSM.Mapnik)
-			this.addLayer(new OpenLayers.Layer.cdauth.OSM.Mapnik("Mapnik"));
+			this.addLayer(new OpenLayers.Layer.cdauth.OSM.Mapnik("Mapnik", { shortName : "Mpnk" }));
 		if(OpenLayers.Layer.cdauth.OSM.MapSurfer)
 		{
 			if(OpenLayers.Layer.cdauth.OSM.MapSurfer.Road)
-				this.addLayer(new OpenLayers.Layer.cdauth.OSM.MapSurfer.Road("MapSurfer Road"));
+				this.addLayer(new OpenLayers.Layer.cdauth.OSM.MapSurfer.Road("MapSurfer Road", { shortName : "MSfR" }));
 			if(OpenLayers.Layer.cdauth.OSM.MapSurfer.Topographic)
-				this.addLayer(new OpenLayers.Layer.cdauth.OSM.MapSurfer.Topographic("MapSurfer Topographic"));
+				this.addLayer(new OpenLayers.Layer.cdauth.OSM.MapSurfer.Topographic("MapSurfer Topographic", { shortName : "MSfT" }));
 		}
 		if(OpenLayers.Layer.cdauth.OSM.OpenStreetBrowser)
-			this.addLayer(new OpenLayers.Layer.cdauth.OSM.OpenStreetBrowser("OpenStreetBrowser"));
+			this.addLayer(new OpenLayers.Layer.cdauth.OSM.OpenStreetBrowser("OpenStreetBrowser", { shortName : "OSBr" }));
 		if(OpenLayers.Layer.cdauth.OSM.Osmarender)
-			this.addLayer(new OpenLayers.Layer.cdauth.OSM.Osmarender("Osmarender"));
+			this.addLayer(new OpenLayers.Layer.cdauth.OSM.Osmarender("Osmarender", { shortName : "Osmr" }));
 		if(OpenLayers.Layer.cdauth.OSM.CycleMap)
-			this.addLayer(new OpenLayers.Layer.cdauth.OSM.CycleMap("OpenCycleMap"));
+			this.addLayer(new OpenLayers.Layer.cdauth.OSM.CycleMap("OpenCycleMap", { shortName : "OCyc" }));
 		if(OpenLayers.Layer.cdauth.OSM.Wanderkarte)
-			this.addLayer(new OpenLayers.Layer.cdauth.OSM.Wanderkarte("Reit- und Wanderkarte"));
+			this.addLayer(new OpenLayers.Layer.cdauth.OSM.Wanderkarte("Reit- und Wanderkarte", { shortName : "OSMC" }));
 		if(OpenLayers.Layer.cdauth.OSM.OpenPisteMap)
-			this.addLayer(new OpenLayers.Layer.cdauth.OSM.OpenPisteMap("OpenPisteMap"));
+			this.addLayer(new OpenLayers.Layer.cdauth.OSM.OpenPisteMap("OpenPisteMap", { shortName : "OPis" }));
 		if(OpenLayers.Layer.cdauth.OSM.OPNVKarte)
-			this.addLayer(new OpenLayers.Layer.cdauth.OSM.OPNVKarte("ÖPNV-Karte"));
+			this.addLayer(new OpenLayers.Layer.cdauth.OSM.OPNVKarte("ÖPNV-Karte", { shortName : "OPNV" }));
 		if(OpenLayers.Layer.cdauth.OSM.MinutelyMapnik)
-			this.addLayer(new OpenLayers.Layer.cdauth.OSM.MinutelyMapnik("Minutely Mapnik"));
+			this.addLayer(new OpenLayers.Layer.cdauth.OSM.MinutelyMapnik("Minutely Mapnik", { shortName : "MiMa" }));
 	},
 
 	addAllAvailableGoogleLayers : function()
 	{
 		if(OpenLayers.Layer.cdauth.Google.Maps)
-			this.addLayer(new OpenLayers.Layer.cdauth.Google.Maps("Google Streets"));
+			this.addLayer(new OpenLayers.Layer.cdauth.Google.Maps("Google Streets", { shortName : "GgSt" }));
 		if(OpenLayers.Layer.cdauth.Google.MapsSatellite)
-			this.addLayer(new OpenLayers.Layer.cdauth.Google.MapsSatellite("Google Satellite"));
+			this.addLayer(new OpenLayers.Layer.cdauth.Google.MapsSatellite("Google Satellite", { shortName : "GgSa" }));
 		if(OpenLayers.Layer.cdauth.Google.MapsHybrid)
-			this.addLayer(new OpenLayers.Layer.cdauth.Google.MapsHybrid("Google Hybrid"));
+			this.addLayer(new OpenLayers.Layer.cdauth.Google.MapsHybrid("Google Hybrid", { shortName : "GgHy" }));
 		if(OpenLayers.Layer.cdauth.Google.MapsTerrain)
-			this.addLayer(new OpenLayers.Layer.cdauth.Google.MapsTerrain("Google Terrain"));
+			this.addLayer(new OpenLayers.Layer.cdauth.Google.MapsTerrain("Google Terrain", { shortName : "GgTe" }));
 		if(OpenLayers.Layer.cdauth.Google.MapMaker)
-			this.addLayer(new OpenLayers.Layer.cdauth.Google.MapMaker("Google MapMaker"));
+			this.addLayer(new OpenLayers.Layer.cdauth.Google.MapMaker("Google MapMaker", { shortName : "GgMM" }));
 		if(OpenLayers.Layer.cdauth.Google.MapMakerHybrid)
-			this.addLayer(new OpenLayers.Layer.cdauth.Google.MapMakerHybrid("Google MapMaker Hybrid"));
+			this.addLayer(new OpenLayers.Layer.cdauth.Google.MapMakerHybrid("Google MapMaker Hybrid", { shortName : "GgMH" }));
 	},
 
 	addAllAvailableYahooLayers : function()
 	{
 		if(OpenLayers.Layer.cdauth.Yahoo.Maps)
-			this.addLayer(new OpenLayers.Layer.cdauth.Yahoo.Maps("Yahoo Street"));
+			this.addLayer(new OpenLayers.Layer.cdauth.Yahoo.Maps("Yahoo Street", { shortName : "YaSt" }));
 		if(OpenLayers.Layer.cdauth.Yahoo.Satellite)
-			this.addLayer(new OpenLayers.Layer.cdauth.Yahoo.Satellite("Yahoo Satellite"));
+			this.addLayer(new OpenLayers.Layer.cdauth.Yahoo.Satellite("Yahoo Satellite", { shortName : "YaSa" }));
 		if(OpenLayers.Layer.cdauth.Yahoo.Hybrid)
-			this.addLayer(new OpenLayers.Layer.cdauth.Yahoo.Hybrid("Yahoo Hybrid"));
+			this.addLayer(new OpenLayers.Layer.cdauth.Yahoo.Hybrid("Yahoo Hybrid", { shortName : "YaHy" }));
 	},
 
 	/**
@@ -209,23 +212,23 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 		this.addAllAvailableYahooLayers();
 
 		if(OpenLayers.Layer.cdauth.other.Relief)
-			this.addLayer(new OpenLayers.Layer.cdauth.other.Relief("Relief", { visibility: false }));
+			this.addLayer(new OpenLayers.Layer.cdauth.other.Relief("Relief", { visibility: false, shortName : "Rlie" }));
 	},
 
 	/**
 	 * Zoom to the specified query object. Remember to add your layers and to eventually set OpenLayers.Layer.cdauth.XML.proxy before running
 	 * this method.
 	 * @param Object query Usually decodeQueryString(location.hash.replace(/^#/, ""))
-	 * @param OpenLayers.Layer.cdauth.markers.LonLat layerMarkers Optional, layer to add position markers to.
-	 * @param OpenLayers.Layer.cdauth.markers.GeoSearch layerGeoSearch Optional, to restore the GeoSearch.
 	*/
 
-	zoomToQuery: function(query, layerMarkers, layerGeoSearch)
+	zoomToQuery: function(query)
 	{
 		var map = this;
 
+		// Zoom to search results only if the position is not manually set
 		var search_may_zoom = (typeof query.lon == "undefined" && typeof query.lat == "undefined");
 
+		// Set position (lon, lat, zoom)
 		if(!query.lon)
 			query.lon = 0;
 		if(!query.lat)
@@ -234,41 +237,97 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 			query.zoom = 2;
 		this.setCenter(new OpenLayers.LonLat(query.lon, query.lat).transform(this.displayProjection, this.getProjectionObject()), query.zoom);
 
+		// Set base layer (layer)
 		if(query.layer)
 		{
-			var matching_layers = this.getLayersByName(query.layer);
+			var matching_layers = this.getLayersBy("shortName", query.layer);
 			if(matching_layers.length > 0)
 				this.setBaseLayer(matching_layers[0]);
 		}
 
+		// Set overlay visibility (overlays)
 		if(query.overlays)
 		{
 			for(var i in query.overlays)
 			{
-				var layers = this.getLayersByName(i);
+				var layers = this.getLayersBy("shortName", i);
 				for(var j=0; j<layers.length; j++)
 					layers[j].setVisibility(query.overlays[i] != "0");
 			}
 		}
 
+		// Set LonLat markers (mlon, mlat, mtitle)
 		if(layerMarkers)
 		{
-			layerMarkers.clearMarkers();
-			if(query.mlat && query.mlon && typeof query.mlat == "object" && typeof query.mlon == "object")
+			var firstLayer = null;
+			for(var i=0; i<this.layers.length; i++)
+			{
+				if(this.layers[i] instanceof OpenLayers.Layer.cdauth.Markers.LonLat)
+				{
+					if(firstLayer == null)
+						firstLayer = this.layers[i];
+					this.layers[i].clearMarkers();
+				}
+			}
+
+			if(firstLayer != null && query.mlat && query.mlon && typeof query.mlat == "object" && typeof query.mlon == "object")
 			{
 				for(var i in query.mlat)
 				{
 					if(typeof query.mlon[i] == "undefined") continue;
-					layerMarkers.addLonLatMarker(new OpenLayers.LonLat(query.mlon[i], query.mlat[i]).transform(this.displayProjection, this.getProjectionObject()), (query.mtitle && typeof query.mtitle == "object") ? htmlspecialchars(query.mtitle[i]) : null);
+
+					if(typeof query.mlat[i] == "object")
+					{
+						if(typeof query.mlon[i] != "object")
+							continue;
+						var thisLayer = this.getLayersBy("shortName", i);
+						if(thisLayer.length < 1)
+							continue;
+						for(var j in query.mlat[i])
+							thisLayer[0].addLonLatMarker(new OpenLayers.LonLat(query.mlon[i][j], query.mlat[i][j]).transform(thisLayer[0].projection, this.getProjectionObject()), (query.mtitle && typeof query.mtitle == "object" && query.mtitle[i] && typeof query.mtitle[i] == "object") ? htmlspecialchars(query.mtitle[i][j]) : null);
+					}
+					else
+						firstLayer.addLonLatMarker(new OpenLayers.LonLat(query.mlon[i], query.mlat[i]).transform(firstLayer.projection, this.getProjectionObject()), (query.mtitle && typeof query.mtitle == "object") ? htmlspecialchars(query.mtitle[i]) : null);
 				}
+
+				// Adding markers might have moved the map, reset map view
 				this.setCenter(new OpenLayers.LonLat(query.lon, query.lat).transform(this.displayProjection, this.getProjectionObject()), query.zoom);
 			}
 		}
 
-		if(layerGeoSearch && query.search)
-			layerGeoSearch.geoSearch(query.search, search_may_zoom ? false : function(){map.setCenter(new OpenLayers.LonLat(query.lon, query.lat).transform(map.displayProjection, map.getProjectionObject()), query.zoom);}, query.smopen);
+		// Perform GeoSearches (search, smopen)
+		if(query.search)
+		{
+			var firstLayer = null;
+			for(var i=0; i<this.layers.length; i++)
+			{
+				if(this.layers[i] instanceof OpenLayers.Layer.cdauth.Markers.GeoSearch)
+				{
+					if(firstLayer == null)
+						firstLayer = this.layers[i];
+					this.layers[i].geoSearch("");
+				}
+			}
 
-		// Handle removable GPX layers
+			if(firstLayer != null)
+			{
+				if(typeof query.search == "object")
+				{
+					for(var i in query.search)
+					{
+						var thisLayer = this.getLayersBy("shortName", i);
+						if(thisLayer.length < 1)
+							continue;
+
+						thisLayer[0].geoSearch(query.search[i], !search_may_zoom, (typeof query.smopen == "object" ? query.smopen[i] : null));
+					}
+				}
+				else
+					firstLayer.geoSearch(query.search, !search_may_zoom, query.smopen);
+			}
+		}
+
+		// Handle removable GPX layers (xml)
 		var xmlLayers = [ ];
 		for(var i=0; i<this.layers.length; i++)
 		{
@@ -322,62 +381,72 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 	 * hash part by calling location.hash = "#"+encodeQueryString(map.getQueryObject());
 	 * Only non-default settings will be added to this query object. Remember to set the visibility of your overlay layers _before_ adding
 	 * them to the map, as the default visibility value will be determined during adding it.
-	 * @param OpenLayers.Layer.cdauth.markers.LonLat layerMarkers Optional, to save the positions of the geographical markers.
-	 * @param OpenLayers.Layer.cdauth.markers.GeoSearch layerGeoSearch Optional, to save the current GeoSearch.
 	 * @return Object
 	*/
 
-	getQueryObject: function(layerMarkers, layerGeoSearch)
+	getQueryObject: function()
 	{
 		if(!this.getCenter())
 			return false;
 
 		var lonlat = this.getCenter().clone().transform(this.getProjectionObject(), this.displayProjection);
 		var hashObject = {
-			lon : lonlat.lon,
-			lat : lonlat.lat,
+			lon : Math.round(lonlat.lon*100000000)/100000000,
+			lat : Math.round(lonlat.lat*100000000)/100000000,
 			zoom : this.getZoom(),
-			layer : this.baseLayer.name,
+			layer : this.baseLayer.shortName,
 			mlon : { },
 			mlat : { },
 			mtitle : { },
 			smopen : { },
 			overlays : { },
-			xml : { }
+			xml : { },
+			search : { }
 		};
 
 		var xml_i = 0;
 
 		for(var i=0; i<this.layers.length; i++)
 		{ // Save overlay visibility
-			if(this.layers[i].isBaseLayer) continue;
-			if(this.layers[i].getVisibility() != this.cdauthDefaultVisibility[this.layers[i].name])
-				hashObject.overlays[this.layers[i].name] = this.layers[i].getVisibility() ? "1" : "0";
-			if(this.layers[i] instanceof OpenLayers.Layer.cdauth.XML && this.layers[i].removableInLayerSwitcher)
-				hashObject.xml[xml_i++] = this.layers[i].cdauthURL;
-		}
+			var l = this.layers[i];
+			if(l.isBaseLayer) continue;
 
-		if(layerGeoSearch && layerGeoSearch.lastSearch)
-		{
-			hashObject.search = layerGeoSearch.lastSearch;
+			if(l.getVisibility() != this.cdauthDefaultVisibility[l.shortName])
+				hashObject.overlays[l.shortName] = l.getVisibility() ? "1" : "0";
 
-			for(var i=0; i<layerGeoSearch.markers.length; i++)
+			if(l instanceof OpenLayers.Layer.cdauth.XML && l.removableInLayerSwitcher)
+				hashObject.xml[xml_i++] = l.cdauthURL;
+
+			if(l instanceof OpenLayers.Layer.cdauth.Markers.GeoSearch && l.lastSearch)
 			{
-				var visible = layerGeoSearch.markers[layerGeoSearch.markers.length-1-i].cdauthFeature.popup ? layerGeoSearch.markers[layerGeoSearch.markers.length-1-i].cdauthFeature.popup.visible() : false;
-				if(visible != (i == 0))
-					hashObject.smopen[i] = visible ? "1" : "0";
+				hashObject.search[l.shortName] = l.lastSearch;
+				var smopen = "";
+				var smchanged = false;
+				for(var j=0; j<l.markers.length; j++)
+				{
+					var visible = l.markers[l.markers.length-1-j].cdauthFeature.popup ? l.markers[l.markers.length-1-j].cdauthFeature.popup.visible() : false;
+					smopen += visible ? "1" : "0";
+					if(visible != (j == 0))
+						smchanged = true;
+				}
+				if(smchanged)
+					hashObject.smopen[l.shortName] = smopen;
 			}
-		}
 
-		if(layerMarkers)
-		{
-			for(var i=0; i<layerMarkers.markers.length; i++)
+			if(l instanceof OpenLayers.Layer.cdauth.Markers.LonLat)
 			{
-				var lonlat = layerMarkers.markers[i].lonlat.clone().transform(this.getProjectionObject(), this.displayProjection);
-				hashObject.mlon[i] = lonlat.lon;
-				hashObject.mlat[i] = lonlat.lat;
-				if(layerMarkers.markers[i].cdauthTitle)
-					hashObject.mtitle[i] = layerMarkers.markers[i].cdauthTitle;
+				hashObject.mlon[l.shortName] = { };
+				hashObject.mlat[l.shortName] = { };
+				hashObject.mtitle[l.shortName] = { };
+
+				for(var j=0; j<layerMarkers.markers.length; j++)
+				{
+					var lonlat = layerMarkers.markers[j].lonlat.clone().transform(this.getProjectionObject(), this.displayProjection);
+					hashObject.mlon[l.shortName][j] = Math.round(lonlat.lon*100000000)/100000000;
+					hashObject.mlat[l.shortName][j] = Math.round(lonlat.lat*100000000)/100000000;
+					if(layerMarkers.markers[j].cdauthTitle)
+						hashObject.mtitle[l.shortName][j] = layerMarkers.markers[j].cdauthTitle;
+				}
 			}
 		}
 
@@ -827,9 +896,9 @@ OpenLayers.Popup.FramedCloud.cdauth = new OpenLayers.Class(OpenLayers.Popup.Fram
  * @event markersChanged A marker popup has been opened or closed.
 */
 
-OpenLayers.Layer.cdauth.markers.Markers = new OpenLayers.Class(OpenLayers.Layer.Markers, {
+OpenLayers.Layer.cdauth.Markers = new OpenLayers.Class(OpenLayers.Layer.Markers, {
 	initialize : function(name, options) {
-		OpenLayers.Layer.Markers.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({zoomableInLayerSwitcher: true}, options) ]);
+		OpenLayers.Layer.Markers.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({zoomableInLayerSwitcher: true, projection: new OpenLayers.Projection("EPSG:4326")}, options) ]);
 		this.events.addEventType("markersChanged");
 
 		this.events.register("visibilitychanged", this, function() {
@@ -911,7 +980,13 @@ OpenLayers.Layer.cdauth.markers.Markers = new OpenLayers.Class(OpenLayers.Layer.
 		this.addMarker(marker);
 		return marker;
 	},
-	CLASS_NAME : "OpenLayers.Layer.cdauth.markers.Markers"
+	removeMarker : function(marker)
+	{
+		if(marker.cdauthFeature && marker.cdauthFeature.popup)
+			marker.cdauthFeature.popup.destroy();
+		OpenLayers.Layer.Markers.prototype.removeMarker.apply(this, arguments);
+	},
+	CLASS_NAME : "OpenLayers.Layer.cdauth.Markers"
 });
 
 /**
@@ -921,12 +996,12 @@ OpenLayers.Layer.cdauth.markers.Markers = new OpenLayers.Class(OpenLayers.Layer.
  * @event markerRemoved
 */
 
-OpenLayers.Layer.cdauth.markers.LonLat = new OpenLayers.Class(OpenLayers.Layer.cdauth.markers.Markers, {
+OpenLayers.Layer.cdauth.Markers.LonLat = new OpenLayers.Class(OpenLayers.Layer.cdauth.Markers, {
 	/**
 	 * @param OpenLayers.Icon defaultIcon The icon to be used for the markers added by addLonLatMarker()
 	*/
 	initialize : function(name, options) {
-		OpenLayers.Layer.cdauth.markers.Markers.prototype.initialize.apply(this, arguments);
+		OpenLayers.Layer.cdauth.Markers.prototype.initialize.apply(this, arguments);
 		this.events.addEventType("markerAdded");
 		this.events.addEventType("markerRemoved");
 
@@ -939,6 +1014,8 @@ OpenLayers.Layer.cdauth.markers.LonLat = new OpenLayers.Class(OpenLayers.Layer.c
 
 		var lonlat_readable = lonlat.clone().transform(this.map.getProjectionObject(), this.map.displayProjection);
 		var marker = this.createMarker(lonlat, ".", true);
+		if(title)
+			marker.cdauthTitle = title;
 		marker.events.register("close", this, function(evt) { var feature = marker.cdauthFeature; delete marker.cdauthFeature; this.removeMarker(marker); feature.destroyMarker(); feature.destroyPopup(); this.events.triggerEvent("markerRemoved"); OpenLayers.Event.stop(evt); });
 		this.map.events.register("zoomend", this, this.resetPopupContent);
 		this.resetPopupContent();
@@ -964,24 +1041,24 @@ OpenLayers.Layer.cdauth.markers.LonLat = new OpenLayers.Class(OpenLayers.Layer.c
 			this.markers[i].cdauthFeature.popup.setContentHTML(content);
 		}
 	},
-	CLASS_NAME : "OpenLayers.Layer.cdauth.markers.LonLat"
+	CLASS_NAME : "OpenLayers.Layer.cdauth.Markers.LonLat"
 });
 
 /**
- * A click control to add markers to a OpenLayers.Layer.cdauth.markers.LonLat layer.
+ * A click control to add markers to a OpenLayers.Layer.cdauth.Markers.LonLat layer.
  * Add an instance of this to your map using OpenLayers.Map.cdauth.addControl() and activate() it.
 */
 
 OpenLayers.Control.cdauth.CreateMarker = OpenLayers.Class(OpenLayers.Control, {
 	/**
-	 * @var OpenLayers.Layer.cdauth.markers.LonLat
+	 * @var OpenLayers.Layer.cdauth.Markers.LonLat
 	*/
 	cdauthLayer : null,
 
 	title : OpenLayers.i18n("Create a marker"),
 
 	/**
-	 * @param OpenLayers.Layer.cdauth.markers.LonLat cdauthLayer
+	 * @param OpenLayers.Layer.cdauth.Markers.LonLat cdauthLayer
 	*/
 	initialize: function(cdauthLayer, options) {
 		this.cdauthLayer = cdauthLayer;
@@ -1022,7 +1099,7 @@ OpenLayers.Control.cdauth.CreateMarker = OpenLayers.Class(OpenLayers.Control, {
  * @event searchFailure
 */
 
-OpenLayers.Layer.cdauth.markers.GeoSearch = new OpenLayers.Class(OpenLayers.Layer.cdauth.markers.Markers, {
+OpenLayers.Layer.cdauth.Markers.GeoSearch = new OpenLayers.Class(OpenLayers.Layer.cdauth.Markers, {
 	lastSearch : false,
 	nameFinderURL : false,
 	nameFinder2URL : false,
@@ -1036,7 +1113,7 @@ OpenLayers.Layer.cdauth.markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 	 * @param OpenLayers.Icon highlightIcon The marker icon to use for the first search result.
 	*/
 	initialize: function(name, nameFinderURL, nameFinder2URL, defaultIcon, highlightIcon, options) {
-		OpenLayers.Layer.cdauth.markers.Markers.prototype.initialize.apply(this, [ name, options ]);
+		OpenLayers.Layer.cdauth.Markers.prototype.initialize.apply(this, [ name, options ]);
 		this.nameFinderURL = nameFinderURL;
 		this.nameFinder2URL = nameFinder2URL;
 		this.defaultIcon = defaultIcon;
@@ -1060,11 +1137,14 @@ OpenLayers.Layer.cdauth.markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 	{
 		layer = this;
 
-		for(var i=0; i<this.markers.length; i++)
+		if(typeof markersvisible == "string")
 		{
-			if(this.markers[i].cdauthFeature.popup)
-				this.markers[i].cdauthFeature.popup.destroy();
+			var markersvisible_obj = { };
+			for(var i=0; i<markersvisible.length; i++)
+				markersvisible_obj[i] = markersvisible.charAt(i);
+			markersvisible = markersvisible_obj;
 		}
+
 		this.clearMarkers();
 		this.lastSearch = false;
 		this.events.triggerEvent("lastSearchChange");
@@ -1301,7 +1381,7 @@ OpenLayers.Layer.cdauth.markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 
 		this.events.triggerEvent("searchSuccess");
 	},
-	CLASS_NAME : "OpenLayers.Layer.cdauth.markers.GeoSearch"
+	CLASS_NAME : "OpenLayers.Layer.cdauth.Markers.GeoSearch"
 });
 
 
