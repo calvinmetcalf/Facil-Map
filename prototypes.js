@@ -96,8 +96,6 @@ OpenLayers.Lang.de = OpenLayers.Util.extend(OpenLayers.Lang.de, {
 	"Wikimedia GeoHack" : "Wikimedia GeoHack"
 });
 
-OpenLayers.cdauth = { };
-
 /**
  * A map with the default values needed for OpenStreetMap and other world maps.
  * If you plan to use the getQueryMethod() function, remember to set the visibility of your overlay layers _before_ adding them to the map.
@@ -1500,7 +1498,7 @@ OpenLayers.Layer.cdauth.XML.relationURL = null;
 /**
  * An instance of this class keeps the location hash part in sync with the Permalink of a map object.
 */
-OpenLayers.cdauth.URLHashHandler = new OpenLayers.Class({
+OpenLayers.Control.cdauth.URLHashHandler = new OpenLayers.Class(OpenLayers.Control, {
 	/**
 	 * The interval in milliseconds, how often location.hash shall be checked for changes.
 	 * @var Number
@@ -1519,12 +1517,6 @@ OpenLayers.cdauth.URLHashHandler = new OpenLayers.Class({
 	intervalObject : null,
 
 	/**
-	 * The map object.
-	 * @var OpenLayers.Map
-	*/
-	map : null,
-
-	/**
 	 * The last value of location.hash that was set by this class. If it differs from location.hash, the user has changed it.
 	 * @var String
 	*/
@@ -1532,17 +1524,28 @@ OpenLayers.cdauth.URLHashHandler = new OpenLayers.Class({
 
 	/**
 	 * Initialises an interval that checks for changes in location.hash automatically.
-	 * @var OpenLayers.cdauth.Map map
 	*/
-	initialize : function(map, options) {
-		OpenLayers.Util.extend(this, options);
+	activate : function() {
+		if(!OpenLayers.Control.prototype.activate.apply(this, arguments) || !this.map)
+			return false;
 
-		this.map = map;
-
-		map.events.register("newHash", this, function() { this.hashChanged = true; });
+		map.events.register("newHash", this, this.newHashHandler);
 
 		var obj = this;
 		this.intervalObject = setInterval(function(){ obj.update(); }, this.interval);
+
+		this.updateMapView();
+
+		return true;
+	},
+
+	deactivate : function() {
+		clearInterval(this.intervalObject);
+		map.events.unregister("newHash", this, this.newHashHandler);
+	},
+
+	newHashHandler : function() {
+		this.hashChanged = true;
 	},
 
 	/**
@@ -1584,7 +1587,9 @@ OpenLayers.cdauth.URLHashHandler = new OpenLayers.Class({
 		var query_object = decodeQueryString(this.getLocationHash());
 		this.map.zoomToQuery(query_object);
 		this.updateLocationHash();
-	}
+	},
+
+	CLASS_NAME : "OpenLayers.Control.cdauth.URLHashHandler"
 });
 
 /**
