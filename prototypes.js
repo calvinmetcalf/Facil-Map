@@ -66,7 +66,8 @@ OpenLayers.Lang.en = OpenLayers.Util.extend(OpenLayers.Lang.en, {
 	"Google Maps Permalink" : "Google Maps Permalink",
 	"Yahoo Maps Permalink" : "Yahoo Maps Permalink",
 	"OpenStreetMap Links" : "OpenStreetMap Links",
-	"Wikimedia GeoHack" : "Wikimedia GeoHack"
+	"Wikimedia GeoHack" : "Wikimedia GeoHack",
+	"Go home" : "Go home"
 });
 
 OpenLayers.Lang.de = OpenLayers.Util.extend(OpenLayers.Lang.de, {
@@ -93,7 +94,8 @@ OpenLayers.Lang.de = OpenLayers.Util.extend(OpenLayers.Lang.de, {
 	"Google Maps Permalink" : "Google Maps Permalink",
 	"Yahoo Maps Permalink" : "Yahoo Maps Permalink",
 	"OpenStreetMap Links" : "OpenStreetMap Links",
-	"Wikimedia GeoHack" : "Wikimedia GeoHack"
+	"Wikimedia GeoHack" : "Wikimedia GeoHack",
+	"Go home" : "Zum Aufenthaltsort"
 });
 
 /**
@@ -104,6 +106,11 @@ OpenLayers.Lang.de = OpenLayers.Util.extend(OpenLayers.Lang.de, {
 */
 
 OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
+	/**
+	 * This CSS file will be additionally loaded.
+	*/
+	cdauthTheme : "http://osm.cdauth.de/map/prototypes.css",
+
 	cdauthDefaultVisibility : { },
 
 	/**
@@ -130,6 +137,9 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 			projection: new OpenLayers.Projection("EPSG:4326"),
 			displayProjection: new OpenLayers.Projection("EPSG:4326")
 		}, options) ]);
+
+		this.loadCSSFile(this.cdauthTheme);
+
 		this.events.addEventType("mapResize");
 		this.events.addEventType("newHash");
 
@@ -452,6 +462,30 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 		}
 
 		return hashObject;
+	},
+
+	loadCSSFile : function(url) {
+		if(url == null)
+			return;
+
+		var addNode = true;
+		var nodes = document.getElementsByTagName('link');
+		for(var i=0; i<nodes.length; i++)
+		{
+			if(OpenLayers.Util.isEquivalentUrl(nodes[i].href, url))
+			{
+				addNode = false;
+				break;
+			}
+		}
+		if(addNode)
+		{
+			var cssNode = document.createElement('link');
+			cssNode.setAttribute('rel', 'stylesheet');
+			cssNode.setAttribute('type', 'text/css');
+			cssNode.setAttribute('href', url);
+			document.getElementsByTagName('head')[0].appendChild(cssNode);
+		}
 	},
 
 	CLASS_NAME : "OpenLayers.Map.cdauth"
@@ -1613,6 +1647,44 @@ OpenLayers.Control.cdauth.URLHashHandler = new OpenLayers.Class(OpenLayers.Contr
 	},
 
 	CLASS_NAME : "OpenLayers.Control.cdauth.URLHashHandler"
+});
+
+OpenLayers.Control.cdauth.GeoLocation = new OpenLayers.Class(OpenLayers.Control, {
+	zoomLevel : 15,
+	element : null,
+	draw : function() {
+		var ret = OpenLayers.Control.prototype.draw.apply(this, arguments);
+
+		if(!navigator.geolocation)
+			return ret;
+
+		var control = this;
+
+		if(!this.element)
+		{
+			this.element = document.createElement("a");
+			this.element.appendChild(document.createTextNode("Go home"));
+			this.element.href = "#";
+			OpenLayers.Event.observe(this.element, "click",
+				OpenLayers.Function.bindAsEventListener(function(e) {
+					this.goToGeoLocation();
+					OpenLayers.Event.stop(e);
+				}, this)
+			);
+			this.div.appendChild(this.element);
+		}
+
+		return ret;
+	},
+	goToGeoLocation : function() {
+		if(!this.map) return;
+		var map = this.map;
+		var zoomLevel = this.zoomLevel;
+		navigator.geolocation.getCurrentPosition(function(position) {
+			map.setCenter(new OpenLayers.LonLat(position.coords.longitude, position.coords.latitude).transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject()), zoomLevel);
+		});
+	},
+	CLASS_NAME : "OpenLayers.Control.cdauth.GeoLocation"
 });
 
 /**
