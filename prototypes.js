@@ -1677,7 +1677,7 @@ OpenLayers.Control.cdauth.GeoLocation = new OpenLayers.Class(OpenLayers.Control,
 		return ret;
 	},
 	goToGeoLocation : function() {
-		if(!this.map) return;
+		if(!this.map || !navigator.geolocation) return;
 		var map = this.map;
 		var zoomLevel = this.zoomLevel;
 		navigator.geolocation.getCurrentPosition(function(position) {
