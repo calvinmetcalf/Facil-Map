@@ -1431,24 +1431,26 @@ OpenLayers.Layer.cdauth.Markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 */
 
 OpenLayers.Layer.cdauth.XML = new OpenLayers.Class(OpenLayers.Layer.GML, {
-	colourCounter : 1,
 	cdauthURL : null,
 	relations : { },
+	colour : null,
 	initialize : function(name, url, options) {
 		this.cdauthURL = url;
 
-		var colour;
-		switch((OpenLayers.Layer.cdauth.XML.prototype.colourCounter++)%4)
+		if(this.colour == null)
 		{
-			case 0: colour = "red"; break;
-			case 1: colour = "blue"; break;
-			case 2: colour = "green"; break;
-			case 3: colour = "black"; break;
+			switch((OpenLayers.Layer.cdauth.XML.colourCounter++)%4)
+			{
+				case 0: this.colour = "red"; break;
+				case 1: this.colour = "blue"; break;
+				case 2: this.colour = "green"; break;
+				case 3: this.colour = "black"; break;
+			}
 		}
 
 		OpenLayers.Layer.GML.prototype.initialize.apply(this, [ name ? name : url, this.proxyURL(url), OpenLayers.Util.extend({
 			style: {
-				strokeColor: colour,
+				strokeColor: this.colour,
 				strokeWidth: 3,
 				strokeOpacity: 0.5
 			},
@@ -1528,6 +1530,8 @@ OpenLayers.Layer.cdauth.XML.proxy = null;
  * @var String
 */
 OpenLayers.Layer.cdauth.XML.relationURL = null;
+
+OpenLayers.Layer.cdauth.XML.colourCounter = 1;
 
 /**
  * An instance of this class keeps the location hash part in sync with the Permalink of a map object.
