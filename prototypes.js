@@ -1157,7 +1157,7 @@ OpenLayers.Layer.cdauth.Markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 	 * The marker icon to use for the first search result.
 	 * @var OpenLayers.Icon
 	*/
-	highlighIcon : new OpenLayers.Icon("http://osm.cdauth.de/map/marker-green.png", new OpenLayers.Size(21,25), new OpenLayers.Pixel(-9, -25)),
+	highlightIcon : new OpenLayers.Icon("http://osm.cdauth.de/map/marker-green.png", new OpenLayers.Size(21,25), new OpenLayers.Pixel(-9, -25)),
 
 	initialize: function(name, options) {
 		OpenLayers.Layer.cdauth.Markers.prototype.initialize.apply(this, arguments);
