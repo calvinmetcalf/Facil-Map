@@ -237,7 +237,7 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 			query.lat = 0;
 		if(!query.zoom)
 			query.zoom = 2;
-		this.setCenter(new OpenLayers.LonLat(0+query.lon, 0+query.lat).transform(this.displayProjection, this.getProjectionObject()), 0+query.zoom);
+		this.setCenter(new OpenLayers.LonLat(1*query.lon, 1*query.lat).transform(this.displayProjection, this.getProjectionObject()), 1*query.zoom);
 
 		// Set base layer (layer)
 		if(query.layer)
@@ -284,14 +284,14 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 					if(thisLayer.length < 1)
 						continue;
 					for(var j in query.mlat[i])
-						thisLayer[0].addLonLatMarker(new OpenLayers.LonLat(0+query.mlon[i][j], 0+query.mlat[i][j]).transform(thisLayer[0].projection, this.getProjectionObject()), (query.mtitle && typeof query.mtitle == "object" && query.mtitle[i] && typeof query.mtitle[i] == "object") ? htmlspecialchars(query.mtitle[i][j]) : null);
+						thisLayer[0].addLonLatMarker(new OpenLayers.LonLat(1*query.mlon[i][j], 1*query.mlat[i][j]).transform(thisLayer[0].projection, this.getProjectionObject()), (query.mtitle && typeof query.mtitle == "object" && query.mtitle[i] && typeof query.mtitle[i] == "object") ? htmlspecialchars(query.mtitle[i][j]) : null);
 				}
 				else
-					firstLayer.addLonLatMarker(new OpenLayers.LonLat(0+query.mlon[i], 0+query.mlat[i]).transform(firstLayer.projection, this.getProjectionObject()), (query.mtitle && typeof query.mtitle == "object") ? htmlspecialchars(query.mtitle[i]) : null);
+					firstLayer.addLonLatMarker(new OpenLayers.LonLat(1*query.mlon[i], 1*query.mlat[i]).transform(firstLayer.projection, this.getProjectionObject()), (query.mtitle && typeof query.mtitle == "object") ? htmlspecialchars(query.mtitle[i]) : null);
 			}
 
 			// Adding markers might have moved the map, reset map view
-			this.setCenter(new OpenLayers.LonLat(0+query.lon, 0+query.lat).transform(this.displayProjection, this.getProjectionObject()), 0+query.zoom);
+			this.setCenter(new OpenLayers.LonLat(1*query.lon, 1*query.lat).transform(this.displayProjection, this.getProjectionObject()), 1*query.zoom);
 		}
 
 		// Perform GeoSearches (search, smopen)
