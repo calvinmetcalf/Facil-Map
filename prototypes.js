@@ -107,6 +107,13 @@ OpenLayers.cdauth = { };
 
 OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 	cdauthDefaultVisibility : { },
+
+	/**
+	 * The projection to use in coordinates in the Permalink.
+	 * @var OpenLayers.Projection
+	*/
+	permalinkProjection : new OpenLayers.Projection("EPSG:4326"),
+
 	initialize : function(div, options)
 	{
 		OpenLayers.Map.prototype.initialize.apply(this, [ div, OpenLayers.Util.extend({
@@ -237,7 +244,7 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 			query.lat = 0;
 		if(!query.zoom)
 			query.zoom = 2;
-		this.setCenter(new OpenLayers.LonLat(1*query.lon, 1*query.lat).transform(this.displayProjection, this.getProjectionObject()), 1*query.zoom);
+		this.setCenter(new OpenLayers.LonLat(1*query.lon, 1*query.lat).transform(this.permalinkProjection, this.getProjectionObject()), 1*query.zoom);
 
 		// Set base layer (layer)
 		if(query.layer)
@@ -284,14 +291,14 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 					if(thisLayer.length < 1)
 						continue;
 					for(var j in query.mlat[i])
-						thisLayer[0].addLonLatMarker(new OpenLayers.LonLat(1*query.mlon[i][j], 1*query.mlat[i][j]).transform(thisLayer[0].projection, this.getProjectionObject()), (query.mtitle && typeof query.mtitle == "object" && query.mtitle[i] && typeof query.mtitle[i] == "object") ? htmlspecialchars(query.mtitle[i][j]) : null);
+						thisLayer[0].addLonLatMarker(new OpenLayers.LonLat(1*query.mlon[i][j], 1*query.mlat[i][j]).transform(this.permalinkProjection, this.getProjectionObject()), (query.mtitle && typeof query.mtitle == "object" && query.mtitle[i] && typeof query.mtitle[i] == "object") ? htmlspecialchars(query.mtitle[i][j]) : null);
 				}
 				else
-					firstLayer.addLonLatMarker(new OpenLayers.LonLat(1*query.mlon[i], 1*query.mlat[i]).transform(firstLayer.projection, this.getProjectionObject()), (query.mtitle && typeof query.mtitle == "object") ? htmlspecialchars(query.mtitle[i]) : null);
+					firstLayer.addLonLatMarker(new OpenLayers.LonLat(1*query.mlon[i], 1*query.mlat[i]).transform(this.permalinkProjection, this.getProjectionObject()), (query.mtitle && typeof query.mtitle == "object") ? htmlspecialchars(query.mtitle[i]) : null);
 			}
 
 			// Adding markers might have moved the map, reset map view
-			this.setCenter(new OpenLayers.LonLat(1*query.lon, 1*query.lat).transform(this.displayProjection, this.getProjectionObject()), 1*query.zoom);
+			this.setCenter(new OpenLayers.LonLat(1*query.lon, 1*query.lat).transform(this.permalinkProjection, this.getProjectionObject()), 1*query.zoom);
 		}
 
 		// Perform GeoSearches (search, smopen)
@@ -385,7 +392,7 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 		if(!this.getCenter())
 			return false;
 
-		var lonlat = this.getCenter().clone().transform(this.getProjectionObject(), this.displayProjection);
+		var lonlat = this.getCenter().clone().transform(this.getProjectionObject(), this.permalinkProjection);
 		var hashObject = {
 			lon : Math.round(lonlat.lon*100000000)/100000000,
 			lat : Math.round(lonlat.lat*100000000)/100000000,
@@ -437,7 +444,7 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 
 				for(var j=0; j<layerMarkers.markers.length; j++)
 				{
-					var lonlat = layerMarkers.markers[j].lonlat.clone().transform(this.getProjectionObject(), this.displayProjection);
+					var lonlat = layerMarkers.markers[j].lonlat.clone().transform(this.getProjectionObject(), this.permalinkProjection);
 					hashObject.mlon[l.shortName][j] = Math.round(lonlat.lon*100000000)/100000000;
 					hashObject.mlat[l.shortName][j] = Math.round(lonlat.lat*100000000)/100000000;
 					if(layerMarkers.markers[j].cdauthTitle)
@@ -994,6 +1001,11 @@ OpenLayers.Layer.cdauth.Markers = new OpenLayers.Class(OpenLayers.Layer.Markers,
 
 OpenLayers.Layer.cdauth.Markers.LonLat = new OpenLayers.Class(OpenLayers.Layer.cdauth.Markers, {
 	/**
+	 * The projection in which coordinates should be displayed in the popups.
+	*/
+	readableProjection : new OpenLayers.Projection("EPSG:4326"),
+
+	/**
 	 * @param OpenLayers.Icon defaultIcon The icon to be used for the markers added by addLonLatMarker()
 	*/
 	initialize : function(name, options) {
@@ -1008,7 +1020,6 @@ OpenLayers.Layer.cdauth.Markers.LonLat = new OpenLayers.Class(OpenLayers.Layer.c
 	{
 		var layer = this;
 
-		var lonlat_readable = lonlat.clone().transform(this.map.getProjectionObject(), this.map.displayProjection);
 		var marker = this.createMarker(lonlat, ".", true);
 		if(title)
 			marker.cdauthTitle = title;
@@ -1033,7 +1044,7 @@ OpenLayers.Layer.cdauth.Markers.LonLat = new OpenLayers.Class(OpenLayers.Layer.c
 				heading.appendChild(document.createTextNode(this.markers[i].cdauthTitle));
 				content.appendChild(heading);
 			}
-			content.appendChild(makePermalinks(this.markers[i].lonlat.clone().transform(this.map.getProjectionObject(), this.map.displayProjection), this.map.getZoom()));
+			content.appendChild(makePermalinks(this.markers[i].lonlat.clone().transform(this.map.getProjectionObject(), this.readableProjection), this.map.getZoom()));
 			this.markers[i].cdauthFeature.popup.setContentHTML(content);
 		}
 	},
