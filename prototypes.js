@@ -259,74 +259,68 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 		}
 
 		// Set LonLat markers (mlon, mlat, mtitle)
-		if(layerMarkers)
+		var firstLayer = null;
+		for(var i=0; i<this.layers.length; i++)
 		{
-			var firstLayer = null;
-			for(var i=0; i<this.layers.length; i++)
+			if(this.layers[i] instanceof OpenLayers.Layer.cdauth.Markers.LonLat)
 			{
-				if(this.layers[i] instanceof OpenLayers.Layer.cdauth.Markers.LonLat)
-				{
-					if(firstLayer == null)
-						firstLayer = this.layers[i];
-					this.layers[i].clearMarkers();
-				}
-			}
-
-			if(firstLayer != null && query.mlat && query.mlon && typeof query.mlat == "object" && typeof query.mlon == "object")
-			{
-				for(var i in query.mlat)
-				{
-					if(typeof query.mlon[i] == "undefined") continue;
-
-					if(typeof query.mlat[i] == "object")
-					{
-						if(typeof query.mlon[i] != "object")
-							continue;
-						var thisLayer = this.getLayersBy("shortName", i);
-						if(thisLayer.length < 1)
-							continue;
-						for(var j in query.mlat[i])
-							thisLayer[0].addLonLatMarker(new OpenLayers.LonLat(query.mlon[i][j], query.mlat[i][j]).transform(thisLayer[0].projection, this.getProjectionObject()), (query.mtitle && typeof query.mtitle == "object" && query.mtitle[i] && typeof query.mtitle[i] == "object") ? htmlspecialchars(query.mtitle[i][j]) : null);
-					}
-					else
-						firstLayer.addLonLatMarker(new OpenLayers.LonLat(query.mlon[i], query.mlat[i]).transform(firstLayer.projection, this.getProjectionObject()), (query.mtitle && typeof query.mtitle == "object") ? htmlspecialchars(query.mtitle[i]) : null);
-				}
-
-				// Adding markers might have moved the map, reset map view
-				this.setCenter(new OpenLayers.LonLat(query.lon, query.lat).transform(this.displayProjection, this.getProjectionObject()), query.zoom);
+				if(firstLayer == null)
+					firstLayer = this.layers[i];
+				this.layers[i].clearMarkers();
 			}
 		}
 
-		// Perform GeoSearches (search, smopen)
-		if(query.search)
+		if(firstLayer != null && query.mlat && query.mlon && typeof query.mlat == "object" && typeof query.mlon == "object")
 		{
-			var firstLayer = null;
-			for(var i=0; i<this.layers.length; i++)
+			for(var i in query.mlat)
 			{
-				if(this.layers[i] instanceof OpenLayers.Layer.cdauth.Markers.GeoSearch)
-				{
-					if(firstLayer == null)
-						firstLayer = this.layers[i];
-					this.layers[i].geoSearch("");
-				}
-			}
+				if(typeof query.mlon[i] == "undefined") continue;
 
-			if(firstLayer != null)
-			{
-				if(typeof query.search == "object")
+				if(typeof query.mlat[i] == "object")
 				{
-					for(var i in query.search)
-					{
-						var thisLayer = this.getLayersBy("shortName", i);
-						if(thisLayer.length < 1)
-							continue;
-
-						thisLayer[0].geoSearch(query.search[i], !search_may_zoom, (typeof query.smopen == "object" ? query.smopen[i] : null));
-					}
+					if(typeof query.mlon[i] != "object")
+						continue;
+					var thisLayer = this.getLayersBy("shortName", i);
+					if(thisLayer.length < 1)
+						continue;
+					for(var j in query.mlat[i])
+						thisLayer[0].addLonLatMarker(new OpenLayers.LonLat(query.mlon[i][j], query.mlat[i][j]).transform(thisLayer[0].projection, this.getProjectionObject()), (query.mtitle && typeof query.mtitle == "object" && query.mtitle[i] && typeof query.mtitle[i] == "object") ? htmlspecialchars(query.mtitle[i][j]) : null);
 				}
 				else
-					firstLayer.geoSearch(query.search, !search_may_zoom, query.smopen);
+					firstLayer.addLonLatMarker(new OpenLayers.LonLat(query.mlon[i], query.mlat[i]).transform(firstLayer.projection, this.getProjectionObject()), (query.mtitle && typeof query.mtitle == "object") ? htmlspecialchars(query.mtitle[i]) : null);
 			}
+
+			// Adding markers might have moved the map, reset map view
+			this.setCenter(new OpenLayers.LonLat(query.lon, query.lat).transform(this.displayProjection, this.getProjectionObject()), query.zoom);
+		}
+
+		// Perform GeoSearches (search, smopen)
+		firstLayer = null;
+		for(var i=0; i<this.layers.length; i++)
+		{
+			if(this.layers[i] instanceof OpenLayers.Layer.cdauth.Markers.GeoSearch)
+			{
+				if(firstLayer == null)
+					firstLayer = this.layers[i];
+				this.layers[i].geoSearch("");
+			}
+		}
+
+		if(firstLayer != null)
+		{
+			if(typeof query.search == "object")
+			{
+				for(var i in query.search)
+				{
+					var thisLayer = this.getLayersBy("shortName", i);
+					if(thisLayer.length < 1)
+						continue;
+
+					thisLayer[0].geoSearch(query.search[i], !search_may_zoom, (typeof query.smopen == "object" ? query.smopen[i] : null));
+				}
+			}
+			else
+				firstLayer.geoSearch(query.search, !search_may_zoom, query.smopen);
 		}
 
 		// Handle removable GPX layers (xml)
