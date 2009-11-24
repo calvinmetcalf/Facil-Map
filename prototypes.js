@@ -1140,23 +1140,28 @@ OpenLayers.Control.cdauth.CreateMarker = OpenLayers.Class(OpenLayers.Control, {
 
 OpenLayers.Layer.cdauth.Markers.GeoSearch = new OpenLayers.Class(OpenLayers.Layer.cdauth.Markers, {
 	lastSearch : false,
-	nameFinderURL : false,
-	nameFinder2URL : false,
-	defaultIcon : false,
-	highlighIcon : false,
 
 	/**
-	 * @param String nameFinderURL http://gazetteer.openstreetmap.org/namefinder/search.xml (search=%s will be appended). To work around the same origin policy, pass a wrapper that lives on your webspace.
-	 * @param String nameFinder2URL http://data.giub.uni-bonn.de/openrouteservice/php/OpenLSLUS_Geocode.php Will be used if the normal namefinder does not find anything
-	 * @param OpenLayers.Icon defaultIcon The default icon to use for the search result markers.
-	 * @param OpenLayers.Icon highlightIcon The marker icon to use for the first search result.
+	 * http://gazetteer.openstreetmap.org/namefinder/search.xml (search=%s will be appended). To work around the same origin policy, pass a wrapper that lives on your webspace.
+	 * @var String
 	*/
-	initialize: function(name, nameFinderURL, nameFinder2URL, defaultIcon, highlightIcon, options) {
-		OpenLayers.Layer.cdauth.Markers.prototype.initialize.apply(this, [ name, options ]);
-		this.nameFinderURL = nameFinderURL;
-		this.nameFinder2URL = nameFinder2URL;
-		this.defaultIcon = defaultIcon;
-		this.highlightIcon = highlightIcon;
+	nameFinderURL : "http://gazetteer.openstreetmap.org/namefinder/search.xml",
+
+	/**
+	 * http://data.giub.uni-bonn.de/openrouteservice/php/OpenLSLUS_Geocode.php Will be used if the normal namefinder does not find anything
+	 * @var String
+	*/
+	nameFinder2URL : "http://data.giub.uni-bonn.de/openrouteservice/php/OpenLSLUS_Geocode.php",
+
+	/**
+	 * The marker icon to use for the first search result.
+	 * @var OpenLayers.Icon
+	*/
+	highlighIcon : new OpenLayers.Icon("http://osm.cdauth.de/map/marker-green.png", new OpenLayers.Size(21,25), new OpenLayers.Pixel(-9, -25)),
+
+	initialize: function(name, options) {
+		OpenLayers.Layer.cdauth.Markers.prototype.initialize.apply(this, arguments);
+
 		this.events.addEventType("lastSearchChange");
 		this.events.addEventType("searchBegin");
 		this.events.addEventType("searchSuccess");
@@ -1400,7 +1405,7 @@ OpenLayers.Layer.cdauth.Markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 				new OpenLayers.LonLat(results[i].lon, results[i].lat).transform(new OpenLayers.Projection("EPSG:4326"), this.map.getProjectionObject()),
 				content,
 				((markersvisible && typeof markersvisible[i] != "undefined" && markersvisible[i] != "0") || ((!markersvisible || typeof markersvisible[i] == "undefined") && i==0)),
-				(i==0 ? this.highlightIcon : this.defaultIcon).clone(),
+				(i==0 && this.highlightIcon ? this.highlightIcon.clone() : null),
 				dontzoom
 			);
 		}
@@ -1526,10 +1531,10 @@ OpenLayers.Layer.cdauth.XML = new OpenLayers.Class(OpenLayers.Layer.GML, {
 OpenLayers.Layer.cdauth.XML.proxy = null;
 /**
  * Set this to the XML URL that shall be loaded for relations referenced in OSM files. “${id}" will be replaced by the ID of the relation.
- * Use the real URL here, not that of your proxy. Usually you set this to "http://www.openstreetmap.org/api/0.6/relation/${id}/full".
+ * Use the real URL here, not that of your proxy.
  * @var String
 */
-OpenLayers.Layer.cdauth.XML.relationURL = null;
+OpenLayers.Layer.cdauth.XML.relationURL = "http://www.openstreetmap.org/api/0.6/relation/${id}/full";
 
 OpenLayers.Layer.cdauth.XML.colourCounter = 1;
 
