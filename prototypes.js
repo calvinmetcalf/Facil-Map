@@ -405,7 +405,7 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 		for(var i=0; i<this.layers.length; i++)
 		{ // Save overlay visibility
 			var l = this.layers[i];
-			if(l.isBaseLayer) continue;
+			if(l.isBaseLayer || l.noPermalink) continue;
 
 			if(l.getVisibility() != this.cdauthDefaultVisibility[l.shortName])
 				hashObject.overlays[l.shortName] = l.getVisibility() ? "1" : "0";
