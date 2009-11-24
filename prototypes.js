@@ -1497,6 +1497,7 @@ OpenLayers.Layer.cdauth.XML.relationURL = null;
 
 /**
  * An instance of this class keeps the location hash part in sync with the Permalink of a map object.
+ * @event hashChanged location.hash was changed.
 */
 OpenLayers.Control.cdauth.URLHashHandler = new OpenLayers.Class(OpenLayers.Control, {
 	/**
@@ -1522,12 +1523,24 @@ OpenLayers.Control.cdauth.URLHashHandler = new OpenLayers.Class(OpenLayers.Contr
 	*/
 	lastHash : null,
 
+	initialize : function() {
+		OpenLayers.Control.prototype.initialize.apply(this, arguments);
+
+		this.events.addEventType("hashChanged");
+	},
+
 	/**
 	 * Initialises an interval that checks for changes in location.hash automatically.
 	*/
 	activate : function() {
-		if(!OpenLayers.Control.prototype.activate.apply(this, arguments) || !this.map)
+		if(!OpenLayers.Control.prototype.activate.apply(this, arguments))
 			return false;
+
+		if(!this.map)
+		{
+			this.deactivate();
+			return false;
+		}
 
 		map.events.register("newHash", this, this.newHashHandler);
 
@@ -1540,8 +1553,17 @@ OpenLayers.Control.cdauth.URLHashHandler = new OpenLayers.Class(OpenLayers.Contr
 	},
 
 	deactivate : function() {
-		clearInterval(this.intervalObject);
+		if(!OpenLayers.Control.prototype.deactivate.apply(this, arguments))
+			return false;
+
+		if(this.intervalObject)
+		{
+			clearInterval(this.intervalObject);
+			this.intervalObject = null;
+		}
 		map.events.unregister("newHash", this, this.newHashHandler);
+
+		return true;
 	},
 
 	newHashHandler : function() {
@@ -1578,6 +1600,7 @@ OpenLayers.Control.cdauth.URLHashHandler = new OpenLayers.Class(OpenLayers.Contr
 		location.hash = "#"+encodeQueryString(this.map.getQueryObject());
 		this.lastHash = this.getLocationHash();
 		this.hashChanged = false;
+		this.events.triggerEvent("hashChanged");
 	},
 
 	/**
