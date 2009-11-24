@@ -67,7 +67,27 @@ OpenLayers.Lang.en = OpenLayers.Util.extend(OpenLayers.Lang.en, {
 	"Yahoo Maps Permalink" : "Yahoo Maps Permalink",
 	"OpenStreetMap Links" : "OpenStreetMap Links",
 	"Wikimedia GeoHack" : "Wikimedia GeoHack",
-	"Go home" : "Go home"
+	"Go home" : "Go home",
+	"Mapnik" : "Mapnik",
+	"MapSurfer Road" : "MapSurfer Road",
+	"MapSurfer Topographic" : "MapSurfer Topographic",
+	"OpenStreetBrowser" : "OpenStreetBrowser",
+	"Osmarender" : "Osmarender",
+	"OpenCycleMap" : "OpenCycleMap",
+	"Reit- und Wanderkarte" : "Reit- und Wanderkarte",
+	"OpenPisteMap" : "OpenPisteMap",
+	"ÖPNV-Karte" : "ÖPNV-Karte",
+	"Minutely Mapnik" : "Minutely Mapnik",
+	"Google Streets" : "Google Streets",
+	"Google Satellite" : "Google Satellite",
+	"Google Hybrid" : "Google Hybrid",
+	"Google Terrain" : "Google Terrain",
+	"Google MapMaker" : "Google MapMaker",
+	"Google MapMaker Hybrid" : "Google MapMaker Hybrid",
+	"Yahoo Street" : "Yahoo Street",
+	"Yahoo Satellite" : "Yahoo Satellite",
+	"Yahoo Hybrid" : "Yahoo Hybrid",
+	"Relief" : "Relief"
 });
 
 OpenLayers.Lang.de = OpenLayers.Util.extend(OpenLayers.Lang.de, {
@@ -95,7 +115,27 @@ OpenLayers.Lang.de = OpenLayers.Util.extend(OpenLayers.Lang.de, {
 	"Yahoo Maps Permalink" : "Yahoo Maps Permalink",
 	"OpenStreetMap Links" : "OpenStreetMap Links",
 	"Wikimedia GeoHack" : "Wikimedia GeoHack",
-	"Go home" : "Zum Aufenthaltsort"
+	"Go home" : "Zum Aufenthaltsort",
+	"Mapnik" : "Mapnik",
+	"MapSurfer Road" : "MapSurfer Road",
+	"MapSurfer Topographic" : "MapSurfer Topographic",
+	"OpenStreetBrowser" : "OpenStreetBrowser",
+	"Osmarender" : "Osmarender",
+	"OpenCycleMap" : "OpenCycleMap",
+	"Reit- und Wanderkarte" : "Reit- und Wanderkarte",
+	"OpenPisteMap" : "OpenPisteMap",
+	"ÖPNV-Karte" : "ÖPNV-Karte",
+	"Minutely Mapnik" : "Minutely Mapnik",
+	"Google Streets" : "Google Karte",
+	"Google Satellite" : "Google Satellit",
+	"Google Hybrid" : "Google Hybrid",
+	"Google Terrain" : "Google Gelände",
+	"Google MapMaker" : "Google MapMaker",
+	"Google MapMaker Hybrid" : "Google MapMaker Hybrid",
+	"Yahoo Street" : "Yahoo Karte",
+	"Yahoo Satellite" : "Yahoo Satellit",
+	"Yahoo Hybrid" : "Yahoo Hybrid",
+	"Relief" : "Relief"
 });
 
 /**
@@ -169,54 +209,54 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 	addAllAvailableOSMLayers : function()
 	{
 		if(OpenLayers.Layer.cdauth.OSM.Mapnik)
-			this.addLayer(new OpenLayers.Layer.cdauth.OSM.Mapnik("Mapnik", { shortName : "Mpnk" }));
+			this.addLayer(new OpenLayers.Layer.cdauth.OSM.Mapnik(OpenLayers.i18n("Mapnik"), { shortName : "Mpnk" }));
 		if(OpenLayers.Layer.cdauth.OSM.MapSurfer)
 		{
 			if(OpenLayers.Layer.cdauth.OSM.MapSurfer.Road)
-				this.addLayer(new OpenLayers.Layer.cdauth.OSM.MapSurfer.Road("MapSurfer Road", { shortName : "MSfR" }));
+				this.addLayer(new OpenLayers.Layer.cdauth.OSM.MapSurfer.Road(OpenLayers.i18n("MapSurfer Road"), { shortName : "MSfR" }));
 			if(OpenLayers.Layer.cdauth.OSM.MapSurfer.Topographic)
-				this.addLayer(new OpenLayers.Layer.cdauth.OSM.MapSurfer.Topographic("MapSurfer Topographic", { shortName : "MSfT" }));
+				this.addLayer(new OpenLayers.Layer.cdauth.OSM.MapSurfer.Topographic(OpenLayers.i18n("MapSurfer Topographic"), { shortName : "MSfT" }));
 		}
 		if(OpenLayers.Layer.cdauth.OSM.OpenStreetBrowser)
-			this.addLayer(new OpenLayers.Layer.cdauth.OSM.OpenStreetBrowser("OpenStreetBrowser", { shortName : "OSBr" }));
+			this.addLayer(new OpenLayers.Layer.cdauth.OSM.OpenStreetBrowser(OpenLayers.i18n("OpenStreetBrowser"), { shortName : "OSBr" }));
 		if(OpenLayers.Layer.cdauth.OSM.Osmarender)
-			this.addLayer(new OpenLayers.Layer.cdauth.OSM.Osmarender("Osmarender", { shortName : "Osmr" }));
+			this.addLayer(new OpenLayers.Layer.cdauth.OSM.Osmarender(OpenLayers.i18n("Osmarender"), { shortName : "Osmr" }));
 		if(OpenLayers.Layer.cdauth.OSM.CycleMap)
-			this.addLayer(new OpenLayers.Layer.cdauth.OSM.CycleMap("OpenCycleMap", { shortName : "OCyc" }));
+			this.addLayer(new OpenLayers.Layer.cdauth.OSM.CycleMap(OpenLayers.i18n("OpenCycleMap"), { shortName : "OCyc" }));
 		if(OpenLayers.Layer.cdauth.OSM.Wanderkarte)
-			this.addLayer(new OpenLayers.Layer.cdauth.OSM.Wanderkarte("Reit- und Wanderkarte", { shortName : "OSMC" }));
+			this.addLayer(new OpenLayers.Layer.cdauth.OSM.Wanderkarte(OpenLayers.i18n("Reit- und Wanderkarte"), { shortName : "OSMC" }));
 		if(OpenLayers.Layer.cdauth.OSM.OpenPisteMap)
-			this.addLayer(new OpenLayers.Layer.cdauth.OSM.OpenPisteMap("OpenPisteMap", { shortName : "OPis" }));
+			this.addLayer(new OpenLayers.Layer.cdauth.OSM.OpenPisteMap(OpenLayers.i18n("OpenPisteMap"), { shortName : "OPis" }));
 		if(OpenLayers.Layer.cdauth.OSM.OPNVKarte)
-			this.addLayer(new OpenLayers.Layer.cdauth.OSM.OPNVKarte("ÖPNV-Karte", { shortName : "OPNV" }));
+			this.addLayer(new OpenLayers.Layer.cdauth.OSM.OPNVKarte(OpenLayers.i18n("ÖPNV-Karte"), { shortName : "OPNV" }));
 		if(OpenLayers.Layer.cdauth.OSM.MinutelyMapnik)
-			this.addLayer(new OpenLayers.Layer.cdauth.OSM.MinutelyMapnik("Minutely Mapnik", { shortName : "MiMa" }));
+			this.addLayer(new OpenLayers.Layer.cdauth.OSM.MinutelyMapnik(OpenLayers.i18n("Minutely Mapnik"), { shortName : "MiMa" }));
 	},
 
 	addAllAvailableGoogleLayers : function()
 	{
 		if(OpenLayers.Layer.cdauth.Google.Maps)
-			this.addLayer(new OpenLayers.Layer.cdauth.Google.Maps("Google Streets", { shortName : "GgSt" }));
+			this.addLayer(new OpenLayers.Layer.cdauth.Google.Maps(OpenLayers.i18n("Google Streets"), { shortName : "GgSt" }));
 		if(OpenLayers.Layer.cdauth.Google.MapsSatellite)
-			this.addLayer(new OpenLayers.Layer.cdauth.Google.MapsSatellite("Google Satellite", { shortName : "GgSa" }));
+			this.addLayer(new OpenLayers.Layer.cdauth.Google.MapsSatellite(OpenLayers.i18n("Google Satellite"), { shortName : "GgSa" }));
 		if(OpenLayers.Layer.cdauth.Google.MapsHybrid)
-			this.addLayer(new OpenLayers.Layer.cdauth.Google.MapsHybrid("Google Hybrid", { shortName : "GgHy" }));
+			this.addLayer(new OpenLayers.Layer.cdauth.Google.MapsHybrid(OpenLayers.i18n("Google Hybrid"), { shortName : "GgHy" }));
 		if(OpenLayers.Layer.cdauth.Google.MapsTerrain)
-			this.addLayer(new OpenLayers.Layer.cdauth.Google.MapsTerrain("Google Terrain", { shortName : "GgTe" }));
+			this.addLayer(new OpenLayers.Layer.cdauth.Google.MapsTerrain(OpenLayers.i18n("Google Terrain"), { shortName : "GgTe" }));
 		if(OpenLayers.Layer.cdauth.Google.MapMaker)
-			this.addLayer(new OpenLayers.Layer.cdauth.Google.MapMaker("Google MapMaker", { shortName : "GgMM" }));
+			this.addLayer(new OpenLayers.Layer.cdauth.Google.MapMaker(OpenLayers.i18n("Google MapMaker"), { shortName : "GgMM" }));
 		if(OpenLayers.Layer.cdauth.Google.MapMakerHybrid)
-			this.addLayer(new OpenLayers.Layer.cdauth.Google.MapMakerHybrid("Google MapMaker Hybrid", { shortName : "GgMH" }));
+			this.addLayer(new OpenLayers.Layer.cdauth.Google.MapMakerHybrid(OpenLayers.i18n("Google MapMaker Hybrid"), { shortName : "GgMH" }));
 	},
 
 	addAllAvailableYahooLayers : function()
 	{
 		if(OpenLayers.Layer.cdauth.Yahoo.Maps)
-			this.addLayer(new OpenLayers.Layer.cdauth.Yahoo.Maps("Yahoo Street", { shortName : "YaSt" }));
+			this.addLayer(new OpenLayers.Layer.cdauth.Yahoo.Maps(OpenLayers.i18n("Yahoo Street"), { shortName : "YaSt" }));
 		if(OpenLayers.Layer.cdauth.Yahoo.Satellite)
-			this.addLayer(new OpenLayers.Layer.cdauth.Yahoo.Satellite("Yahoo Satellite", { shortName : "YaSa" }));
+			this.addLayer(new OpenLayers.Layer.cdauth.Yahoo.Satellite(OpenLayers.i18n("Yahoo Satellite"), { shortName : "YaSa" }));
 		if(OpenLayers.Layer.cdauth.Yahoo.Hybrid)
-			this.addLayer(new OpenLayers.Layer.cdauth.Yahoo.Hybrid("Yahoo Hybrid", { shortName : "YaHy" }));
+			this.addLayer(new OpenLayers.Layer.cdauth.Yahoo.Hybrid(OpenLayers.i18n("Yahoo Hybrid"), { shortName : "YaHy" }));
 	},
 
 	/**
@@ -229,7 +269,7 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 		this.addAllAvailableYahooLayers();
 
 		if(OpenLayers.Layer.cdauth.other.Relief)
-			this.addLayer(new OpenLayers.Layer.cdauth.other.Relief("Relief", { visibility: false, shortName : "Rlie" }));
+			this.addLayer(new OpenLayers.Layer.cdauth.other.Relief(OpenLayers.i18n("Relief"), { visibility: false, shortName : "Rlie" }));
 	},
 
 	/**
