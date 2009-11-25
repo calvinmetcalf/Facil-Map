@@ -1618,7 +1618,10 @@ OpenLayers.Control.cdauth.URLHashHandler = new OpenLayers.Class(OpenLayers.Contr
 		var obj = this;
 		this.intervalObject = setInterval(function(){ obj.update(); }, this.interval);
 
-		this.updateMapView();
+		if(this.getLocationHash() != "")
+			this.updateMapView();
+		else
+			this.updateLocationHash();
 
 		return true;
 	},
@@ -1668,10 +1671,14 @@ OpenLayers.Control.cdauth.URLHashHandler = new OpenLayers.Class(OpenLayers.Contr
 	 * Updates location.hash to the current map view.
 	*/
 	updateLocationHash : function() {
-		location.hash = "#"+encodeQueryString(this.map.getQueryObject());
+		var queryObject = this.map.getQueryObject();
+		if(!queryObject)
+			return false;
+		location.hash = "#"+encodeQueryString(queryObject);
 		this.lastHash = this.getLocationHash();
 		this.hashChanged = false;
 		this.events.triggerEvent("hashChanged");
+		return true;
 	},
 
 	/**
