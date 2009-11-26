@@ -187,7 +187,7 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 	{
 		var ret = OpenLayers.Map.prototype.addLayer.apply(this, arguments);
 
-		if(layer.shortName == null)
+		if(typeof layer.shortName == "undefined")
 			layer.shortName = layer.name;
 
 		if(!layer.isBaseLayer)
@@ -448,7 +448,7 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 		for(var i=0; i<this.layers.length; i++)
 		{ // Save overlay visibility
 			var l = this.layers[i];
-			if(l.isBaseLayer || l.noPermalink) continue;
+			if(l.isBaseLayer || l.shortName == null) continue;
 
 			if(l.getVisibility() != this.cdauthDefaultVisibility[l.shortName])
 				hashObject.overlays[l.shortName] = l.getVisibility() ? "1" : "0";
