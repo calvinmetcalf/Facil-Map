@@ -1777,9 +1777,10 @@ OpenLayers.Layer.cdauth.CoordinateGrid = new OpenLayers.Class(OpenLayers.Layer.V
 
 		this.map.events.register("moveend", this, this.drawGrid);
 		this.map.events.register("mapResize", this, this.drawGrid);
+		this.events.register("visibilitychanged", this, this.drawGrid);
 	},
 	drawGrid : function() {
-		if(!this.map || !this.map.getExtent()) return;
+		if(!this.map || !this.map.getExtent() || !this.getVisibility()) return;
 
 		var extent = this.map.getExtent().transform(this.map.getProjectionObject(), this.projection);
 		var maxExtent = this.map.maxExtent.clone().transform(this.map.getProjectionObject(), this.projection);
