@@ -488,13 +488,13 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 				hashObject.mlat[l.shortName] = { };
 				hashObject.mtitle[l.shortName] = { };
 
-				for(var j=0; j<layerMarkers.markers.length; j++)
+				for(var j=0; j<l.markers.length; j++)
 				{
-					var lonlat = layerMarkers.markers[j].lonlat.clone().transform(this.getProjectionObject(), this.permalinkProjection);
+					var lonlat = l.markers[j].lonlat.clone().transform(this.getProjectionObject(), this.permalinkProjection);
 					hashObject.mlon[l.shortName][j] = Math.round(lonlat.lon*100000000)/100000000;
 					hashObject.mlat[l.shortName][j] = Math.round(lonlat.lat*100000000)/100000000;
-					if(layerMarkers.markers[j].cdauthTitle)
-						hashObject.mtitle[l.shortName][j] = layerMarkers.markers[j].cdauthTitle;
+					if(l.markers[j].cdauthTitle)
+						hashObject.mtitle[l.shortName][j] = l.markers[j].cdauthTitle;
 				}
 			}
 		}
