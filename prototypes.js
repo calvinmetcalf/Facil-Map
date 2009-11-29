@@ -1327,10 +1327,10 @@ OpenLayers.Layer.cdauth.Markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 					success : function(request) {
 						if(results1 && results1.length > 0)
 							return;
+						var results = [ ];
 						if(request.responseXML)
 						{
 							var searchresults = request.responseXML.getElementsByTagName("xls:GeocodedAddress");
-							var results = [ ];
 							for(var i=0; i<searchresults.length; i++)
 							{
 								var accuracy = searchresults[i].getElementsByTagName("xls:GeocodeMatchCode");
@@ -1376,21 +1376,16 @@ OpenLayers.Layer.cdauth.Markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 									name : desc.join(" ")
 								});
 							}
-
-							results2 = results;
-							if(results1 && results1.length == 0)
-								layer.showResults(results, query, dontzoom, markersvisible);
-							return;
 						}
 
-						results2 = [ ];
+						results2 = results;
 						if(results1 && results1.length == 0)
-							alert(OpenLayers.i18n("No results."));
+							layer.showResults(results2, query, dontzoom, markersvisible);
 					},
 					failure : function() {
 						results2 = [ ];
 						if(results1 && results1.length == 0)
-							alert(OpenLayers.i18n("No results."));
+							layer.showResults(results2, query, dontzoom, markersvisible);
 					}
 				});
 			}
