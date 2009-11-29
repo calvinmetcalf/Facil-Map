@@ -45,14 +45,8 @@ OpenLayers.i18n = OpenLayers.Lang.translate = function(key, context) {
 OpenLayers.Lang.en = OpenLayers.Util.extend(OpenLayers.Lang.en, {
 	"[Zoom]" : "[Zoom]",
 	"[Remove]" : "[Remove]",
-	"Rendering CC-by-SA by <a href=\"http://www.cloudmade.com/\">CloudMade</a>. Data CC-by-SA by <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>" : "Rendering CC-by-SA by <a href=\"http://www.cloudmade.com/\">CloudMade</a>. Data CC-by-SA by <a href=\"http://openstreetmap.org/\">OpenStreetMap</a>",
-	"Rendering CC-by-SA by <a href=\"http://www.mapsurfer.net/\">MapSurfer</a>. Data CC-by-SA by <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>" : "Rendering CC-by-SA by <a href=\"http://www.mapsurfer.net/\">MapSurfer</a>. Data CC-by-SA by <a href=\"http://openstreetmap.org/\">OpenStreetMap</a>",
-	"Rendering CC-by-SA by <a href=\"http://osmc.broadbox.de/\">OSMC Reit- und Wanderkarte</a>. Data CC-by-SA by <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>" : "Rendering CC-by-SA by <a href=\"http://osmc.broadbox.de/\">OSMC Reit- und Wanderkarte</a>. Data CC-by-SA by <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>",
-	"Rendering CC-by-SA by <a href=\"http://www.opencyclemap.org/\">OpenCycleMap</a>. Data CC-by-SA by <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>" : "Rendering CC-by-SA by <a href=\"http://www.opencyclemap.org/\">OpenCycleMap</a>. Data CC-by-SA by <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>",
-	"Rendering CC-by-SA by <a href=\"http://www.openstreetbrowser.org/\">OpenStreetBrowser</a>. Data CC-by-SA by <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>" : "Rendering CC-by-SA by <a href=\"http://www.openstreetbrowser.org/\">OpenStreetBrowser</a>. Data CC-by-SA by <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>",
-	"Rendering CC-by-SA by <a href=\"http://www.openpistemap.org/\">OpenPisteMap</a>. Data CC-by-SA by <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>" : "Rendering CC-by-SA by <a href=\"http://www.openpistemap.org/\">OpenPisteMap</a>. Data CC-by-SA by <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>",
-	"Rendering CC-by-SA by <a href=\"http://www.xn--pnvkarte-m4a.de/\">ÖPNV-Karte</a>. Data CC-by-SA by <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>" : "Rendering CC-by-SA by <a href=\"http://www.xn--pnvkarte-m4a.de/\">ÖPNV-Karte</a>. Data CC-by-SA by <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>",
-	"Relief CC-by-SA by <a href=\"http://openrouteservice.org/\">Kartografie Universität Bonn</a>" : "Relief CC-by-SA by <a href=\"http://openrouteservice.org/\">Kartografie Universität Bonn</a>",
+	"attribution-osm" : "Rendering CC-by-SA by ${rendering}, Data CC-by-SA by <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>",
+	"attribution-relief" : "Relief by <a href=\"http://openrouteservice.org/\">Kartografie Universität Bonn</a>/<a href=\"http://srtm.csi.cgiar.org/\">CIAT-CSI SRTM</a> (<a href=\"http://data.giub.uni-bonn.de/openrouteservice/contact.php#disclaimer\">Terms of Use</a>)",
 	"Create a marker" : "Create a marker",
 	"Coordinates" : "Coordinates",
 	"unknown" : "unknown",
@@ -66,20 +60,35 @@ OpenLayers.Lang.en = OpenLayers.Util.extend(OpenLayers.Lang.en, {
 	"Google Maps Permalink" : "Google Maps Permalink",
 	"Yahoo Maps Permalink" : "Yahoo Maps Permalink",
 	"OpenStreetMap Links" : "OpenStreetMap Links",
-	"Wikimedia GeoHack" : "Wikimedia GeoHack"
+	"Wikimedia GeoHack" : "Wikimedia GeoHack",
+	"Go home" : "Go home",
+	"Mapnik" : "Mapnik",
+	"MapSurfer Road" : "MapSurfer Road",
+	"MapSurfer Topographic" : "MapSurfer Topographic",
+	"OpenStreetBrowser" : "OpenStreetBrowser",
+	"Osmarender" : "Osmarender",
+	"OpenCycleMap" : "OpenCycleMap",
+	"Reit- und Wanderkarte" : "Reit- und Wanderkarte",
+	"OpenPisteMap" : "OpenPisteMap",
+	"ÖPNV-Karte" : "ÖPNV-Karte",
+	"Minutely Mapnik" : "Minutely Mapnik",
+	"Google Streets" : "Google Streets",
+	"Google Satellite" : "Google Satellite",
+	"Google Hybrid" : "Google Hybrid",
+	"Google Terrain" : "Google Terrain",
+	"Google MapMaker" : "Google MapMaker",
+	"Google MapMaker Hybrid" : "Google MapMaker Hybrid",
+	"Yahoo Street" : "Yahoo Street",
+	"Yahoo Satellite" : "Yahoo Satellite",
+	"Yahoo Hybrid" : "Yahoo Hybrid",
+	"Relief" : "Relief"
 });
 
 OpenLayers.Lang.de = OpenLayers.Util.extend(OpenLayers.Lang.de, {
 	"[Zoom]" : "[Zoom]",
 	"[Remove]" : "[Entfernen]",
-	"Rendering CC-by-SA by <a href=\"http://www.cloudmade.com/\">CloudMade</a>. Data CC-by-SA by <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>" : "Darstellung: <a href=\"http://www.cloudmade.com/\">CloudMade</a>; Daten: <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a> (CC-by-SA)",
-	"Rendering CC-by-SA by <a href=\"http://www.mapsurfer.net/\">MapSurfer</a>. Data CC-by-SA by <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>" : "Darstellung: <a href=\"http://www.mapsurfer.net/\">MapSurfer</a>; Daten: <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a> (CC-by-SA)",
-	"Rendering CC-by-SA by <a href=\"http://osmc.broadbox.de/\">OSMC Reit- und Wanderkarte</a>. Data CC-by-SA by <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>" : "Darstellung: <a href=\"http://osmc.broadbox.de/\">OSMC Reit- und Wanderkarte</a>; Daten: <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a> (CC-by-SA)",
-	"Rendering CC-by-SA by <a href=\"http://www.opencyclemap.org/\">OpenCycleMap</a>. Data CC-by-SA by <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>" : "Darstellung: <a href=\"http://www.opencyclemap.org/\">OpenCycleMap</a>; Daten: <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a> (CC-by-SA)",
-	"Rendering CC-by-SA by <a href=\"http://www.openstreetbrowser.org/\">OpenStreetBrowser</a>. Data CC-by-SA by <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>" : "Darstellung: <a href=\"http://www.openstreetbrowser.org/\">OpenStreetBrowser</a>; Daten: <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a> (CC-by-SA)",
-	"Rendering CC-by-SA by <a href=\"http://www.openpistemap.org/\">OpenPisteMap</a>. Data CC-by-SA by <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>" : "Darstellung: <a href=\"http://www.openpistemap.org/\">OpenPisteMap</a>; Daten: <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a> (CC-by-SA)",
-	"Rendering CC-by-SA by <a href=\"http://www.xn--pnvkarte-m4a.de/\">ÖPNV-Karte</a>. Data CC-by-SA by <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>" : "Darstellung: <a href=\"http://www.xn--pnvkarte-m4a.de/\">ÖPNV-Karte</a>; Daten: <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a> (CC-by-SA)",
-	"Relief CC-by-SA by <a href=\"http://openrouteservice.org/\">Kartografie Universität Bonn</a>" : "Reliefdarstellung CC-by-SA von der <a href=\"http://openrouteservice.org/\">Kartografie Universität Bonn</a>",
+	"attribution-osm" : "Darstellung: ${rendering} (CC-by-SA), Daten: <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a> (CC-by-SA)",
+	"attribution-relief" : "Reliefdarstellung: <a href=\"http://openrouteservice.org/\">Kartografie Universität Bonn</a>/<a href=\"http://srtm.csi.cgiar.org/\">CIAT-CSI SRTM</a> (<a href=\"http://data.giub.uni-bonn.de/openrouteservice/contact.php#disclaimer\">Nutzungsbedingungen</a>)",
 	"Create a marker" : "Marker anlegen",
 	"Coordinates" : "Koordinaten",
 	"unknown" : "unbekannt",
@@ -93,7 +102,28 @@ OpenLayers.Lang.de = OpenLayers.Util.extend(OpenLayers.Lang.de, {
 	"Google Maps Permalink" : "Google Maps Permalink",
 	"Yahoo Maps Permalink" : "Yahoo Maps Permalink",
 	"OpenStreetMap Links" : "OpenStreetMap Links",
-	"Wikimedia GeoHack" : "Wikimedia GeoHack"
+	"Wikimedia GeoHack" : "Wikimedia GeoHack",
+	"Go home" : "Zum Aufenthaltsort",
+	"Mapnik" : "Mapnik",
+	"MapSurfer Road" : "MapSurfer Road",
+	"MapSurfer Topographic" : "MapSurfer Topographic",
+	"OpenStreetBrowser" : "OpenStreetBrowser",
+	"Osmarender" : "Osmarender",
+	"OpenCycleMap" : "OpenCycleMap",
+	"Reit- und Wanderkarte" : "Reit- und Wanderkarte",
+	"OpenPisteMap" : "OpenPisteMap",
+	"ÖPNV-Karte" : "ÖPNV-Karte",
+	"Minutely Mapnik" : "Minutely Mapnik",
+	"Google Streets" : "Google Karte",
+	"Google Satellite" : "Google Satellit",
+	"Google Hybrid" : "Google Hybrid",
+	"Google Terrain" : "Google Gelände",
+	"Google MapMaker" : "Google MapMaker",
+	"Google MapMaker Hybrid" : "Google MapMaker Hybrid",
+	"Yahoo Street" : "Yahoo Karte",
+	"Yahoo Satellite" : "Yahoo Satellit",
+	"Yahoo Hybrid" : "Yahoo Hybrid",
+	"Relief" : "Relief"
 });
 
 /**
@@ -104,7 +134,17 @@ OpenLayers.Lang.de = OpenLayers.Util.extend(OpenLayers.Lang.de, {
 */
 
 OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
-	cdauthDefaultVisibility : { },
+	/**
+	 * This CSS file will be additionally loaded.
+	*/
+	cdauthTheme : "http://osm.cdauth.de/map/prototypes.css",
+
+	/**
+	 * The projection to use in coordinates in the Permalink.
+	 * @var OpenLayers.Projection
+	*/
+	permalinkProjection : new OpenLayers.Projection("EPSG:4326"),
+
 	initialize : function(div, options)
 	{
 		OpenLayers.Map.prototype.initialize.apply(this, [ div, OpenLayers.Util.extend({
@@ -123,6 +163,9 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 			projection: new OpenLayers.Projection("EPSG:4326"),
 			displayProjection: new OpenLayers.Projection("EPSG:4326")
 		}, options) ]);
+
+		this.loadCSSFile(this.cdauthTheme);
+
 		this.events.addEventType("mapResize");
 		this.events.addEventType("newHash");
 
@@ -142,61 +185,64 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 	{
 		var ret = OpenLayers.Map.prototype.addLayer.apply(this, arguments);
 
-		if(!layer.isBaseLayer)
-			this.cdauthDefaultVisibility[layer.name] = layer.getVisibility();
+		if(typeof layer.shortName == "undefined")
+			layer.shortName = layer.name;
+
+		if(typeof layer.cdauthDefaultVisibility == "undefined")
+			layer.cdauthDefaultVisibility = layer.getVisibility();
 	},
 
 	addAllAvailableOSMLayers : function()
 	{
 		if(OpenLayers.Layer.cdauth.OSM.Mapnik)
-			this.addLayer(new OpenLayers.Layer.cdauth.OSM.Mapnik("Mapnik"));
+			this.addLayer(new OpenLayers.Layer.cdauth.OSM.Mapnik(OpenLayers.i18n("Mapnik"), { shortName : "Mpnk" }));
 		if(OpenLayers.Layer.cdauth.OSM.MapSurfer)
 		{
 			if(OpenLayers.Layer.cdauth.OSM.MapSurfer.Road)
-				this.addLayer(new OpenLayers.Layer.cdauth.OSM.MapSurfer.Road("MapSurfer Road"));
+				this.addLayer(new OpenLayers.Layer.cdauth.OSM.MapSurfer.Road(OpenLayers.i18n("MapSurfer Road"), { shortName : "MSfR" }));
 			if(OpenLayers.Layer.cdauth.OSM.MapSurfer.Topographic)
-				this.addLayer(new OpenLayers.Layer.cdauth.OSM.MapSurfer.Topographic("MapSurfer Topographic"));
+				this.addLayer(new OpenLayers.Layer.cdauth.OSM.MapSurfer.Topographic(OpenLayers.i18n("MapSurfer Topographic"), { shortName : "MSfT" }));
 		}
 		if(OpenLayers.Layer.cdauth.OSM.OpenStreetBrowser)
-			this.addLayer(new OpenLayers.Layer.cdauth.OSM.OpenStreetBrowser("OpenStreetBrowser"));
+			this.addLayer(new OpenLayers.Layer.cdauth.OSM.OpenStreetBrowser(OpenLayers.i18n("OpenStreetBrowser"), { shortName : "OSBr" }));
 		if(OpenLayers.Layer.cdauth.OSM.Osmarender)
-			this.addLayer(new OpenLayers.Layer.cdauth.OSM.Osmarender("Osmarender"));
+			this.addLayer(new OpenLayers.Layer.cdauth.OSM.Osmarender(OpenLayers.i18n("Osmarender"), { shortName : "Osmr" }));
 		if(OpenLayers.Layer.cdauth.OSM.CycleMap)
-			this.addLayer(new OpenLayers.Layer.cdauth.OSM.CycleMap("OpenCycleMap"));
+			this.addLayer(new OpenLayers.Layer.cdauth.OSM.CycleMap(OpenLayers.i18n("OpenCycleMap"), { shortName : "OCyc" }));
 		if(OpenLayers.Layer.cdauth.OSM.Wanderkarte)
-			this.addLayer(new OpenLayers.Layer.cdauth.OSM.Wanderkarte("Reit- und Wanderkarte"));
+			this.addLayer(new OpenLayers.Layer.cdauth.OSM.Wanderkarte(OpenLayers.i18n("Reit- und Wanderkarte"), { shortName : "OSMC" }));
 		if(OpenLayers.Layer.cdauth.OSM.OpenPisteMap)
-			this.addLayer(new OpenLayers.Layer.cdauth.OSM.OpenPisteMap("OpenPisteMap"));
+			this.addLayer(new OpenLayers.Layer.cdauth.OSM.OpenPisteMap(OpenLayers.i18n("OpenPisteMap"), { shortName : "OPis" }));
 		if(OpenLayers.Layer.cdauth.OSM.OPNVKarte)
-			this.addLayer(new OpenLayers.Layer.cdauth.OSM.OPNVKarte("ÖPNV-Karte"));
+			this.addLayer(new OpenLayers.Layer.cdauth.OSM.OPNVKarte(OpenLayers.i18n("ÖPNV-Karte"), { shortName : "OPNV" }));
 		if(OpenLayers.Layer.cdauth.OSM.MinutelyMapnik)
-			this.addLayer(new OpenLayers.Layer.cdauth.OSM.MinutelyMapnik("Minutely Mapnik"));
+			this.addLayer(new OpenLayers.Layer.cdauth.OSM.MinutelyMapnik(OpenLayers.i18n("Minutely Mapnik"), { shortName : "MiMa" }));
 	},
 
 	addAllAvailableGoogleLayers : function()
 	{
 		if(OpenLayers.Layer.cdauth.Google.Maps)
-			this.addLayer(new OpenLayers.Layer.cdauth.Google.Maps("Google Streets"));
+			this.addLayer(new OpenLayers.Layer.cdauth.Google.Maps(OpenLayers.i18n("Google Streets"), { shortName : "GgSt" }));
 		if(OpenLayers.Layer.cdauth.Google.MapsSatellite)
-			this.addLayer(new OpenLayers.Layer.cdauth.Google.MapsSatellite("Google Satellite"));
+			this.addLayer(new OpenLayers.Layer.cdauth.Google.MapsSatellite(OpenLayers.i18n("Google Satellite"), { shortName : "GgSa" }));
 		if(OpenLayers.Layer.cdauth.Google.MapsHybrid)
-			this.addLayer(new OpenLayers.Layer.cdauth.Google.MapsHybrid("Google Hybrid"));
+			this.addLayer(new OpenLayers.Layer.cdauth.Google.MapsHybrid(OpenLayers.i18n("Google Hybrid"), { shortName : "GgHy" }));
 		if(OpenLayers.Layer.cdauth.Google.MapsTerrain)
-			this.addLayer(new OpenLayers.Layer.cdauth.Google.MapsTerrain("Google Terrain"));
+			this.addLayer(new OpenLayers.Layer.cdauth.Google.MapsTerrain(OpenLayers.i18n("Google Terrain"), { shortName : "GgTe" }));
 		if(OpenLayers.Layer.cdauth.Google.MapMaker)
-			this.addLayer(new OpenLayers.Layer.cdauth.Google.MapMaker("Google MapMaker"));
+			this.addLayer(new OpenLayers.Layer.cdauth.Google.MapMaker(OpenLayers.i18n("Google MapMaker"), { shortName : "GgMM" }));
 		if(OpenLayers.Layer.cdauth.Google.MapMakerHybrid)
-			this.addLayer(new OpenLayers.Layer.cdauth.Google.MapMakerHybrid("Google MapMaker Hybrid"));
+			this.addLayer(new OpenLayers.Layer.cdauth.Google.MapMakerHybrid(OpenLayers.i18n("Google MapMaker Hybrid"), { shortName : "GgMH" }));
 	},
 
 	addAllAvailableYahooLayers : function()
 	{
 		if(OpenLayers.Layer.cdauth.Yahoo.Maps)
-			this.addLayer(new OpenLayers.Layer.cdauth.Yahoo.Maps("Yahoo Street"));
+			this.addLayer(new OpenLayers.Layer.cdauth.Yahoo.Maps(OpenLayers.i18n("Yahoo Street"), { shortName : "YaSt" }));
 		if(OpenLayers.Layer.cdauth.Yahoo.Satellite)
-			this.addLayer(new OpenLayers.Layer.cdauth.Yahoo.Satellite("Yahoo Satellite"));
+			this.addLayer(new OpenLayers.Layer.cdauth.Yahoo.Satellite(OpenLayers.i18n("Yahoo Satellite"), { shortName : "YaSa" }));
 		if(OpenLayers.Layer.cdauth.Yahoo.Hybrid)
-			this.addLayer(new OpenLayers.Layer.cdauth.Yahoo.Hybrid("Yahoo Hybrid"));
+			this.addLayer(new OpenLayers.Layer.cdauth.Yahoo.Hybrid(OpenLayers.i18n("Yahoo Hybrid"), { shortName : "YaHy" }));
 	},
 
 	/**
@@ -209,66 +255,116 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 		this.addAllAvailableYahooLayers();
 
 		if(OpenLayers.Layer.cdauth.other.Relief)
-			this.addLayer(new OpenLayers.Layer.cdauth.other.Relief("Relief", { visibility: false }));
+			this.addLayer(new OpenLayers.Layer.cdauth.other.Relief(OpenLayers.i18n("Relief"), { visibility: false, shortName : "Rlie" }));
 	},
 
 	/**
 	 * Zoom to the specified query object. Remember to add your layers and to eventually set OpenLayers.Layer.cdauth.XML.proxy before running
 	 * this method.
 	 * @param Object query Usually decodeQueryString(location.hash.replace(/^#/, ""))
-	 * @param OpenLayers.Layer.cdauth.markers.LonLat layerMarkers Optional, layer to add position markers to.
-	 * @param OpenLayers.Layer.cdauth.markers.GeoSearch layerGeoSearch Optional, to restore the GeoSearch.
 	*/
 
-	zoomToQuery: function(query, layerMarkers, layerGeoSearch)
+	zoomToQuery: function(query)
 	{
 		var map = this;
 
+		// Zoom to search results only if the position is not manually set
 		var search_may_zoom = (typeof query.lon == "undefined" && typeof query.lat == "undefined");
 
+		// Set position (lon, lat, zoom)
 		if(!query.lon)
 			query.lon = 0;
 		if(!query.lat)
 			query.lat = 0;
 		if(!query.zoom)
 			query.zoom = 2;
-		this.setCenter(new OpenLayers.LonLat(query.lon, query.lat).transform(this.displayProjection, this.getProjectionObject()), query.zoom);
+		this.setCenter(new OpenLayers.LonLat(1*query.lon, 1*query.lat).transform(this.permalinkProjection, this.getProjectionObject()), 1*query.zoom);
 
+		// Set base layer (layer)
 		if(query.layer)
 		{
-			var matching_layers = this.getLayersByName(query.layer);
+			var matching_layers = this.getLayersBy("shortName", query.layer);
 			if(matching_layers.length > 0)
 				this.setBaseLayer(matching_layers[0]);
 		}
 
+		// Set overlay visibility (overlays)
 		if(query.overlays)
 		{
 			for(var i in query.overlays)
 			{
-				var layers = this.getLayersByName(i);
+				var layers = this.getLayersBy("shortName", i);
 				for(var j=0; j<layers.length; j++)
 					layers[j].setVisibility(query.overlays[i] != "0");
 			}
 		}
 
-		if(layerMarkers)
+		// Set LonLat markers (mlon, mlat, mtitle)
+		var firstLayer = null;
+		for(var i=0; i<this.layers.length; i++)
 		{
-			layerMarkers.clearMarkers();
-			if(query.mlat && query.mlon && typeof query.mlat == "object" && typeof query.mlon == "object")
+			if(this.layers[i] instanceof OpenLayers.Layer.cdauth.Markers.LonLat)
 			{
-				for(var i in query.mlat)
-				{
-					if(typeof query.mlon[i] == "undefined") continue;
-					layerMarkers.addLonLatMarker(new OpenLayers.LonLat(query.mlon[i], query.mlat[i]).transform(this.displayProjection, this.getProjectionObject()), (query.mtitle && typeof query.mtitle == "object") ? htmlspecialchars(query.mtitle[i]) : null);
-				}
-				this.setCenter(new OpenLayers.LonLat(query.lon, query.lat).transform(this.displayProjection, this.getProjectionObject()), query.zoom);
+				if(firstLayer == null)
+					firstLayer = this.layers[i];
+				this.layers[i].clearMarkers();
 			}
 		}
 
-		if(layerGeoSearch && query.search)
-			layerGeoSearch.geoSearch(query.search, search_may_zoom ? false : function(){map.setCenter(new OpenLayers.LonLat(query.lon, query.lat).transform(map.displayProjection, map.getProjectionObject()), query.zoom);}, query.smopen);
+		if(firstLayer != null && query.mlat && query.mlon && typeof query.mlat == "object" && typeof query.mlon == "object")
+		{
+			for(var i in query.mlat)
+			{
+				if(typeof query.mlon[i] == "undefined") continue;
 
-		// Handle removable GPX layers
+				if(typeof query.mlat[i] == "object")
+				{
+					if(typeof query.mlon[i] != "object")
+						continue;
+					var thisLayer = this.getLayersBy("shortName", i);
+					if(thisLayer.length < 1)
+						continue;
+					for(var j in query.mlat[i])
+						thisLayer[0].addLonLatMarker(new OpenLayers.LonLat(1*query.mlon[i][j], 1*query.mlat[i][j]).transform(this.permalinkProjection, this.getProjectionObject()), (query.mtitle && typeof query.mtitle == "object" && query.mtitle[i] && typeof query.mtitle[i] == "object") ? htmlspecialchars(query.mtitle[i][j]) : null);
+				}
+				else
+					firstLayer.addLonLatMarker(new OpenLayers.LonLat(1*query.mlon[i], 1*query.mlat[i]).transform(this.permalinkProjection, this.getProjectionObject()), (query.mtitle && typeof query.mtitle == "object") ? htmlspecialchars(query.mtitle[i]) : null);
+			}
+
+			// Adding markers might have moved the map, reset map view
+			this.setCenter(new OpenLayers.LonLat(1*query.lon, 1*query.lat).transform(this.permalinkProjection, this.getProjectionObject()), 1*query.zoom);
+		}
+
+		// Perform GeoSearches (search, smopen)
+		firstLayer = null;
+		for(var i=0; i<this.layers.length; i++)
+		{
+			if(this.layers[i] instanceof OpenLayers.Layer.cdauth.Markers.GeoSearch)
+			{
+				if(firstLayer == null)
+					firstLayer = this.layers[i];
+				this.layers[i].geoSearch("");
+			}
+		}
+
+		if(firstLayer != null)
+		{
+			if(typeof query.search == "object")
+			{
+				for(var i in query.search)
+				{
+					var thisLayer = this.getLayersBy("shortName", i);
+					if(thisLayer.length < 1)
+						continue;
+
+					thisLayer[0].geoSearch(query.search[i], !search_may_zoom, (typeof query.smopen == "object" ? query.smopen[i] : null));
+				}
+			}
+			else
+				firstLayer.geoSearch(query.search, !search_may_zoom, query.smopen);
+		}
+
+		// Handle removable GPX layers (xml)
 		var xmlLayers = [ ];
 		for(var i=0; i<this.layers.length; i++)
 		{
@@ -322,66 +418,100 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 	 * hash part by calling location.hash = "#"+encodeQueryString(map.getQueryObject());
 	 * Only non-default settings will be added to this query object. Remember to set the visibility of your overlay layers _before_ adding
 	 * them to the map, as the default visibility value will be determined during adding it.
-	 * @param OpenLayers.Layer.cdauth.markers.LonLat layerMarkers Optional, to save the positions of the geographical markers.
-	 * @param OpenLayers.Layer.cdauth.markers.GeoSearch layerGeoSearch Optional, to save the current GeoSearch.
 	 * @return Object
 	*/
 
-	getQueryObject: function(layerMarkers, layerGeoSearch)
+	getQueryObject: function()
 	{
 		if(!this.getCenter())
 			return false;
 
-		var lonlat = this.getCenter().clone().transform(this.getProjectionObject(), this.displayProjection);
+		var lonlat = this.getCenter().clone().transform(this.getProjectionObject(), this.permalinkProjection);
 		var hashObject = {
-			lon : lonlat.lon,
-			lat : lonlat.lat,
+			lon : Math.round(lonlat.lon*100000000)/100000000,
+			lat : Math.round(lonlat.lat*100000000)/100000000,
 			zoom : this.getZoom(),
-			layer : this.baseLayer.name,
+			layer : this.baseLayer.shortName,
 			mlon : { },
 			mlat : { },
 			mtitle : { },
 			smopen : { },
 			overlays : { },
-			xml : { }
+			xml : { },
+			search : { }
 		};
 
 		var xml_i = 0;
 
 		for(var i=0; i<this.layers.length; i++)
 		{ // Save overlay visibility
-			if(this.layers[i].isBaseLayer) continue;
-			if(this.layers[i].getVisibility() != this.cdauthDefaultVisibility[this.layers[i].name])
-				hashObject.overlays[this.layers[i].name] = this.layers[i].getVisibility() ? "1" : "0";
-			if(this.layers[i] instanceof OpenLayers.Layer.cdauth.XML && this.layers[i].removableInLayerSwitcher)
-				hashObject.xml[xml_i++] = this.layers[i].cdauthURL;
-		}
+			var l = this.layers[i];
+			if(l.isBaseLayer || l.shortName == null) continue;
 
-		if(layerGeoSearch && layerGeoSearch.lastSearch)
-		{
-			hashObject.search = layerGeoSearch.lastSearch;
+			if(l.getVisibility() != l.cdauthDefaultVisibility)
+				hashObject.overlays[l.shortName] = l.getVisibility() ? "1" : "0";
 
-			for(var i=0; i<layerGeoSearch.markers.length; i++)
+			if(l instanceof OpenLayers.Layer.cdauth.XML && l.removableInLayerSwitcher)
+				hashObject.xml[xml_i++] = l.cdauthURL;
+
+			if(l instanceof OpenLayers.Layer.cdauth.Markers.GeoSearch && l.lastSearch)
 			{
-				var visible = layerGeoSearch.markers[layerGeoSearch.markers.length-1-i].cdauthFeature.popup ? layerGeoSearch.markers[layerGeoSearch.markers.length-1-i].cdauthFeature.popup.visible() : false;
-				if(visible != (i == 0))
-					hashObject.smopen[i] = visible ? "1" : "0";
+				hashObject.search[l.shortName] = l.lastSearch;
+				var smopen = "";
+				var smchanged = false;
+				for(var j=0; j<l.markers.length; j++)
+				{
+					var visible = l.markers[l.markers.length-1-j].cdauthFeature.popup ? l.markers[l.markers.length-1-j].cdauthFeature.popup.visible() : false;
+					smopen += visible ? "1" : "0";
+					if(visible != (j == 0))
+						smchanged = true;
+				}
+				if(smchanged)
+					hashObject.smopen[l.shortName] = smopen;
 			}
-		}
 
-		if(layerMarkers)
-		{
-			for(var i=0; i<layerMarkers.markers.length; i++)
+			if(l instanceof OpenLayers.Layer.cdauth.Markers.LonLat)
 			{
-				var lonlat = layerMarkers.markers[i].lonlat.clone().transform(this.getProjectionObject(), this.displayProjection);
-				hashObject.mlon[i] = lonlat.lon;
-				hashObject.mlat[i] = lonlat.lat;
-				if(layerMarkers.markers[i].cdauthTitle)
-					hashObject.mtitle[i] = layerMarkers.markers[i].cdauthTitle;
+				hashObject.mlon[l.shortName] = { };
+				hashObject.mlat[l.shortName] = { };
+				hashObject.mtitle[l.shortName] = { };
+
+				for(var j=0; j<layerMarkers.markers.length; j++)
+				{
+					var lonlat = layerMarkers.markers[j].lonlat.clone().transform(this.getProjectionObject(), this.permalinkProjection);
+					hashObject.mlon[l.shortName][j] = Math.round(lonlat.lon*100000000)/100000000;
+					hashObject.mlat[l.shortName][j] = Math.round(lonlat.lat*100000000)/100000000;
+					if(layerMarkers.markers[j].cdauthTitle)
+						hashObject.mtitle[l.shortName][j] = layerMarkers.markers[j].cdauthTitle;
+				}
 			}
 		}
 
 		return hashObject;
+	},
+
+	loadCSSFile : function(url) {
+		if(url == null)
+			return;
+
+		var addNode = true;
+		var nodes = document.getElementsByTagName('link');
+		for(var i=0; i<nodes.length; i++)
+		{
+			if(OpenLayers.Util.isEquivalentUrl(nodes[i].href, url))
+			{
+				addNode = false;
+				break;
+			}
+		}
+		if(addNode)
+		{
+			var cssNode = document.createElement('link');
+			cssNode.setAttribute('rel', 'stylesheet');
+			cssNode.setAttribute('type', 'text/css');
+			cssNode.setAttribute('href', url);
+			document.getElementsByTagName('head')[0].appendChild(cssNode);
+		}
 	},
 
 	CLASS_NAME : "OpenLayers.Map.cdauth"
@@ -574,7 +704,7 @@ if(OpenLayers.Layer.OSM)
 				[ "http://a.andy.sandbox.cloudmade.com/tiles/cycle/${z}/${x}/${y}.png", "http://b.andy.sandbox.cloudmade.com/tiles/cycle/${z}/${x}/${y}.png", "http://c.andy.sandbox.cloudmade.com/tiles/cycle/${z}/${x}/${y}.png" ],
 				OpenLayers.Util.extend({
 					numZoomLevels: 19,
-					attribution: OpenLayers.i18n("Rendering CC-by-SA by <a href=\"http://www.opencyclemap.org/\">OpenCycleMap</a>. Data CC-by-SA by <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>")
+					attribution: OpenLayers.String.format(OpenLayers.i18n("attribution-osm"), { rendering: "<a href=\"http://www.opencyclemap.org/\">OpenCycleMap</a>" })
 				}, options)
 			]);
         },
@@ -597,7 +727,7 @@ if(OpenLayers.Layer.OSM)
 					],
 					OpenLayers.Util.extend({
 						numZoomLevels: 19,
-						attribution: OpenLayers.i18n("Rendering CC-by-SA by <a href=\"http://www.cloudmade.com/\">CloudMade</a>. Data CC-by-SA by <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>")
+						attribution: OpenLayers.String.format(OpenLayers.i18n("attribution-osm"), { rendering: "<a href=\"http://www.cloudmade.com/\">CloudMade</a>" })
 					}, options)
 				]
 			);
@@ -610,7 +740,7 @@ if(OpenLayers.Layer.OSM)
 	*/
 	OpenLayers.Layer.cdauth.OSM.OpenStreetBrowser = new OpenLayers.Class(OpenLayers.Layer.OSM, {
 		initialize: function(name, options) {
-			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://openstreetbrowser.org/tiles/base/${z}/${x}/${y}.png", OpenLayers.Util.extend({numZoomLevels: 19, attribution: OpenLayers.i18n("Rendering CC-by-SA by <a href=\"http://www.openstreetbrowser.org/\">OpenStreetBrowser</a>. Data CC-by-SA by <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>")}, options) ]);
+			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://openstreetbrowser.org/tiles/base/${z}/${x}/${y}.png", OpenLayers.Util.extend({numZoomLevels: 19, attribution: OpenLayers.String.format(OpenLayers.i18n("attribution-osm"), { rendering: "<a href=\"http://www.openstreetbrowser.org/\">OpenStreetBrowser</a>" })}, options) ]);
 		},
 		CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.OpenStreetBrowser"
 	});
@@ -620,7 +750,7 @@ if(OpenLayers.Layer.OSM)
 	*/
 	OpenLayers.Layer.cdauth.OSM.OpenPisteMap = new OpenLayers.Class(OpenLayers.Layer.OSM, {
 		initialize: function(name, options) {
-			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://openpistemap.org/tiles/contours/${z}/${x}/${y}.png", OpenLayers.Util.extend({numZoomLevels: 18, attribution: OpenLayers.i18n("Rendering CC-by-SA by <a href=\"http://www.openpistemap.org/\">OpenPisteMap</a>. Data CC-by-SA by <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>")}, options) ]);
+			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://openpistemap.org/tiles/contours/${z}/${x}/${y}.png", OpenLayers.Util.extend({numZoomLevels: 18, attribution: OpenLayers.String.format(OpenLayers.i18n("attribution-osm"), { rendering: "<a href=\"http://www.openpistemap.org/\">OpenPisteMap</a>" })}, options) ]);
 		},
 		CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.OpenPisteMap"
 	});
@@ -630,7 +760,7 @@ if(OpenLayers.Layer.OSM)
 	*/
 	OpenLayers.Layer.cdauth.OSM.Wanderkarte = new OpenLayers.Class(OpenLayers.Layer.OSM, {
 		initialize: function(name, options) {
-			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://topo.geofabrik.de/trails/${z}/${x}/${y}.png", OpenLayers.Util.extend({minZoomLevel: 8, maxZoomLevel: 15, attribution: OpenLayers.i18n("Rendering CC-by-SA by <a href=\"http://osmc.broadbox.de/\">OSMC Reit- und Wanderkarte</a>. Data CC-by-SA by <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>")}, options) ]);
+			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://topo.geofabrik.de/trails/${z}/${x}/${y}.png", OpenLayers.Util.extend({minZoomLevel: 8, maxZoomLevel: 15, attribution: OpenLayers.String.format(OpenLayers.i18n("attribution-osm"), { rendering: "<a href=\"http://osmc.broadbox.de/\">OSMC Reit- und Wanderkarte</a>" })}, options) ]);
 		},
 		CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.Wanderkarte"
 	});
@@ -640,7 +770,7 @@ if(OpenLayers.Layer.OSM)
 	*/
 	OpenLayers.Layer.cdauth.OSM.OPNVKarte = new OpenLayers.Class(OpenLayers.Layer.OSM, {
 		initialize: function(name, options) {
-			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://tile.xn--pnvkarte-m4a.de/tilegen/${z}/${x}/${y}.png", OpenLayers.Util.extend({numZoomLevels: 19, attribution: OpenLayers.i18n("Rendering CC-by-SA by <a href=\"http://www.xn--pnvkarte-m4a.de/\">ÖPNV-Karte</a>. Data CC-by-SA by <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>")}, options) ]);
+			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://tile.xn--pnvkarte-m4a.de/tilegen/${z}/${x}/${y}.png", OpenLayers.Util.extend({numZoomLevels: 19, attribution: OpenLayers.String.format(OpenLayers.i18n("attribution-osm"), { rendering: "<a href=\"http://www.xn--pnvkarte-m4a.de/\">ÖPNV-Karte</a>" })}, options) ]);
 		},
 		CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.OPNVKarte"
 	});
@@ -649,7 +779,7 @@ if(OpenLayers.Layer.OSM)
 	 * Parent class for MapSurfer (http://www.mapsurfer.net/) renderings.
 	*/
 	OpenLayers.Layer.cdauth.OSM.MapSurfer = new OpenLayers.Class(OpenLayers.Layer.OSM, {
-		attribution : OpenLayers.i18n("Rendering CC-by-SA by <a href=\"http://www.mapsurfer.net/\">MapSurfer</a>. Data CC-by-SA by <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>"),
+		attribution : OpenLayers.String.format(OpenLayers.i18n("attribution-osm"), { rendering: "<a href=\"http://www.mapsurfer.net/\">MapSurfer</a>" }),
 		CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.MapSurfer"
 	});
 
@@ -683,7 +813,7 @@ if(OpenLayers.Layer.WMS)
 
 	OpenLayers.Layer.cdauth.other.Relief = new OpenLayers.Class(OpenLayers.Layer.WMS, {
 		initialize: function(name, options) {
-			OpenLayers.Layer.WMS.prototype.initialize.apply(this, [ name, "http://services.giub.uni-bonn.de/hillshade?", {layers: 'europe_wms:hs_srtm_europa',srs: 'EPSG:900913', format: 'image/JPEG', transparent: 'true' }, OpenLayers.Util.extend({attribution: OpenLayers.i18n("Relief CC-by-SA by <a href=\"http://openrouteservice.org/\">Kartografie Universität Bonn</a>"), opacity: 0.2 }, options) ]);
+			OpenLayers.Layer.WMS.prototype.initialize.apply(this, [ name, "http://services.giub.uni-bonn.de/hillshade?", {layers: 'europe_wms:hs_srtm_europa',srs: 'EPSG:900913', format: 'image/JPEG', transparent: 'true' }, OpenLayers.Util.extend({attribution: OpenLayers.i18n("attribution-relief"), opacity: 0.2 }, options) ]);
 		},
 		CLASS_NAME : "OpenLayers.Layer.cdauth.other.Relief"
 	});
@@ -879,9 +1009,9 @@ OpenLayers.Popup.FramedCloud.cdauth = new OpenLayers.Class(OpenLayers.Popup.Fram
  * @event markersChanged A marker popup has been opened or closed.
 */
 
-OpenLayers.Layer.cdauth.markers.Markers = new OpenLayers.Class(OpenLayers.Layer.Markers, {
+OpenLayers.Layer.cdauth.Markers = new OpenLayers.Class(OpenLayers.Layer.Markers, {
 	initialize : function(name, options) {
-		OpenLayers.Layer.Markers.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({zoomableInLayerSwitcher: true}, options) ]);
+		OpenLayers.Layer.Markers.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({zoomableInLayerSwitcher: true, projection: new OpenLayers.Projection("EPSG:4326")}, options) ]);
 		this.events.addEventType("markersChanged");
 
 		this.events.register("visibilitychanged", this, function() {
@@ -963,7 +1093,13 @@ OpenLayers.Layer.cdauth.markers.Markers = new OpenLayers.Class(OpenLayers.Layer.
 		this.addMarker(marker);
 		return marker;
 	},
-	CLASS_NAME : "OpenLayers.Layer.cdauth.markers.Markers"
+	removeMarker : function(marker)
+	{
+		if(marker.cdauthFeature && marker.cdauthFeature.popup)
+			marker.cdauthFeature.popup.destroy();
+		OpenLayers.Layer.Markers.prototype.removeMarker.apply(this, arguments);
+	},
+	CLASS_NAME : "OpenLayers.Layer.cdauth.Markers"
 });
 
 /**
@@ -973,12 +1109,17 @@ OpenLayers.Layer.cdauth.markers.Markers = new OpenLayers.Class(OpenLayers.Layer.
  * @event markerRemoved
 */
 
-OpenLayers.Layer.cdauth.markers.LonLat = new OpenLayers.Class(OpenLayers.Layer.cdauth.markers.Markers, {
+OpenLayers.Layer.cdauth.Markers.LonLat = new OpenLayers.Class(OpenLayers.Layer.cdauth.Markers, {
+	/**
+	 * The projection in which coordinates should be displayed in the popups.
+	*/
+	readableProjection : new OpenLayers.Projection("EPSG:4326"),
+
 	/**
 	 * @param OpenLayers.Icon defaultIcon The icon to be used for the markers added by addLonLatMarker()
 	*/
 	initialize : function(name, options) {
-		OpenLayers.Layer.cdauth.markers.Markers.prototype.initialize.apply(this, arguments);
+		OpenLayers.Layer.cdauth.Markers.prototype.initialize.apply(this, arguments);
 		this.events.addEventType("markerAdded");
 		this.events.addEventType("markerRemoved");
 
@@ -989,8 +1130,9 @@ OpenLayers.Layer.cdauth.markers.LonLat = new OpenLayers.Class(OpenLayers.Layer.c
 	{
 		var layer = this;
 
-		var lonlat_readable = lonlat.clone().transform(this.map.getProjectionObject(), this.map.displayProjection);
 		var marker = this.createMarker(lonlat, ".", true);
+		if(title)
+			marker.cdauthTitle = title;
 		marker.events.register("close", this, function(evt) { var feature = marker.cdauthFeature; delete marker.cdauthFeature; this.removeMarker(marker); feature.destroyMarker(); feature.destroyPopup(); this.events.triggerEvent("markerRemoved"); OpenLayers.Event.stop(evt); });
 		this.map.events.register("zoomend", this, this.resetPopupContent);
 		this.resetPopupContent();
@@ -1012,28 +1154,28 @@ OpenLayers.Layer.cdauth.markers.LonLat = new OpenLayers.Class(OpenLayers.Layer.c
 				heading.appendChild(document.createTextNode(this.markers[i].cdauthTitle));
 				content.appendChild(heading);
 			}
-			content.appendChild(makePermalinks(this.markers[i].lonlat.clone().transform(this.map.getProjectionObject(), this.map.displayProjection), this.map.getZoom()));
+			content.appendChild(makePermalinks(this.markers[i].lonlat.clone().transform(this.map.getProjectionObject(), this.readableProjection), this.map.getZoom()));
 			this.markers[i].cdauthFeature.popup.setContentHTML(content);
 		}
 	},
-	CLASS_NAME : "OpenLayers.Layer.cdauth.markers.LonLat"
+	CLASS_NAME : "OpenLayers.Layer.cdauth.Markers.LonLat"
 });
 
 /**
- * A click control to add markers to a OpenLayers.Layer.cdauth.markers.LonLat layer.
+ * A click control to add markers to a OpenLayers.Layer.cdauth.Markers.LonLat layer.
  * Add an instance of this to your map using OpenLayers.Map.cdauth.addControl() and activate() it.
 */
 
 OpenLayers.Control.cdauth.CreateMarker = OpenLayers.Class(OpenLayers.Control, {
 	/**
-	 * @var OpenLayers.Layer.cdauth.markers.LonLat
+	 * @var OpenLayers.Layer.cdauth.Markers.LonLat
 	*/
 	cdauthLayer : null,
 
 	title : OpenLayers.i18n("Create a marker"),
 
 	/**
-	 * @param OpenLayers.Layer.cdauth.markers.LonLat cdauthLayer
+	 * @param OpenLayers.Layer.cdauth.Markers.LonLat cdauthLayer
 	*/
 	initialize: function(cdauthLayer, options) {
 		this.cdauthLayer = cdauthLayer;
@@ -1074,25 +1216,30 @@ OpenLayers.Control.cdauth.CreateMarker = OpenLayers.Class(OpenLayers.Control, {
  * @event searchFailure
 */
 
-OpenLayers.Layer.cdauth.markers.GeoSearch = new OpenLayers.Class(OpenLayers.Layer.cdauth.markers.Markers, {
+OpenLayers.Layer.cdauth.Markers.GeoSearch = new OpenLayers.Class(OpenLayers.Layer.cdauth.Markers, {
 	lastSearch : false,
-	nameFinderURL : false,
-	nameFinder2URL : false,
-	defaultIcon : false,
-	highlighIcon : false,
 
 	/**
-	 * @param String nameFinderURL http://gazetteer.openstreetmap.org/namefinder/search.xml (search=%s will be appended). To work around the same origin policy, pass a wrapper that lives on your webspace.
-	 * @param String nameFinder2URL http://data.giub.uni-bonn.de/openrouteservice/php/OpenLSLUS_Geocode.php Will be used if the normal namefinder does not find anything
-	 * @param OpenLayers.Icon defaultIcon The default icon to use for the search result markers.
-	 * @param OpenLayers.Icon highlightIcon The marker icon to use for the first search result.
+	 * http://gazetteer.openstreetmap.org/namefinder/search.xml (search=%s will be appended). To work around the same origin policy, pass a wrapper that lives on your webspace.
+	 * @var String
 	*/
-	initialize: function(name, nameFinderURL, nameFinder2URL, defaultIcon, highlightIcon, options) {
-		OpenLayers.Layer.cdauth.markers.Markers.prototype.initialize.apply(this, [ name, options ]);
-		this.nameFinderURL = nameFinderURL;
-		this.nameFinder2URL = nameFinder2URL;
-		this.defaultIcon = defaultIcon;
-		this.highlightIcon = highlightIcon;
+	nameFinderURL : "http://gazetteer.openstreetmap.org/namefinder/search.xml",
+
+	/**
+	 * http://data.giub.uni-bonn.de/openrouteservice/php/OpenLSLUS_Geocode.php Will be used if the normal namefinder does not find anything
+	 * @var String
+	*/
+	nameFinder2URL : "http://data.giub.uni-bonn.de/openrouteservice/php/OpenLSLUS_Geocode.php",
+
+	/**
+	 * The marker icon to use for the first search result.
+	 * @var OpenLayers.Icon
+	*/
+	highlightIcon : new OpenLayers.Icon("http://osm.cdauth.de/map/marker-green.png", new OpenLayers.Size(21,25), new OpenLayers.Pixel(-9, -25)),
+
+	initialize: function(name, options) {
+		OpenLayers.Layer.cdauth.Markers.prototype.initialize.apply(this, arguments);
+
 		this.events.addEventType("lastSearchChange");
 		this.events.addEventType("searchBegin");
 		this.events.addEventType("searchSuccess");
@@ -1112,11 +1259,14 @@ OpenLayers.Layer.cdauth.markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 	{
 		layer = this;
 
-		for(var i=0; i<this.markers.length; i++)
+		if(typeof markersvisible == "string")
 		{
-			if(this.markers[i].cdauthFeature.popup)
-				this.markers[i].cdauthFeature.popup.destroy();
+			var markersvisible_obj = { };
+			for(var i=0; i<markersvisible.length; i++)
+				markersvisible_obj[i] = markersvisible.charAt(i);
+			markersvisible = markersvisible_obj;
 		}
+
 		this.clearMarkers();
 		this.lastSearch = false;
 		this.events.triggerEvent("lastSearchChange");
@@ -1333,7 +1483,7 @@ OpenLayers.Layer.cdauth.markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 				new OpenLayers.LonLat(results[i].lon, results[i].lat).transform(new OpenLayers.Projection("EPSG:4326"), this.map.getProjectionObject()),
 				content,
 				((markersvisible && typeof markersvisible[i] != "undefined" && markersvisible[i] != "0") || ((!markersvisible || typeof markersvisible[i] == "undefined") && i==0)),
-				(i==0 ? this.highlightIcon : this.defaultIcon).clone(),
+				(i==0 && this.highlightIcon ? this.highlightIcon.clone() : null),
 				dontzoom
 			);
 		}
@@ -1353,7 +1503,7 @@ OpenLayers.Layer.cdauth.markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 
 		this.events.triggerEvent("searchSuccess");
 	},
-	CLASS_NAME : "OpenLayers.Layer.cdauth.markers.GeoSearch"
+	CLASS_NAME : "OpenLayers.Layer.cdauth.Markers.GeoSearch"
 });
 
 
@@ -1364,24 +1514,26 @@ OpenLayers.Layer.cdauth.markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 */
 
 OpenLayers.Layer.cdauth.XML = new OpenLayers.Class(OpenLayers.Layer.GML, {
-	colourCounter : 1,
 	cdauthURL : null,
 	relations : { },
+	colour : null,
 	initialize : function(name, url, options) {
 		this.cdauthURL = url;
 
-		var colour;
-		switch((OpenLayers.Layer.cdauth.XML.prototype.colourCounter++)%4)
+		if(this.colour == null)
 		{
-			case 0: colour = "red"; break;
-			case 1: colour = "blue"; break;
-			case 2: colour = "green"; break;
-			case 3: colour = "black"; break;
+			switch((OpenLayers.Layer.cdauth.XML.colourCounter++)%4)
+			{
+				case 0: this.colour = "red"; break;
+				case 1: this.colour = "blue"; break;
+				case 2: this.colour = "green"; break;
+				case 3: this.colour = "black"; break;
+			}
 		}
 
 		OpenLayers.Layer.GML.prototype.initialize.apply(this, [ name ? name : url, this.proxyURL(url), OpenLayers.Util.extend({
 			style: {
-				strokeColor: colour,
+				strokeColor: this.colour,
 				strokeWidth: 3,
 				strokeOpacity: 0.5
 			},
@@ -1457,10 +1609,177 @@ OpenLayers.Layer.cdauth.XML = new OpenLayers.Class(OpenLayers.Layer.GML, {
 OpenLayers.Layer.cdauth.XML.proxy = null;
 /**
  * Set this to the XML URL that shall be loaded for relations referenced in OSM files. “${id}" will be replaced by the ID of the relation.
- * Use the real URL here, not that of your proxy. Usually you set this to "http://www.openstreetmap.org/api/0.6/relation/${id}/full".
+ * Use the real URL here, not that of your proxy.
  * @var String
 */
-OpenLayers.Layer.cdauth.XML.relationURL = null;
+OpenLayers.Layer.cdauth.XML.relationURL = "http://www.openstreetmap.org/api/0.6/relation/${id}/full";
+
+OpenLayers.Layer.cdauth.XML.colourCounter = 1;
+
+/**
+ * An instance of this class keeps the location hash part in sync with the Permalink of a map object.
+ * @event hashChanged location.hash was changed.
+*/
+OpenLayers.Control.cdauth.URLHashHandler = new OpenLayers.Class(OpenLayers.Control, {
+	/**
+	 * The interval in milliseconds, how often location.hash shall be checked for changes.
+	 * @var Number
+	*/
+	interval : 500,
+
+	/**
+	 * Is set to true on the map event newHash. Makes update() update the location hash.
+	 * @var boolean
+	*/
+	hashChanged : false,
+
+	/**
+	 * The return value of setInterval.
+	*/
+	intervalObject : null,
+
+	/**
+	 * The last value of location.hash that was set by this class. If it differs from location.hash, the user has changed it.
+	 * @var String
+	*/
+	lastHash : null,
+
+	initialize : function() {
+		OpenLayers.Control.prototype.initialize.apply(this, arguments);
+
+		this.events.addEventType("hashChanged");
+	},
+
+	/**
+	 * Initialises an interval that checks for changes in location.hash automatically.
+	*/
+	activate : function() {
+		if(!OpenLayers.Control.prototype.activate.apply(this, arguments))
+			return false;
+
+		if(!this.map)
+		{
+			this.deactivate();
+			return false;
+		}
+
+		map.events.register("newHash", this, this.newHashHandler);
+
+		var obj = this;
+		this.intervalObject = setInterval(function(){ obj.update(); }, this.interval);
+
+		if(this.getLocationHash() != "")
+			this.updateMapView();
+		else
+			this.updateLocationHash();
+
+		return true;
+	},
+
+	deactivate : function() {
+		if(!OpenLayers.Control.prototype.deactivate.apply(this, arguments))
+			return false;
+
+		if(this.intervalObject)
+		{
+			clearInterval(this.intervalObject);
+			this.intervalObject = null;
+		}
+		map.events.unregister("newHash", this, this.newHashHandler);
+
+		return true;
+	},
+
+	newHashHandler : function() {
+		this.hashChanged = true;
+	},
+
+	/**
+	 * Gets the part after the # in the URL.
+	 * At least in Firefox, location.hash contains “&” if the hash part contains “%26”. This makes searching for URLs (such as OSM PermaLinks) hard and we work around that problem by extracting the desired value from location.href.
+	*/
+	getLocationHash : function() {
+		var match = location.href.match(/#(.*)$/);
+		if(match)
+			return match[1];
+		else
+			return "";
+	},
+
+	/**
+	 * Updates location.hash if the map view has changed.
+	 * Updates the map view if location.hash has changed.
+	*/
+	update : function() {
+		if(this.hashChanged)
+			this.updateLocationHash();
+		else if(this.getLocationHash() != this.lastHash)
+			this.updateMapView();
+	},
+
+	/**
+	 * Updates location.hash to the current map view.
+	*/
+	updateLocationHash : function() {
+		var queryObject = this.map.getQueryObject();
+		if(!queryObject)
+			return false;
+		location.hash = "#"+encodeQueryString(queryObject);
+		this.lastHash = this.getLocationHash();
+		this.hashChanged = false;
+		this.events.triggerEvent("hashChanged");
+		return true;
+	},
+
+	/**
+	 * Updates the map view to show the content of location.hash.
+	*/
+	updateMapView : function() {
+		var query_object = decodeQueryString(this.getLocationHash());
+		this.map.zoomToQuery(query_object);
+		this.updateLocationHash();
+	},
+
+	CLASS_NAME : "OpenLayers.Control.cdauth.URLHashHandler"
+});
+
+OpenLayers.Control.cdauth.GeoLocation = new OpenLayers.Class(OpenLayers.Control, {
+	zoomLevel : 15,
+	element : null,
+	draw : function() {
+		var ret = OpenLayers.Control.prototype.draw.apply(this, arguments);
+
+		if(!navigator.geolocation)
+			return ret;
+
+		var control = this;
+
+		if(!this.element)
+		{
+			this.element = document.createElement("a");
+			this.element.appendChild(document.createTextNode("Go home"));
+			this.element.href = "#";
+			OpenLayers.Event.observe(this.element, "click",
+				OpenLayers.Function.bindAsEventListener(function(e) {
+					this.goToGeoLocation();
+					OpenLayers.Event.stop(e);
+				}, this)
+			);
+			this.div.appendChild(this.element);
+		}
+
+		return ret;
+	},
+	goToGeoLocation : function() {
+		if(!this.map || !navigator.geolocation) return;
+		var map = this.map;
+		var zoomLevel = this.zoomLevel;
+		navigator.geolocation.getCurrentPosition(function(position) {
+			map.setCenter(new OpenLayers.LonLat(position.coords.longitude, position.coords.latitude).transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject()), zoomLevel);
+		});
+	},
+	CLASS_NAME : "OpenLayers.Control.cdauth.GeoLocation"
+});
 
 /**
  * decodeURIComponent() throws an exception if the string contains invalid constructions (such as a % sign not followed by a 2-digits hexadecimal number). This function returns the original string in case of an error.
