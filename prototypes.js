@@ -1742,13 +1742,13 @@ OpenLayers.Layer.cdauth.CoordinateGrid = new OpenLayers.Class(OpenLayers.Layer.V
 	 * The line style of normal coordinate lines.
 	 * @var OpenLayers.Feature.Vector.style
 	*/
-	styleMapNormal : new OpenLayers.StyleMap({"default": { stroke: true, stokeWidth: 1, strokeColor: "black", strokeOpacity: 0.2, label: "${coord}" }}),
+	styleMapNormal : { stroke: true, stokeWidth: 1, strokeColor: "black", strokeOpacity: 0.2 },
 
 	/**
 	 * The line style of an important coordinate line, such as a number dividable by 10.
 	 * @var OpenLayers.Feature.Vector.style
 	*/
-	styleMapHighlight : new OpenLayers.StyleMap({"default": { stroke: true, stokeWidth: 2, strokeColor: "black", strokeOpacity: 0.5, label: "${coord}" }}),
+	styleMapHighlight : { stroke: true, stokeWidth: 2, strokeColor: "black", strokeOpacity: 0.5 },
 
 	horizontalLines : { },
 	verticalLines : { },
@@ -1798,13 +1798,11 @@ OpenLayers.Layer.cdauth.CoordinateGrid = new OpenLayers.Class(OpenLayers.Layer.V
 		{
 			if(this.horizontalLines[coordinate])
 				continue;
-			if(coordinate < -90 || coordinate > 90)
-				continue;
 			this.horizontalLines[coordinate] = new OpenLayers.Feature.Vector(
 				new OpenLayers.Geometry.LineString([ new OpenLayers.Geometry.Point(maxExtent.left, coordinate).transform(this.projection, this.map.getProjectionObject()), new OpenLayers.Geometry.Point(maxExtent.right, coordinate).transform(this.projection, this.map.getProjectionObject()) ]),
-				{ coord : coordinate }
+				null,
+				(coordinate/horizontalDivisor % 5 == 0) ? this.styleMapHighlight : this.styleMapNormal
 			);
-			this.horizontalLines[coordinate].style = (coordinate/horizontalDivisor % 5 == 0 ? this.styleMapHighlight : this.styleMapNormal).createSymbolizer(this.horizontalLines[coordinate], "default");
 			addFeatures.push(this.horizontalLines[coordinate]);
 		}
 
@@ -1833,13 +1831,11 @@ OpenLayers.Layer.cdauth.CoordinateGrid = new OpenLayers.Class(OpenLayers.Layer.V
 		{
 			if(this.verticalLines[coordinate])
 				continue;
-			if(coordinate <= -180 || coordinate > 180)
-				continue;
 			this.verticalLines[coordinate] = new OpenLayers.Feature.Vector(
 				new OpenLayers.Geometry.LineString([ new OpenLayers.Geometry.Point(coordinate, maxExtent.top).transform(this.projection, this.map.getProjectionObject()), new OpenLayers.Geometry.Point(coordinate, maxExtent.bottom).transform(this.projection, this.map.getProjectionObject()) ]),
-				{ coord : coordinate }
+				null,
+				(coordinate/verticalDivisor % 5 == 0) ? this.styleMapHighlight : this.styleMapNormal
 			);
-			this.verticalLines[coordinate].style = (coordinate/horizontalDivisor % 5 == 0 ? this.styleMapHighlight : this.styleMapNormal).createSymbolizer(this.verticalLines[coordinate], "default");
 			addFeatures.push(this.verticalLines[coordinate]);
 		}
 
