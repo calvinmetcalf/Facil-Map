@@ -1616,7 +1616,7 @@ OpenLayers.Control.cdauth.URLHashHandler = new OpenLayers.Class(OpenLayers.Contr
 			return false;
 		}
 
-		map.events.register("newHash", this, this.newHashHandler);
+		this.map.events.register("newHash", this, this.newHashHandler);
 
 		var obj = this;
 		this.intervalObject = setInterval(function(){ obj.update(); }, this.interval);
