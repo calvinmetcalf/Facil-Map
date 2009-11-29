@@ -50,7 +50,6 @@ OpenLayers.Lang.en = OpenLayers.Util.extend(OpenLayers.Lang.en, {
 	"Create a marker" : "Create a marker",
 	"Coordinates" : "Coordinates",
 	"unknown" : "unknown",
-	"No results." : "No results.",
 	"Error parsing file." : "Error parsing file.",
 	"Latitude" : "Latitude",
 	"Longitude" : "Longitude",
@@ -92,7 +91,6 @@ OpenLayers.Lang.de = OpenLayers.Util.extend(OpenLayers.Lang.de, {
 	"Create a marker" : "Marker anlegen",
 	"Coordinates" : "Koordinaten",
 	"unknown" : "unbekannt",
-	"No results." : "Kein Ergebnis.",
 	"Error parsing file." : "Fehler beim Parsen der Datei.",
 	"Latitude" : "Breite",
 	"Longitude" : "Länge",
@@ -1160,8 +1158,8 @@ OpenLayers.Control.cdauth.CreateMarker = OpenLayers.Class(OpenLayers.Control, {
  * A markers layer to display the search results of the OpenStreetMap NameFinder.
  * @event lastSearchChange The value of lastSearch has changed.
  * @event searchBegin
- * @event searchSuccess
- * @event searchFailure
+ * @event searchSuccess The search results have been displayed
+ * @event searchFailure No results have been found or an error occured
 */
 
 OpenLayers.Layer.cdauth.Markers.GeoSearch = new OpenLayers.Class(OpenLayers.Layer.cdauth.Markers, {
@@ -1433,18 +1431,17 @@ OpenLayers.Layer.cdauth.Markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 
 		if(!dontzoom)
 		{
-			if(results.length == 0)
-				alert(OpenLayers.i18n("No results."));
-			else if(results.length == 1)
+			if(results.length == 1)
 				this.map.setCenter(new OpenLayers.LonLat(results[0].lon, results[0].lat).transform(new OpenLayers.Projection("EPSG:4326"), this.map.getProjectionObject()), results[0].zoom);
-			else
+			else if(results.length > 1)
 				this.map.zoomToExtent(this.getDataExtent());
 		}
 
 		this.lastSearch = query;
 		this.events.triggerEvent("lastSearchChange");
 
-		this.events.triggerEvent("searchSuccess");
+		var eventType = (results.length == 0 ? "searchFailure" : "searchSuccess");
+		this.events.triggerEvent(eventType, { object : this, type : eventType, element: null, dontzoom: dontzoom, query: query });
 	},
 	CLASS_NAME : "OpenLayers.Layer.cdauth.Markers.GeoSearch"
 });
