@@ -517,6 +517,22 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 	CLASS_NAME : "OpenLayers.Map.cdauth"
 });
 
+OpenLayers.Layer.Grid.prototype.setVisibility = OpenLayers.Layer.XYZ.prototype.setVisibility = OpenLayers.Layer.OSM.prototype.setVisibility = function(visibility) {
+	OpenLayers.Layer.HTTPRequest.prototype.setVisibility.apply(this, arguments);
+
+	if(this.grid == null || visibility)
+		return;
+
+	for(var i=0; i<this.grid.length; i++)
+	{
+		for(var j=0; j<this.grid[i].length; j++)
+		{
+			if(this.grid[i][j] && this.grid[i][j].isLoading)
+				this.grid[i][j].clear();
+		}
+	}
+};
+
 OpenLayers.Control.cdauth = { };
 
 /**
