@@ -517,42 +517,6 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 	CLASS_NAME : "OpenLayers.Map.cdauth"
 });
 
-OpenLayers.Tile.Image.maxConcurrentRequests = 1;
-OpenLayers.Tile.Image.queue = [ ];
-OpenLayers.Tile.Image.currentlyLoading = 0;
-
-OpenLayers.Tile.Image.prototype.actuallyPositionImage = OpenLayers.Tile.Image.prototype.positionImage;
-OpenLayers.Tile.Image.prototype.positionImage = function()
-{
-	if(this.layer == null) return;
-
-	this.events.register("loadend", this, function() {
-		if(OpenLayers.Tile.Image.queue.length > 0)
-		{
-			var nextTile;
-			while(true)
-			{
-				if(OpenLayers.Tile.Image.queue.length == 0)
-					break;
-				nextTile = OpenLayers.Tile.Image.queue.shift();
-				if(nextTile.layer == null || !nextTile.layer.getVisibility())
-					continue;
-				nextTile.actuallyPositionImage();
-				return true;
-			}
-		}
-		OpenLayers.Tile.Image.currentlyLoading--;
-	});
-
-	if(OpenLayers.Tile.Image.currentlyLoading > 0 && OpenLayers.Tile.Image.currentlyLoading >= OpenLayers.Tile.Image.maxConcurrentRequests)
-		OpenLayers.Tile.Image.queue.push(this);
-	else if(this.layer.getVisibility())
-	{
-		OpenLayers.Tile.Image.currentlyLoading++;
-		this.actuallyPositionImage();
-	}
-};
-
 OpenLayers.Control.cdauth = { };
 
 /**
