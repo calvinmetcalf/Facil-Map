@@ -271,6 +271,26 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 		// Zoom to search results only if the position is not manually set
 		var search_may_zoom = (typeof query.lon == "undefined" && typeof query.lat == "undefined");
 
+		// Set base layer (layer)
+		if(query.layer)
+		{
+			var matching_layers = this.getLayersBy("shortName", query.layer);
+			if(matching_layers.length > 0)
+				this.setBaseLayer(matching_layers[0]);
+		}
+
+		if(this.baseLayer == null)
+		{
+			for(var i=0; i<this.layers.length; i++)
+			{
+				if(this.layers[i].isBaseLayer)
+				{
+					this.setBaseLayer(this.layers[i]);
+					break;
+				}
+			}
+		}
+
 		// Set position (lon, lat, zoom)
 		if(!query.lon)
 			query.lon = 0;
@@ -279,14 +299,6 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 		if(!query.zoom)
 			query.zoom = 2;
 		this.setCenter(new OpenLayers.LonLat(1*query.lon, 1*query.lat).transform(this.permalinkProjection, this.getProjectionObject()), 1*query.zoom);
-
-		// Set base layer (layer)
-		if(query.layer)
-		{
-			var matching_layers = this.getLayersBy("shortName", query.layer);
-			if(matching_layers.length > 0)
-				this.setBaseLayer(matching_layers[0]);
-		}
 
 		// Set overlay visibility (overlays)
 		if(query.overlays)
