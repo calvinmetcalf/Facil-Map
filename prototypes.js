@@ -1800,15 +1800,13 @@ OpenLayers.Layer.cdauth.CoordinateGrid = new OpenLayers.Class(OpenLayers.Layer.V
 
 		for(var i in this.horizontalLines)
 		{
-			if(this.horizontalLines[i] == null)
-				continue;
 			var r = i/horizontalDivisor;
 			var highlight = (r % 5 == 0);
 			var highlighted = (this.horizontalLines[i].style == this.styleMapHighlight);
 			if(Math.floor(r) != r || highlight != highlighted)
 			{
 				destroyFeatures.push(this.horizontalLines[i]);
-				this.horizontalLines[i] = null;
+				delete this.horizontalLines[i];
 			}
 		}
 
@@ -1822,13 +1820,13 @@ OpenLayers.Layer.cdauth.CoordinateGrid = new OpenLayers.Class(OpenLayers.Layer.V
 			this.degreeLabels.push(new OpenLayers.Feature.Vector(
 				new OpenLayers.Geometry.Point(extent.left, coordinate).transform(this.projection, this.map.getProjectionObject()),
 				null,
-				OpenLayers.Util.extend({ label: coordinate+"°", labelAlign: "lm" }, highlight ? this.labelStyleMapHighlight : this.labelStyleMapNormal)
+				OpenLayers.Util.extend({ label: (Math.round(coordinate*100000000)/100000000)+"°", labelAlign: "lm" }, highlight ? this.labelStyleMapHighlight : this.labelStyleMapNormal)
 			));
 
 			this.degreeLabels.push(new OpenLayers.Feature.Vector(
 				new OpenLayers.Geometry.Point(extent.right, coordinate).transform(this.projection, this.map.getProjectionObject()),
 				null,
-				OpenLayers.Util.extend({ label: coordinate+"°", labelAlign: "rm" }, highlight ? this.labelStyleMapHighlight : this.labelStyleMapNormal)
+				OpenLayers.Util.extend({ label: (Math.round(coordinate*100000000)/100000000)+"°", labelAlign: "rm" }, highlight ? this.labelStyleMapHighlight : this.labelStyleMapNormal)
 			));
 
 			if(this.horizontalLines[coordinate])
@@ -1852,15 +1850,13 @@ OpenLayers.Layer.cdauth.CoordinateGrid = new OpenLayers.Class(OpenLayers.Layer.V
 
 		for(var i in this.verticalLines)
 		{
-			if(this.verticalLines[i] == null)
-				continue;
 			var r = i/verticalDivisor;
 			var highlight = (r % 5 == 0);
 			var highlighted = (this.verticalLines[i].style == this.styleMapHighlight);
 			if(Math.floor(r) != r || highlight != highlighted)
 			{
 				destroyFeatures.push(this.verticalLines[i]);
-				this.verticalLines[i] = null;
+				delete this.verticalLines[i];
 			}
 		}
 
@@ -1874,13 +1870,13 @@ OpenLayers.Layer.cdauth.CoordinateGrid = new OpenLayers.Class(OpenLayers.Layer.V
 			this.degreeLabels.push(new OpenLayers.Feature.Vector(
 				new OpenLayers.Geometry.Point(coordinate, extent.top).transform(this.projection, this.map.getProjectionObject()),
 				null,
-				OpenLayers.Util.extend({ label: coordinate+"°", labelAlign: "ct" }, highlight ? this.labelStyleMapHighlight : this.labelStyleMapNormal)
+				OpenLayers.Util.extend({ label: (Math.round(coordinate*100000000)/100000000)+"°", labelAlign: "ct" }, highlight ? this.labelStyleMapHighlight : this.labelStyleMapNormal)
 			));
 
 			this.degreeLabels.push(new OpenLayers.Feature.Vector(
 				new OpenLayers.Geometry.Point(coordinate, extent.bottom).transform(this.projection, this.map.getProjectionObject()),
 				null,
-				OpenLayers.Util.extend({ label: coordinate+"°", labelAlign: "cb" }, highlight ? this.labelStyleMapHighlight : this.labelStyleMapNormal)
+				OpenLayers.Util.extend({ label: (Math.round(coordinate*100000000)/100000000)+"°", labelAlign: "cb" }, highlight ? this.labelStyleMapHighlight : this.labelStyleMapNormal)
 			));
 
 			if(this.verticalLines[coordinate])
