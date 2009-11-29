@@ -1767,9 +1767,9 @@ OpenLayers.Layer.cdauth.CoordinateGrid = new OpenLayers.Class(OpenLayers.Layer.V
 	degreeLabels : [ ],
 
 	initialize : function(name, options) {
-		if(typeof name == "undefined")
+		if(typeof name == "undefined" || name == null)
 			name = OpenLayers.i18n("Coordinate grid");
-		options = OpenLayers.Util.extend(options, { projection : new OpenLayers.Projection("EPSG:4326"), zoomableInLayerSwitcher : true });
+		options = OpenLayers.Util.extend(options, { projection : new OpenLayers.Projection("EPSG:4326") });
 		OpenLayers.Layer.Vector.prototype.initialize.apply(this, [ name, options ]);
 	},
 	setMap : function() {
