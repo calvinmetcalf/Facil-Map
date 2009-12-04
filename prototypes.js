@@ -1775,9 +1775,20 @@ OpenLayers.Control.cdauth.URLHashHandler = new OpenLayers.Class(OpenLayers.Contr
 	CLASS_NAME : "OpenLayers.Control.cdauth.URLHashHandler"
 });
 
+/**
+ * Adds a “Go home” link to the map in browsers that support geolocation. The link requests the current position of the user and zooms
+ * the map there.
+*/
+
 OpenLayers.Control.cdauth.GeoLocation = new OpenLayers.Class(OpenLayers.Control, {
+	/**
+	 * The zoom level to use when zooming to the user’s location.
+	 * @var Number
+	*/
 	zoomLevel : 15,
+
 	element : null,
+
 	draw : function() {
 		var ret = OpenLayers.Control.prototype.draw.apply(this, arguments);
 
@@ -1802,6 +1813,11 @@ OpenLayers.Control.cdauth.GeoLocation = new OpenLayers.Class(OpenLayers.Control,
 
 		return ret;
 	},
+
+	/**
+	 * Requests the geolocation from the browser if it is supported and zooms there.
+	 * @return void
+	*/
 	goToGeoLocation : function() {
 		if(!this.map || !navigator.geolocation) return;
 		var map = this.map;
@@ -1810,6 +1826,7 @@ OpenLayers.Control.cdauth.GeoLocation = new OpenLayers.Class(OpenLayers.Control,
 			map.setCenter(new OpenLayers.LonLat(position.coords.longitude, position.coords.latitude).transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject()), zoomLevel);
 		});
 	},
+
 	CLASS_NAME : "OpenLayers.Control.cdauth.GeoLocation"
 });
 
