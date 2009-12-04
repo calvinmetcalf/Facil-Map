@@ -1570,10 +1570,10 @@ OpenLayers.Layer.cdauth.XML.relationURL = "http://www.openstreetmap.org/api/0.6/
 OpenLayers.Layer.cdauth.XML.colourCounter = 1;
 
 /**
- * An instance of this class keeps the location hash part in sync with the Permalink of a map object.
- * @event hashChanged location.hash was changed.
+ * A class to control the URL hash part.
+ * @event hashChanged The URL hash has been changed by the user
 */
-OpenLayers.Control.cdauth.URLHashHandler = new OpenLayers.Class(OpenLayers.Control, {
+OpenLayers.URLHashHandler = new OpenLayers.Class({
 	/**
 	 * The interval in milliseconds, how often location.hash shall be checked for changes.
 	 * @var Number
@@ -1597,10 +1597,110 @@ OpenLayers.Control.cdauth.URLHashHandler = new OpenLayers.Class(OpenLayers.Contr
 	*/
 	lastHash : null,
 
+	/**
+	 * @var OpenLayers.Events
+	*/
+	events : null,
+
+	initialize : function() {
+		this.events = new OpenLayers.Events(this, null, [ "hashChanged" ]);
+	},
+
+	/**
+	 * Starts the Interval that looks for changes.
+	 * @return void
+	*/
+	start : function() {
+		var obj = this;
+		this.lastHash = this.getLocationHash();
+		if(this.intervalObject == null)
+			this.intervalObject = setInterval(function(){ obj.checkHash(); }, this.interval);
+	},
+
+	/**
+	 * Stops the Interval that looks for changes.
+	 * @return void
+	*/
+	stop : function() {
+		if(this.intervalObject == null)
+			return;
+		clearInterval(this.intervalObject);
+		this.intervalObject = null;
+	},
+
+	/**
+	 * Checks if location.hash has changed and triggers an event then.
+	 * @return void
+	*/
+	checkHash : function() {
+		var oldHash = this.lastHash;
+		this.lastHash = this.getLocationHash();
+		if(this.lastHash != oldHash)
+			this.events.triggerEvent("hashChanged", { oldHash: oldHash, newHash: this.lastHash });
+	},
+
+	/**
+	 * Gets the part after the # in the URL.
+	 * At least in Firefox, location.hash contains “&” if the hash part contains “%26”. This makes searching for URLs (such as OSM PermaLinks) hard and we work around that problem by extracting the desired value from location.href.
+	 * @return String
+	*/
+	getLocationHash : function() {
+		var match = location.href.match(/#(.*)$/);
+		if(match)
+			return match[1];
+		else
+			return "";
+	},
+
+	/**
+	 * Sets the location has to the given hash.
+	 * @param String hash The hash part without #
+	 * @return void
+	*/
+	setLocationHash : function(hash)
+	{
+		var restart = false;
+		if(this.intervalObject)
+		{
+			this.stop();
+			restart = true;
+		}
+
+		location.hash = "#"+hash;
+
+		if(restart)
+			this.start();
+	},
+
+	CLASS_NAME: "OpenLayers.URLHashHandler"
+});
+
+/**
+ * An instance of this class keeps the location hash part in sync with the Permalink of a map object.
+ * @event hashChanged location.hash was changed.
+*/
+OpenLayers.Control.cdauth.URLHashHandler = new OpenLayers.Class(OpenLayers.Control, {
+	/**
+	 * @var OpenLayers.URLHashHandler
+	*/
+	hashHandler : null,
+
+	/**
+	 * The minimum number of milliseconds that the map view has to stay the same for the location hash to be updated. This way it is not
+	 * updated while scrolling the map.
+	 * @var Number
+	*/
+	minRest : 750,
+
+	locationUpdateTimeout : null,
+
 	initialize : function() {
 		OpenLayers.Control.prototype.initialize.apply(this, arguments);
 
 		this.events.addEventType("hashChanged");
+
+		this.hashHandler = new OpenLayers.URLHashHandler();
+		this.hashHandler.events.register("hashChanged", this, this.updateMapView);
 	},
 
 	/**
@@ -1617,11 +1717,9 @@ OpenLayers.Control.cdauth.URLHashHandler = new OpenLayers.Class(OpenLayers.Contr
 		}
 
 		this.map.events.register("newHash", this, this.newHashHandler);
+		this.hashHandler.start();
 
-		var obj = this;
-		this.intervalObject = setInterval(function(){ obj.update(); }, this.interval);
-
-		if(this.getLocationHash() != "")
+		if(this.hashHandler.getLocationHash() != "")
 			this.updateMapView();
 		else
 			this.updateLocationHash();
@@ -1633,41 +1731,24 @@ OpenLayers.Control.cdauth.URLHashHandler = new OpenLayers.Class(OpenLayers.Contr
 		if(!OpenLayers.Control.prototype.deactivate.apply(this, arguments))
 			return false;
 
-		if(this.intervalObject)
-		{
-			clearInterval(this.intervalObject);
-			this.intervalObject = null;
-		}
+		this.hashHandler.stop();
 		map.events.unregister("newHash", this, this.newHashHandler);
 
 		return true;
 	},
 
 	newHashHandler : function() {
-		this.hashChanged = true;
-	},
+		if(this.locationUpdateTimeout)
+		{
+			clearTimeout(this.locationUpdateTimeout);
+			this.locationUpdateTimeout = null;
+		}
 
-	/**
-	 * Gets the part after the # in the URL.
-	 * At least in Firefox, location.hash contains “&” if the hash part contains “%26”. This makes searching for URLs (such as OSM PermaLinks) hard and we work around that problem by extracting the desired value from location.href.
-	*/
-	getLocationHash : function() {
-		var match = location.href.match(/#(.*)$/);
-		if(match)
-			return match[1];
-		else
-			return "";
-	},
-
-	/**
-	 * Updates location.hash if the map view has changed.
-	 * Updates the map view if location.hash has changed.
-	*/
-	update : function() {
-		if(this.hashChanged)
-			this.updateLocationHash();
-		else if(this.getLocationHash() != this.lastHash)
-			this.updateMapView();
+		var control = this;
+		this.locationUpdateTimeout = setTimeout(function(){
+			control.locationUpdateTimeout = null;
+			control.updateLocationHash();
+		}, this.minRest);
 	},
 
 	/**
@@ -1677,9 +1758,7 @@ OpenLayers.Control.cdauth.URLHashHandler = new OpenLayers.Class(OpenLayers.Contr
 		var queryObject = this.map.getQueryObject();
 		if(!queryObject)
 			return false;
-		location.hash = "#"+encodeQueryString(queryObject);
-		this.lastHash = this.getLocationHash();
-		this.hashChanged = false;
+		this.hashHandler.setLocationHash(encodeQueryString(queryObject));
 		this.events.triggerEvent("hashChanged");
 		return true;
 	},
@@ -1688,7 +1767,7 @@ OpenLayers.Control.cdauth.URLHashHandler = new OpenLayers.Class(OpenLayers.Contr
 	 * Updates the map view to show the content of location.hash.
 	*/
 	updateMapView : function() {
-		var query_object = decodeQueryString(this.getLocationHash());
+		var query_object = decodeQueryString(this.hashHandler.getLocationHash());
 		this.map.zoomToQuery(query_object);
 		this.updateLocationHash();
 	},
