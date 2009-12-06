@@ -1180,16 +1180,10 @@ OpenLayers.Layer.cdauth.Markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 	lastSearch : false,
 
 	/**
-	 * http://gazetteer.openstreetmap.org/namefinder/search.xml (search=%s will be appended). To work around the same origin policy, pass a wrapper that lives on your webspace.
+	 * http://nominatim.openstreetmap.org/search. To work around the same origin policy, pass a wrapper that lives on your webspace.
 	 * @var String
 	*/
-	nameFinderURL : "http://gazetteer.openstreetmap.org/namefinder/search.xml",
-
-	/**
-	 * http://data.giub.uni-bonn.de/openrouteservice/php/OpenLSLUS_Geocode.php Will be used if the normal namefinder does not find anything
-	 * @var String
-	*/
-	nameFinder2URL : "http://data.giub.uni-bonn.de/openrouteservice/php/OpenLSLUS_Geocode.php",
+	nameFinderURL : "http://nominatim.openstreetmap.org/search",
 
 	/**
 	 * The marker icon to use for the first search result.
@@ -1279,18 +1273,16 @@ OpenLayers.Layer.cdauth.Markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 		{ // NameFinder
 			var layer = this;
 
-			var results1,results2;
-
 			OpenLayers.Request.GET({
 				url : this.nameFinderURL,
-				params : { "find": query },
+				params : { "q": query, "format" : "xml", "polygon" : "0", "addressdetails" : "0" },
 				success : function(request) {
+					var results = [ ];
 					if(request.responseXML)
 					{
 						var searchresults = request.responseXML.getElementsByTagName("searchresults");
 						if(searchresults.length > 0)
 						{
-							var results = [ ];
 							if(searchresults[0].getAttribute("findplace") == null || searchresults[0].getAttribute("findplace") == "" || searchresults[0].getAttribute("foundnearplace") == "yes")
 							{
 								var named = searchresults[0].childNodes;
@@ -1298,109 +1290,24 @@ OpenLayers.Layer.cdauth.Markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 								{
 									if(named[i].nodeType != 1) continue;
 
+									var box = named[i].getAttribute("boundingbox").split(",");
 									results.push({
-										zoom : named[i].getAttribute("zoom"),
-										lon : named[i].getAttribute("lon"),
-										lat : named[i].getAttribute("lat"),
-										name : named[i].getAttribute("name"),
-										info : named[i].getAttribute("info")
+										zoombox : new OpenLayers.Bounds(box[2], box[1], box[3], box[0]),
+										lonlat : new OpenLayers.LonLat(named[i].getAttribute("lon"), named[i].getAttribute("lat")),
+										name : named[i].getAttribute("display_name"),
+										info : named[i].getAttribute("class"),
+										icon : named[i].getAttribute("icon")
 									});
 								}
 							}
-
-							if(results.length > 0)
-							{
-								results1 = results;
-								layer.showResults(results, query, dontzoom, markersvisible);
-								return;
-							}
 						}
 					}
-
-					results1 = [ ];
-					if(results2)
-						layer.showResults(results2, query, dontzoom, markersvisible);
+					layer.showResults(results, query, dontzoom, markersvisible);
 				},
 				failure : function() {
-					results1 = [ ];
-					if(results2)
-						layer.showResults(results2, query, dontzoom, markersvisible);
+					layer.showResults([ ], query, dontzoom, markersvisible);
 				}
 			});
-
-			if(!this.nameFinder2URL)
-				results2 = [ ];
-			else
-			{
-				OpenLayers.Request.POST({
-					url : this.nameFinder2URL,
-					data : OpenLayers.Util.getParameterString({ "FreeFormAdress" : query, "MaxResponse" : 50 }),
-					headers : { "Content-type" : "application/x-www-form-urlencoded" },
-					success : function(request) {
-						if(results1 && results1.length > 0)
-							return;
-						var results = [ ];
-						if(request.responseXML)
-						{
-							var searchresults = request.responseXML.getElementsByTagName("xls:GeocodedAddress");
-							for(var i=0; i<searchresults.length; i++)
-							{
-								var accuracy = searchresults[i].getElementsByTagName("xls:GeocodeMatchCode");
-								if(accuracy.length >= 1 && accuracy[0].getAttribute("accuracy") < 0.6)
-									continue;
-								var pos = searchresults[i].getElementsByTagName("gml:pos");
-								if(pos.length < 1) continue;
-								pos = pos[0].firstChild.data.split(" ");
-
-								// FIXME: The determination of the name is not very proper
-								var desc = [ ];
-								var desc_street = searchresults[i].getElementsByTagName("xls:Street");
-								if(desc_street.length >= 1 && desc_street[0].getAttribute("officialName"))
-									desc.push(desc_street[0].getAttribute("officialName"));
-								var desc_number = searchresults[i].getElementsByTagName("xls:Building");
-								if(desc_number.length >= 1 && desc_number[0].getAttribute("number"))
-									desc.push(desc_number[0].getAttribute("number"));
-								var desc_postalcode = searchresults[i].getElementsByTagName("xls:PostalCode");
-								if(desc_postalcode.length >= 1)
-									desc.push(desc_postalcode[0].firstChild.data);
-								var desc_place = searchresults[i].getElementsByTagName("xls:Place");
-								for(var j=0; j<desc_place.length; j++)
-								{
-									if(desc_place[j].getAttribute("type") == "Municipality")
-									{
-										desc.push(desc_place[j].firstChild.data);
-										break;
-									}
-								}
-								for(var j=0; j<desc_place.length; j++)
-								{
-									if(desc_place[j].getAttribute("type") == "CountrySubdivision")
-									{
-										desc.push(desc_place[j].firstChild.data);
-										break;
-									}
-								}
-
-								results.push({
-									zoom : 16,
-									lon : pos[0],
-									lat : pos[1],
-									name : desc.join(" ")
-								});
-							}
-						}
-
-						results2 = results;
-						if(results1 && results1.length == 0)
-							layer.showResults(results2, query, dontzoom, markersvisible);
-					},
-					failure : function() {
-						results2 = [ ];
-						if(results1 && results1.length == 0)
-							layer.showResults(results2, query, dontzoom, markersvisible);
-					}
-				});
-			}
 		}
 	},
 	showResults : function(results, query, dontzoom, markersvisible) {
@@ -1427,18 +1334,25 @@ OpenLayers.Layer.cdauth.Markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 			content_zoom.href = "#";
 			(function(i){
 				content_zoom.onclick = function() {
-					layer.map.setCenter(new OpenLayers.LonLat(results[i].lon, results[i].lat).transform(new OpenLayers.Projection("EPSG:4326"), layer.map.getProjectionObject()), results[i].zoom);
+					layer.map.zoomToExtent(results[i].zoombox.clone().transform(new OpenLayers.Projection("EPSG:4326"), layer.map.getProjectionObject()));
+					return false;
 				};
 			})(i);
 			content_zoom.appendChild(document.createTextNode(OpenLayers.i18n("[Zoom]")));
 			content_heading.appendChild(content_zoom);
 			content.appendChild(content_heading);
-			content.appendChild(makePermalinks(new OpenLayers.LonLat(results[i].lon, results[i].lat), results[i].zoom));
+			content.appendChild(makePermalinks(results[i].lonlat, results[i].zoom));
+
+			var icon = null;
+			if(results[i].icon)
+				icon = new OpenLayers.Icon(results[i].icon, new OpenLayers.Size(20, 20), new OpenLayers.Pixel(-10, -10));
+			else if(i == 0)
+				icon = this.highlightIcon.clone();
 			var marker = this.createMarker(
-				new OpenLayers.LonLat(results[i].lon, results[i].lat).transform(new OpenLayers.Projection("EPSG:4326"), this.map.getProjectionObject()),
+				results[i].lonlat.clone().transform(new OpenLayers.Projection("EPSG:4326"), this.map.getProjectionObject()),
 				content,
 				((markersvisible && typeof markersvisible[i] != "undefined" && markersvisible[i] != "0") || ((!markersvisible || typeof markersvisible[i] == "undefined") && i==0)),
-				(i==0 && this.highlightIcon ? this.highlightIcon.clone() : null),
+				icon,
 				dontzoom
 			);
 		}
@@ -1446,7 +1360,7 @@ OpenLayers.Layer.cdauth.Markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 		if(!dontzoom)
 		{
 			if(results.length == 1)
-				this.map.setCenter(new OpenLayers.LonLat(results[0].lon, results[0].lat).transform(new OpenLayers.Projection("EPSG:4326"), this.map.getProjectionObject()), results[0].zoom);
+				layer.map.zoomToExtent(results[0].zoombox.clone().transform(new OpenLayers.Projection("EPSG:4326"), layer.map.getProjectionObject()));
 			else if(results.length > 1)
 				this.map.zoomToExtent(this.getDataExtent());
 		}

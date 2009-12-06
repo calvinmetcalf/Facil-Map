@@ -25,9 +25,9 @@
 
 	ini_set("display_errors", "Off");
 
-	$fh = fsockopen("gazetteer.openstreetmap.org", 80);
-	fwrite($fh, "GET /namefinder/search.xml?find=".rawurlencode(isset($_GET["find"]) ? $_GET["find"] : "")." HTTP/1.0\r\n");
-	fwrite($fh, "Host: gazetteer.openstreetmap.org\r\n");
+	$fh = fsockopen("nominatim.openstreetmap.org", 80);
+	fwrite($fh, "GET /search?".$_SERVER["QUERY_STRING"]." HTTP/1.0\r\n");
+	fwrite($fh, "Host: nominatim.openstreetmap.org\r\n");
 	fwrite($fh, "User-Agent: ".rawurlencode("cdauth’s map")."\r\n");
 	fwrite($fh, "X-Forwarded-For: ".$_SERVER["REMOTE_ADDR"]."\r\n");
 	fwrite($fh, "Connection: close\r\n");
