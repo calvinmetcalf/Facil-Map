@@ -1191,6 +1191,18 @@ OpenLayers.Layer.cdauth.Markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 	*/
 	highlightIcon : new OpenLayers.Icon("http://osm.cdauth.de/map/marker-green.png", new OpenLayers.Size(21,25), new OpenLayers.Pixel(-9, -25)),
 
+	/**
+	 * The icon type for Nominatim search result icons. Either "p" or "n", see http://www.sjjb.co.uk/mapicons/SJJBMapIconsv0.03/recoloured/, p has a transparent background, n a coloured.
+	 * @var String
+	*/
+	iconType : "n",
+
+	/**
+	 * The icon size for Nominatim search result icons. 12, 16, 20, 24 or 32. See http://www.sjjb.co.uk/mapicons/SJJBMapIconsv0.03/recoloured/.
+	 * @var Number
+	*/
+	iconSize : 24,
+
 	initialize: function(name, options) {
 		OpenLayers.Layer.cdauth.Markers.prototype.initialize.apply(this, arguments);
 
@@ -1345,7 +1357,7 @@ OpenLayers.Layer.cdauth.Markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 
 			var icon = null;
 			if(results[i].icon)
-				icon = new OpenLayers.Icon(results[i].icon, new OpenLayers.Size(20, 20), new OpenLayers.Pixel(-10, -10));
+				icon = new OpenLayers.Icon(results[i].icon.replace(/\.p\.20\.png$/, "."+this.iconType+"."+this.iconSize+".png"), new OpenLayers.Size(this.iconSize, this.iconSize), new OpenLayers.Pixel(-this.iconSize/2, -this.iconSize/2));
 			else if(i == 0)
 				icon = this.highlightIcon.clone();
 			var marker = this.createMarker(
