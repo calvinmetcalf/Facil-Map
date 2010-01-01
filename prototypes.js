@@ -951,6 +951,7 @@ if(OpenLayers.Layer.Yahoo && typeof YMap != "undefined")
 /**
  * Extends a FramedCloud with various useful features. An event is triggered during closing instead of passing the callback function
  * to the initialize function. You may pass a DOM element for the popup content instead of HTML code.
+ * This FramedCloud supports the OpenLayers.Popup.OPACITY setting. On mouse over, the opacity is set to 1.
  * @event close
 */
 
@@ -964,6 +965,9 @@ OpenLayers.Popup.FramedCloud.cdauth = new OpenLayers.Class(OpenLayers.Popup.Fram
 		this.events.addEventType("close");
 
 		this.setContentHTML(contentDom);
+
+		OpenLayers.Event.observe(this.div, "mouseover", OpenLayers.Function.bindAsEventListener(function(){this.unsetOpacity()}, this));
+		OpenLayers.Event.observe(this.div, "mouseout", OpenLayers.Function.bindAsEventListener(function(){this.setOpacity()}, this));
 	},
 	setContentHTML: function(contentDom) {
 		if(typeof contentDom == "object")
@@ -992,6 +996,17 @@ OpenLayers.Popup.FramedCloud.cdauth = new OpenLayers.Class(OpenLayers.Popup.Fram
                 this.updateSize();
             }
 		}
+	},
+	setOpacity: function(opacity) {
+		if(opacity != undefined)
+			this.opacity = opacity;
+
+		if(this.div != null)
+			OpenLayers.Util.modifyDOMElement(this.div, null, null, null, null, null, null, this.opacity);
+	},
+	unsetOpacity: function() {
+		if(this.div != null)
+			OpenLayers.Util.modifyDOMElement(this.div, null, null, null, null, null, null, 1.0);
 	},
 	destroy: function() {
 		this.contentDom = null;
@@ -1085,6 +1100,8 @@ OpenLayers.Layer.cdauth.Markers = new OpenLayers.Class(OpenLayers.Layer.Markers,
 				this.marker.events.triggerEvent(this.popup.visible() ? "open" : "close");
 				layer.events.triggerEvent("markersChanged");
 			});
+			marker.events.register("mouseover", feature.popup, function(){this.unsetOpacity()});
+			marker.events.register("mouseout", feature.popup, function(){this.setOpacity()});
 		}
 		marker.cdauthFeature = feature;
 		this.addMarker(marker);
