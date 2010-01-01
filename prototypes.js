@@ -47,6 +47,8 @@ OpenLayers.Lang.en = OpenLayers.Util.extend(OpenLayers.Lang.en, {
 	"[Remove]" : "[Remove]",
 	"attribution-osm" : "Rendering CC-by-SA by ${rendering}, Data CC-by-SA by <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>",
 	"attribution-relief" : "Relief by <a href=\"http://openrouteservice.org/\">Kartografie Universität Bonn</a>/<a href=\"http://srtm.csi.cgiar.org/\">CIAT-CSI SRTM</a> (<a href=\"http://data.giub.uni-bonn.de/openrouteservice/contact.php#disclaimer\">Terms of Use</a>)",
+	"attribution-oom-streets" : "Streets overlay CC-by-SA by <a href=\"http://oobrien.com/oom/\">OpenOrienteeringMap</a>/<a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a> data",
+	"attribution-oom-labels" : "Labels overlay CC-by-SA by <a href=\"http://oobrien.com/oom/\">OpenOrienteeringMap</a>/<a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a> data",
 	"Create a marker" : "Create a marker",
 	"Coordinates" : "Coordinates",
 	"unknown" : "unknown",
@@ -81,7 +83,9 @@ OpenLayers.Lang.en = OpenLayers.Util.extend(OpenLayers.Lang.en, {
 	"Yahoo Satellite" : "Yahoo Satellite",
 	"Yahoo Hybrid" : "Yahoo Hybrid",
 	"Relief" : "Relief",
-	"Coordinate grid" : "Coordinate grid"
+	"Coordinate grid" : "Coordinate grid",
+	"Streets overlay" : "Streets overlay",
+	"Labels overlay" : "Labels overlay"
 });
 
 OpenLayers.Lang.de = OpenLayers.Util.extend(OpenLayers.Lang.de, {
@@ -89,6 +93,8 @@ OpenLayers.Lang.de = OpenLayers.Util.extend(OpenLayers.Lang.de, {
 	"[Remove]" : "[Entfernen]",
 	"attribution-osm" : "Darstellung: ${rendering} (CC-by-SA), Daten: <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a> (CC-by-SA)",
 	"attribution-relief" : "Reliefdarstellung: <a href=\"http://openrouteservice.org/\">Kartografie Universität Bonn</a>/<a href=\"http://srtm.csi.cgiar.org/\">CIAT-CSI SRTM</a> (<a href=\"http://data.giub.uni-bonn.de/openrouteservice/contact.php#disclaimer\">Nutzungsbedingungen</a>)",
+	"attribution-oom-streets" : "Straßenhybrid von <a href=\"http://oobrien.com/oom/\">OpenOrienteeringMap</a> (<a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>-Daten, CC-by-SA)",
+	"attribution-oom-labels" : "Beschriftungen von <a href=\"http://oobrien.com/oom/\">OpenOrienteeringMap</a> (<a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>-Daten, CC-by-SA)",
 	"Create a marker" : "Marker anlegen",
 	"Coordinates" : "Koordinaten",
 	"unknown" : "unbekannt",
@@ -123,7 +129,9 @@ OpenLayers.Lang.de = OpenLayers.Util.extend(OpenLayers.Lang.de, {
 	"Yahoo Satellite" : "Yahoo Satellit",
 	"Yahoo Hybrid" : "Yahoo Hybrid",
 	"Relief" : "Relief",
-	"Coordinate grid" : "Koordinatensystem"
+	"Coordinate grid" : "Koordinatensystem",
+	"Streets overlay" : "Straßen-Hybrid",
+	"Labels overlay" : "Beschriftungen"
 });
 
 /**
@@ -217,6 +225,11 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 			this.addLayer(new OpenLayers.Layer.cdauth.OSM.OPNVKarte(OpenLayers.i18n("ÖPNV-Karte"), { shortName : "OPNV" }));
 		if(OpenLayers.Layer.cdauth.OSM.MinutelyMapnik)
 			this.addLayer(new OpenLayers.Layer.cdauth.OSM.MinutelyMapnik(OpenLayers.i18n("Minutely Mapnik"), { shortName : "MiMa" }));
+
+		if(OpenLayers.Layer.cdauth.OSM.OOMStreets)
+			this.addLayer(new OpenLayers.Layer.cdauth.OSM.OOMStreets(OpenLayers.i18n("Streets overlay"), { shortName : "OOMS", visibility : false }));
+		if(OpenLayers.Layer.cdauth.OSM.OOMLabels)
+			this.addLayer(new OpenLayers.Layer.cdauth.OSM.OOMLabels(OpenLayers.i18n("Labels overlay"), { shortName : "OOML", visibility : false }));
 	},
 
 	addAllAvailableGoogleLayers : function()
@@ -250,12 +263,12 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 	*/
 	addAllAvailableLayers : function()
 	{
+		if(OpenLayers.Layer.cdauth.other.Relief)
+			this.addLayer(new OpenLayers.Layer.cdauth.other.Relief(OpenLayers.i18n("Relief"), { visibility: false, shortName : "Rlie" }));
+
 		this.addAllAvailableOSMLayers();
 		this.addAllAvailableGoogleLayers();
 		this.addAllAvailableYahooLayers();
-
-		if(OpenLayers.Layer.cdauth.other.Relief)
-			this.addLayer(new OpenLayers.Layer.cdauth.other.Relief(OpenLayers.i18n("Relief"), { visibility: false, shortName : "Rlie" }));
 	},
 
 	/**
@@ -762,6 +775,30 @@ if(OpenLayers.Layer.OSM)
 		},
 		CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.MapSurfer.Topographic"
 	});
+
+	/**
+	 * OpenOrienteeringMap (http://oobrien.com/oom/) Street-O overlay.
+	*/
+	OpenLayers.Layer.cdauth.OSM.OOMStreets = new OpenLayers.Class(OpenLayers.Layer.OSM, {
+		attribution : OpenLayers.i18n("attribution-oom-streets"),
+		initialize : function(name, options) {
+			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://tiler3.censusprofiler.org/streeto/${z}/${x}/${y}.png", OpenLayers.Util.extend({ numZoomLevels: 19, isBaseLayer: false }, options) ]);
+		},
+		CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.OOMStreets"
+	});
+
+	/**
+	 * OpenOrienteeringMap (http://oobrien.com/oom/) names overlay.
+	*/
+	OpenLayers.Layer.cdauth.OSM.OOMLabels = new OpenLayers.Class(OpenLayers.Layer.OSM, {
+		attribution : OpenLayers.i18n("attribution-oom-labels"),
+		initialize : function(name, options) {
+			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://tiler2.censusprofiler.org/labelsonly/${z}/${x}/${y}.png", OpenLayers.Util.extend({ numZoomLevels: 19, isBaseLayer: false }, options) ]);
+		},
+		CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.OOMLabels"
+	});
+
+
 }
 
 
