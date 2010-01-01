@@ -314,14 +314,14 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 		this.setCenter(new OpenLayers.LonLat(1*query.lon, 1*query.lat).transform(this.permalinkProjection, this.getProjectionObject()), 1*query.zoom);
 
 		// Set overlay visibility (overlays)
-		if(query.overlays)
+		for(var i=0; i<this.layers.length; i++)
 		{
-			for(var i in query.overlays)
-			{
-				var layers = this.getLayersBy("shortName", i);
-				for(var j=0; j<layers.length; j++)
-					layers[j].setVisibility(query.overlays[i] != "0");
-			}
+			if(this.layers[i].isBaseLayer || typeof this.layers[i].cdauthDefaultVisibility == "undefined" || typeof this.layers[i].shortName == "undefined")
+				continue;
+			if(query.overlays && typeof query.overlays[this.layers[i].shortName] != "undefined")
+				this.layers[i].setVisibility(query.overlays[this.layers[i].shortName] != "0");
+			else
+				this.layers[i].setVisibility(this.layers[i].cdauthDefaultVisibility);
 		}
 
 		// Set LonLat markers (mlon, mlat, mtitle)
