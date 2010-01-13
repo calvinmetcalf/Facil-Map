@@ -783,6 +783,8 @@ if(OpenLayers.Layer.OSM)
 		attribution : OpenLayers.i18n("attribution-oom-streets"),
 		initialize : function(name, options) {
 			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://tiler3.censusprofiler.org/streeto/${z}/${x}/${y}.png", OpenLayers.Util.extend({ numZoomLevels: 19, isBaseLayer: false }, options) ]);
+			// New world-wide tiles. Aren’t transparent anymore so not as good for using them as an overlay as the old ones. See http://www.openstreetmap.org/user/Ollie/diary/9223.
+			//OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://tiler1.censusprofiler.org/streeto/${z}/${x}/${y}.png", OpenLayers.Util.extend({ numZoomLevels: 19, isBaseLayer: false }, options) ]);
 		},
 		CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.OOMStreets"
 	});
@@ -793,7 +795,7 @@ if(OpenLayers.Layer.OSM)
 	OpenLayers.Layer.cdauth.OSM.OOMLabels = new OpenLayers.Class(OpenLayers.Layer.OSM, {
 		attribution : OpenLayers.i18n("attribution-oom-labels"),
 		initialize : function(name, options) {
-			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://tiler2.censusprofiler.org/labelsonly/${z}/${x}/${y}.png", OpenLayers.Util.extend({ numZoomLevels: 19, isBaseLayer: false }, options) ]);
+			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://tiler1.censusprofiler.org/labelsonly/${z}/${x}/${y}.png", OpenLayers.Util.extend({ numZoomLevels: 19, isBaseLayer: false }, options) ]);
 		},
 		CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.OOMLabels"
 	});
