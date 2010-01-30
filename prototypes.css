@@ -4,3 +4,7 @@
 	font-size:smaller;
 	bottom:6em;
 }
+
+.olLayercdauthMarkers img {
+	cursor:pointer;
+}

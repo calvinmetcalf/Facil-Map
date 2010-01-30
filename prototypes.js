@@ -134,6 +134,15 @@ OpenLayers.Lang.de = OpenLayers.Util.extend(OpenLayers.Lang.de, {
 	"Labels overlay" : "Beschriftungen"
 });
 
+// Save parent classes in class objects, needed for makeClassName()
+OpenLayers.cdauthClassBackup = OpenLayers.Class;
+OpenLayers.Class = function() {
+	var ret = OpenLayers.cdauthClassBackup.apply(this, arguments);
+	ret.prototype.cdauthParentClasses = arguments;
+	return ret;
+};
+OpenLayers.Class.isPrototype = OpenLayers.cdauthClassBackup.isPrototype;
+
 /**
  * A map with the default values needed for OpenStreetMap and other world maps.
  * If you plan to use the getQueryMethod() function, remember to set the visibility of your overlay layers _before_ adding them to the map.
@@ -199,6 +208,8 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 
 		if(typeof layer.cdauthDefaultVisibility == "undefined")
 			layer.cdauthDefaultVisibility = layer.getVisibility();
+
+		layer.div.className = makeClassName(layer) + " " + layer.div.className;
 	},
 
 	addAllAvailableOSMLayers : function()
@@ -712,7 +723,7 @@ if(OpenLayers.Layer.OSM)
 	/**
 	 * OpenStreetBrowser rendering of OpenStreetMap data. See http://openstreetbrowser.org/.
 	*/
-	OpenLayers.Layer.cdauth.OSM.OpenStreetBrowser = new OpenLayers.Class(OpenLayers.Layer.OSM, {
+	OpenLayers.Layer.cdauth.OSM.OpenStreetBrowser = OpenLayers.Class(OpenLayers.Layer.OSM, {
 		initialize: function(name, options) {
 			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://openstreetbrowser.org/tiles/base/${z}/${x}/${y}.png", OpenLayers.Util.extend({numZoomLevels: 19, attribution: OpenLayers.String.format(OpenLayers.i18n("attribution-osm"), { rendering: "<a href=\"http://www.openstreetbrowser.org/\">OpenStreetBrowser</a>" })}, options) ]);
 		},
@@ -722,7 +733,7 @@ if(OpenLayers.Layer.OSM)
 	/**
 	 * OpenPisteMap rendering of OpenStreetMap data. See http://openpistemap.org/.
 	*/
-	OpenLayers.Layer.cdauth.OSM.OpenPisteMap = new OpenLayers.Class(OpenLayers.Layer.OSM, {
+	OpenLayers.Layer.cdauth.OSM.OpenPisteMap = OpenLayers.Class(OpenLayers.Layer.OSM, {
 		initialize: function(name, options) {
 			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://openpistemap.org/tiles/contours/${z}/${x}/${y}.png", OpenLayers.Util.extend({numZoomLevels: 18, attribution: OpenLayers.String.format(OpenLayers.i18n("attribution-osm"), { rendering: "<a href=\"http://www.openpistemap.org/\">OpenPisteMap</a>" })}, options) ]);
 		},
@@ -732,7 +743,7 @@ if(OpenLayers.Layer.OSM)
 	/**
 	 * OSM Reit- und Wanderkarte rendering of OSM foot- and bridle ways. See http://osmc.broadbox.de/.
 	*/
-	OpenLayers.Layer.cdauth.OSM.Wanderkarte = new OpenLayers.Class(OpenLayers.Layer.OSM, {
+	OpenLayers.Layer.cdauth.OSM.Wanderkarte = OpenLayers.Class(OpenLayers.Layer.OSM, {
 		initialize: function(name, options) {
 			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://topo.geofabrik.de/trails/${z}/${x}/${y}.png", OpenLayers.Util.extend({minZoomLevel: 8, maxZoomLevel: 15, attribution: OpenLayers.String.format(OpenLayers.i18n("attribution-osm"), { rendering: "<a href=\"http://osmc.broadbox.de/\">OSMC Reit- und Wanderkarte</a>" })}, options) ]);
 		},
@@ -742,7 +753,7 @@ if(OpenLayers.Layer.OSM)
 	/**
 	 * OpenStreetMap data rendering by ÖPNV-Karte (PSV map).
 	*/
-	OpenLayers.Layer.cdauth.OSM.OPNVKarte = new OpenLayers.Class(OpenLayers.Layer.OSM, {
+	OpenLayers.Layer.cdauth.OSM.OPNVKarte = OpenLayers.Class(OpenLayers.Layer.OSM, {
 		initialize: function(name, options) {
 			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://tile.xn--pnvkarte-m4a.de/tilegen/${z}/${x}/${y}.png", OpenLayers.Util.extend({numZoomLevels: 19, attribution: OpenLayers.String.format(OpenLayers.i18n("attribution-osm"), { rendering: "<a href=\"http://www.xn--pnvkarte-m4a.de/\">ÖPNV-Karte</a>" })}, options) ]);
 		},
@@ -752,7 +763,7 @@ if(OpenLayers.Layer.OSM)
 	/**
 	 * Parent class for MapSurfer (http://www.mapsurfer.net/) renderings.
 	*/
-	OpenLayers.Layer.cdauth.OSM.MapSurfer = new OpenLayers.Class(OpenLayers.Layer.OSM, {
+	OpenLayers.Layer.cdauth.OSM.MapSurfer = OpenLayers.Class(OpenLayers.Layer.OSM, {
 		attribution : OpenLayers.String.format(OpenLayers.i18n("attribution-osm"), { rendering: "<a href=\"http://www.mapsurfer.net/\">MapSurfer</a>" }),
 		CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.MapSurfer"
 	});
@@ -760,7 +771,7 @@ if(OpenLayers.Layer.OSM)
 	/**
 	 * MapSurfer road map.
 	*/
-	OpenLayers.Layer.cdauth.OSM.MapSurfer.Road = new OpenLayers.Class(OpenLayers.Layer.cdauth.OSM.MapSurfer, {
+	OpenLayers.Layer.cdauth.OSM.MapSurfer.Road = OpenLayers.Class(OpenLayers.Layer.cdauth.OSM.MapSurfer, {
 		initialize : function(name, options) {
 			OpenLayers.Layer.cdauth.OSM.MapSurfer.prototype.initialize.apply(this, [ name, "http://tiles1.mapsurfer.net/tms_r.ashx?x=${x}&y=${y}&z=${z}", options ]);
 		},
@@ -770,7 +781,7 @@ if(OpenLayers.Layer.OSM)
 	/**
 	 * MapSurfer topographic map.
 	*/
-	OpenLayers.Layer.cdauth.OSM.MapSurfer.Topographic = new OpenLayers.Class(OpenLayers.Layer.cdauth.OSM.MapSurfer, {
+	OpenLayers.Layer.cdauth.OSM.MapSurfer.Topographic = OpenLayers.Class(OpenLayers.Layer.cdauth.OSM.MapSurfer, {
 		initialize : function(name, options) {
 			OpenLayers.Layer.cdauth.OSM.MapSurfer.prototype.initialize.apply(this, [ name, "http://tiles2.mapsurfer.net/tms_t.ashx?x=${x}&y=${y}&z=${z}", options ]);
 		},
@@ -780,7 +791,7 @@ if(OpenLayers.Layer.OSM)
 	/**
 	 * OpenOrienteeringMap (http://oobrien.com/oom/) Street-O overlay.
 	*/
-	OpenLayers.Layer.cdauth.OSM.OOMStreets = new OpenLayers.Class(OpenLayers.Layer.OSM, {
+	OpenLayers.Layer.cdauth.OSM.OOMStreets = OpenLayers.Class(OpenLayers.Layer.OSM, {
 		attribution : OpenLayers.i18n("attribution-oom-streets"),
 		initialize : function(name, options) {
 			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://tiler3.censusprofiler.org/streeto/${z}/${x}/${y}.png", OpenLayers.Util.extend({ numZoomLevels: 19, isBaseLayer: false }, options) ]);
@@ -793,7 +804,7 @@ if(OpenLayers.Layer.OSM)
 	/**
 	 * OpenOrienteeringMap (http://oobrien.com/oom/) names overlay.
 	*/
-	OpenLayers.Layer.cdauth.OSM.OOMLabels = new OpenLayers.Class(OpenLayers.Layer.OSM, {
+	OpenLayers.Layer.cdauth.OSM.OOMLabels = OpenLayers.Class(OpenLayers.Layer.OSM, {
 		attribution : OpenLayers.i18n("attribution-oom-labels"),
 		initialize : function(name, options) {
 			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://tiler1.censusprofiler.org/labelsonly/${z}/${x}/${y}.png", OpenLayers.Util.extend({ numZoomLevels: 19, isBaseLayer: false }, options) ]);
@@ -811,7 +822,7 @@ if(OpenLayers.Layer.WMS)
 	 * Relief rendering from Kartografie Universität Bonn / OpenRouteService
 	*/
 
-	OpenLayers.Layer.cdauth.other.Relief = new OpenLayers.Class(OpenLayers.Layer.WMS, {
+	OpenLayers.Layer.cdauth.other.Relief = OpenLayers.Class(OpenLayers.Layer.WMS, {
 		initialize: function(name, options) {
 			OpenLayers.Layer.WMS.prototype.initialize.apply(this, [ name, "http://services.giub.uni-bonn.de/hillshade?", {layers: 'europe_wms:hs_srtm_europa',srs: 'EPSG:900913', format: 'image/JPEG', transparent: 'true' }, OpenLayers.Util.extend({attribution: OpenLayers.i18n("attribution-relief"), opacity: 0.2 }, options) ]);
 		},
@@ -826,7 +837,7 @@ if(OpenLayers.Layer.Google && typeof GMap2 != "undefined")
 	 * Get a Google map key from http://code.google.com/apis/maps/signup.html and include
 	 * http://maps.google.com/maps?file=api&v=2&key=[Your key] for this to work.
 	*/
-	OpenLayers.Layer.cdauth.Google.Maps = new OpenLayers.Class(OpenLayers.Layer.Google, {
+	OpenLayers.Layer.cdauth.Google.Maps = OpenLayers.Class(OpenLayers.Layer.Google, {
 		initialize: function(name, options) {
 			OpenLayers.Layer.Google.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({sphericalMercator: true}, options) ]);
 		},
@@ -840,7 +851,7 @@ if(OpenLayers.Layer.Google && typeof GMap2 != "undefined")
 	*/
 	if(typeof G_SATELLITE_MAP != "undefined")
 	{
-		OpenLayers.Layer.cdauth.Google.MapsSatellite = new OpenLayers.Class(OpenLayers.Layer.cdauth.Google.Maps, {
+		OpenLayers.Layer.cdauth.Google.MapsSatellite = OpenLayers.Class(OpenLayers.Layer.cdauth.Google.Maps, {
 			initialize: function(name, options) {
 				OpenLayers.Layer.cdauth.Google.Maps.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({type: G_SATELLITE_MAP, numZoomLevels: 22}, options) ]);
 			},
@@ -855,7 +866,7 @@ if(OpenLayers.Layer.Google && typeof GMap2 != "undefined")
 	*/
 	if(typeof G_HYBRID_MAP != "undefined")
 	{
-		OpenLayers.Layer.cdauth.Google.MapsHybrid = new OpenLayers.Class(OpenLayers.Layer.cdauth.Google.Maps, {
+		OpenLayers.Layer.cdauth.Google.MapsHybrid = OpenLayers.Class(OpenLayers.Layer.cdauth.Google.Maps, {
 			initialize: function(name, options) {
 				OpenLayers.Layer.cdauth.Google.Maps.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({type: G_HYBRID_MAP}, options) ]);
 			},
@@ -870,7 +881,7 @@ if(OpenLayers.Layer.Google && typeof GMap2 != "undefined")
 	*/
 	if(typeof G_PHYSICAL_MAP != "undefined")
 	{
-		OpenLayers.Layer.cdauth.Google.MapsTerrain = new OpenLayers.Class(OpenLayers.Layer.cdauth.Google.Maps, {
+		OpenLayers.Layer.cdauth.Google.MapsTerrain = OpenLayers.Class(OpenLayers.Layer.cdauth.Google.Maps, {
 			initialize: function(name, options) {
 				OpenLayers.Layer.cdauth.Google.Maps.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({type: G_PHYSICAL_MAP}, options) ]);
 			},
@@ -885,7 +896,7 @@ if(OpenLayers.Layer.Google && typeof GMap2 != "undefined")
 	*/
 	if(typeof G_MAPMAKER_NORMAL_MAP != "undefined")
 	{
-		OpenLayers.Layer.cdauth.Google.MapMaker = new OpenLayers.Class(OpenLayers.Layer.cdauth.Google.Maps, {
+		OpenLayers.Layer.cdauth.Google.MapMaker = OpenLayers.Class(OpenLayers.Layer.cdauth.Google.Maps, {
 			initialize: function(name, options) {
 				OpenLayers.Layer.cdauth.Google.Maps.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({type: G_MAPMAKER_NORMAL_MAP}, options) ]);
 			},
@@ -900,7 +911,7 @@ if(OpenLayers.Layer.Google && typeof GMap2 != "undefined")
 	*/
 	if(typeof G_MAPMAKER_HYBRID_MAP != "undefined")
 	{
-		OpenLayers.Layer.cdauth.Google.MapMakerHybrid = new OpenLayers.Class(OpenLayers.Layer.cdauth.Google.Maps, {
+		OpenLayers.Layer.cdauth.Google.MapMakerHybrid = OpenLayers.Class(OpenLayers.Layer.cdauth.Google.Maps, {
 			initialize: function(name, options) {
 				OpenLayers.Layer.cdauth.Google.Maps.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({type: G_MAPMAKER_HYBRID_MAP}, options) ]);
 			},
@@ -915,7 +926,7 @@ if(OpenLayers.Layer.Yahoo && typeof YMap != "undefined")
 	 * Yahoo Streets (http://maps.yahoo.com/)
 	 * Include http://api.maps.yahoo.com/ajaxymap?v=3.0&appid=cdauths-map for this to work.
 	*/
-	OpenLayers.Layer.cdauth.Yahoo.Maps = new OpenLayers.Class(OpenLayers.Layer.Yahoo, {
+	OpenLayers.Layer.cdauth.Yahoo.Maps = OpenLayers.Class(OpenLayers.Layer.Yahoo, {
 		initialize: function(name, options) {
 			OpenLayers.Layer.Yahoo.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({sphericalMercator: true}, options) ]);
 		},
@@ -928,7 +939,7 @@ if(OpenLayers.Layer.Yahoo && typeof YMap != "undefined")
 	*/
 	if(typeof YAHOO_MAP_SAT != "undefined")
 	{
-		OpenLayers.Layer.cdauth.Yahoo.Satellite = new OpenLayers.Class(OpenLayers.Layer.cdauth.Yahoo.Maps, {
+		OpenLayers.Layer.cdauth.Yahoo.Satellite = OpenLayers.Class(OpenLayers.Layer.cdauth.Yahoo.Maps, {
 			initialize: function(name, options) {
 				OpenLayers.Layer.cdauth.Yahoo.Maps.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({type: YAHOO_MAP_SAT}, options) ]);
 			},
@@ -942,7 +953,7 @@ if(OpenLayers.Layer.Yahoo && typeof YMap != "undefined")
 	*/
 	if(typeof YAHOO_MAP_HYB != "undefined")
 	{
-		OpenLayers.Layer.cdauth.Yahoo.Hybrid = new OpenLayers.Class(OpenLayers.Layer.cdauth.Yahoo.Maps, {
+		OpenLayers.Layer.cdauth.Yahoo.Hybrid = OpenLayers.Class(OpenLayers.Layer.cdauth.Yahoo.Maps, {
 			initialize: function(name, options) {
 				OpenLayers.Layer.cdauth.Yahoo.Maps.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({type: YAHOO_MAP_HYB}, options) ]);
 			},
@@ -958,7 +969,7 @@ if(OpenLayers.Layer.Yahoo && typeof YMap != "undefined")
  * @event close
 */
 
-OpenLayers.Popup.FramedCloud.cdauth = new OpenLayers.Class(OpenLayers.Popup.FramedCloud, {
+OpenLayers.Popup.FramedCloud.cdauth = OpenLayers.Class(OpenLayers.Popup.FramedCloud, {
 	contentDom: null,
 	autoSize: true,
 	initialize: function(id, lonlat, contentSize, contentDom, anchor, closeBox, closeBoxCallback) {
@@ -1024,7 +1035,9 @@ OpenLayers.Popup.FramedCloud.cdauth = new OpenLayers.Class(OpenLayers.Popup.Fram
  * @event markersChanged A marker popup has been opened or closed.
 */
 
-OpenLayers.Layer.cdauth.Markers = new OpenLayers.Class(OpenLayers.Layer.Markers, {
+OpenLayers.Layer.cdauth.Markers = OpenLayers.Class(OpenLayers.Layer.Markers, {
+	defaultIcon : new OpenLayers.Icon('http://osm.cdauth.de/map/marker.png', new OpenLayers.Size(21,25), new OpenLayers.Pixel(-9, -25)),
+	openPopupsOnShow : [ ],
 	initialize : function(name, options) {
 		OpenLayers.Layer.Markers.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({zoomableInLayerSwitcher: true, projection: new OpenLayers.Projection("EPSG:4326")}, options) ]);
 		this.events.addEventType("markersChanged");
@@ -1049,8 +1062,6 @@ OpenLayers.Layer.cdauth.Markers = new OpenLayers.Class(OpenLayers.Layer.Markers,
 			}
 		});
 	},
-	defaultIcon : new OpenLayers.Icon('http://osm.cdauth.de/map/marker.png', new OpenLayers.Size(21,25), new OpenLayers.Pixel(-9, -25)),
-	openPopupsOnShow : [ ],
 	/**
 	 * Creates a marker with a popup (OpenLayers.Popup.FramedCloud) on this layer. The visibility of the popup can be toggled by clicking
 	 * on the marker.
@@ -1126,7 +1137,7 @@ OpenLayers.Layer.cdauth.Markers = new OpenLayers.Class(OpenLayers.Layer.Markers,
  * @event markerRemoved
 */
 
-OpenLayers.Layer.cdauth.Markers.LonLat = new OpenLayers.Class(OpenLayers.Layer.cdauth.Markers, {
+OpenLayers.Layer.cdauth.Markers.LonLat = OpenLayers.Class(OpenLayers.Layer.cdauth.Markers, {
 	/**
 	 * The projection in which coordinates should be displayed in the popups.
 	*/
@@ -1233,7 +1244,7 @@ OpenLayers.Control.cdauth.CreateMarker = OpenLayers.Class(OpenLayers.Control, {
  * @event searchFailure No results have been found or an error occured
 */
 
-OpenLayers.Layer.cdauth.Markers.GeoSearch = new OpenLayers.Class(OpenLayers.Layer.cdauth.Markers, {
+OpenLayers.Layer.cdauth.Markers.GeoSearch = OpenLayers.Class(OpenLayers.Layer.cdauth.Markers, {
 	lastSearch : false,
 
 	/**
@@ -1449,7 +1460,7 @@ OpenLayers.Layer.cdauth.Markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
  * If you set OpenLayers.Layer.cdauth.XML.relationURL, OSM sub-relations will be loaded in additional requests.
 */
 
-OpenLayers.Layer.cdauth.XML = new OpenLayers.Class(OpenLayers.Layer.GML, {
+OpenLayers.Layer.cdauth.XML = OpenLayers.Class(OpenLayers.Layer.GML, {
 	cdauthURL : null,
 	relations : { },
 	colour : null,
@@ -1556,7 +1567,7 @@ OpenLayers.Layer.cdauth.XML.colourCounter = 1;
  * A class to control the URL hash part.
  * @event hashChanged The URL hash has been changed by the user
 */
-OpenLayers.URLHashHandler = new OpenLayers.Class({
+OpenLayers.URLHashHandler = OpenLayers.Class({
 	/**
 	 * The interval in milliseconds, how often location.hash shall be checked for changes.
 	 * @var Number
@@ -1662,7 +1673,7 @@ OpenLayers.URLHashHandler = new OpenLayers.Class({
  * An instance of this class keeps the location hash part in sync with the Permalink of a map object.
  * @event hashChanged location.hash was changed.
 */
-OpenLayers.Control.cdauth.URLHashHandler = new OpenLayers.Class(OpenLayers.Control, {
+OpenLayers.Control.cdauth.URLHashHandler = OpenLayers.Class(OpenLayers.Control, {
 	/**
 	 * @var OpenLayers.URLHashHandler
 	*/
@@ -1763,7 +1774,7 @@ OpenLayers.Control.cdauth.URLHashHandler = new OpenLayers.Class(OpenLayers.Contr
  * the map there.
 */
 
-OpenLayers.Control.cdauth.GeoLocation = new OpenLayers.Class(OpenLayers.Control, {
+OpenLayers.Control.cdauth.GeoLocation = OpenLayers.Class(OpenLayers.Control, {
 	/**
 	 * The zoom level to use when zooming to the user’s location.
 	 * @var Number
@@ -1816,7 +1827,7 @@ OpenLayers.Control.cdauth.GeoLocation = new OpenLayers.Class(OpenLayers.Control,
 /**
  * A coordinate grid on the map. Draws coordinate lines on the map in a scale that maxHorizontalLines and maxVerticalLines aren’t exceeded.
 */
-OpenLayers.Layer.cdauth.CoordinateGrid = new OpenLayers.Class(OpenLayers.Layer.Vector, {
+OpenLayers.Layer.cdauth.CoordinateGrid = OpenLayers.Class(OpenLayers.Layer.Vector, {
 	/**
 	 * The maximum number of horizontal coordinate lines on the viewport.
 	 * @var Number
@@ -2242,6 +2253,44 @@ function decodeShortLink(encoded)
 		lonlat : new OpenLayers.LonLat(lon, lat),
 		zoom : zoom
 	};
+}
+
+/**
+ * Makes a usable class name out of an OpenLayers.Class object. Adds all parent classes to the class name, too.
+ * The class name for an OpenLayers.Map.cdauth object would be "olMapcdauth olMap" for example.
+ * The class name is determined by the CLASS_NAME property.
+ * @param Object olObject Either a class returned by OpenLayers.Class() or an instance of such a class.
+ * @return String
+ */
+function makeClassName(olObject)
+{
+	var array = arguments[1];
+	if(array == undefined)
+		array = { };
+
+	if(olObject != undefined)
+	{
+		var olClass = (olObject.prototype != undefined ? olObject.prototype : olObject);
+		if(olClass.CLASS_NAME != undefined)
+			array[olClass.CLASS_NAME.replace("OpenLayers.", "ol").replace(/\./g, "")] = true;
+		if(olClass.cdauthParentClasses != undefined)
+		{
+			for(var i=0; i<olClass.cdauthParentClasses.length; i++)
+				makeClassName(olClass.cdauthParentClasses[i], array);
+		}
+	}
+
+	if(arguments[1] == undefined)
+	{
+		var ret = "";
+		for(var it in array)
+		{
+			if(ret != "")
+				ret += " ";
+			ret += it;
+		}
+		return ret;
+	}
 }
 
 function alert_r(data)
