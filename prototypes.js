@@ -164,11 +164,12 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 				new OpenLayers.Control.cdauth.KeyboardDefaults(),
 				new OpenLayers.Control.MousePosition(),
 				new OpenLayers.Control.ScaleLine() ],
+			//maxExtent: new OpenLayers.Bounds(-180, -85, 180, 85), // FIXME: 4326 as projection does not seem to work
 			maxExtent: new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34),
 			maxResolution: 156543.0399,
 			numZoomLevels: 19,
 			units: 'm',
-			projection: new OpenLayers.Projection("EPSG:4326"),
+			projection: new OpenLayers.Projection("EPSG:900913"),
 			displayProjection: new OpenLayers.Projection("EPSG:4326")
 		}, options) ]);
 
@@ -350,10 +351,10 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 					if(thisLayer.length < 1)
 						continue;
 					for(var j in query.mlat[i])
-						thisLayer[0].addLonLatMarker(new OpenLayers.LonLat(1*query.mlon[i][j], 1*query.mlat[i][j]).transform(this.permalinkProjection, this.getProjectionObject()), (query.mtitle && typeof query.mtitle == "object" && query.mtitle[i] && typeof query.mtitle[i] == "object") ? htmlspecialchars(query.mtitle[i][j]) : null);
+						thisLayer[0].addLonLatMarker(new OpenLayers.LonLat(1*query.mlon[i][j], 1*query.mlat[i][j]), (query.mtitle && typeof query.mtitle == "object" && query.mtitle[i] && typeof query.mtitle[i] == "object") ? htmlspecialchars(query.mtitle[i][j]) : null);
 				}
 				else
-					firstLayer.addLonLatMarker(new OpenLayers.LonLat(1*query.mlon[i], 1*query.mlat[i]).transform(this.permalinkProjection, this.getProjectionObject()), (query.mtitle && typeof query.mtitle == "object") ? htmlspecialchars(query.mtitle[i]) : null);
+					firstLayer.addLonLatMarker(new OpenLayers.LonLat(1*query.mlon[i], 1*query.mlat[i]), (query.mtitle && typeof query.mtitle == "object") ? htmlspecialchars(query.mtitle[i]) : null);
 			}
 
 			// Adding markers might have moved the map, reset map view
@@ -1062,7 +1063,7 @@ OpenLayers.Layer.cdauth.Markers = new OpenLayers.Class(OpenLayers.Layer.Markers,
 	 * that connects the marker with the popup. The marker triggers the events “open” or “close” when changing the visibility of the popup.
 	*/
 	createMarker : function(lonlat, popupContent, popupVisible, icon, noPan) {
-		var feature = new OpenLayers.Feature(this, lonlat);
+		var feature = new OpenLayers.Feature(this, lonlat.clone().transform(this.projection, this.map.getProjectionObject()));
 		feature.data.icon = icon ? icon : this.defaultIcon.clone();
 		if(popupContent)
 		{
@@ -1217,7 +1218,7 @@ OpenLayers.Control.cdauth.CreateMarker = OpenLayers.Class(OpenLayers.Control, {
 	click: function(e) {
 		if(!this.map) return true;
 
-		var lonlat = this.map.getLonLatFromViewPortPx(e.xy);
+		var lonlat = this.map.getLonLatFromViewPortPx(e.xy).clone().transform(this.map.getProjectionObject(), this.cdauthLayer.projection);
 		this.cdauthLayer.addLonLatMarker(lonlat);
 	},
 
@@ -1417,7 +1418,7 @@ OpenLayers.Layer.cdauth.Markers.GeoSearch = new OpenLayers.Class(OpenLayers.Laye
 			else if(i == 0)
 				icon = this.highlightIcon.clone();
 			var marker = this.createMarker(
-				results[i].lonlat.clone().transform(new OpenLayers.Projection("EPSG:4326"), this.map.getProjectionObject()),
+				results[i].lonlat,
 				content,
 				((markersvisible && typeof markersvisible[i] != "undefined" && markersvisible[i] != "0") || ((!markersvisible || typeof markersvisible[i] == "undefined") && i==0)),
 				icon,
