@@ -164,11 +164,12 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 
 	initialize : function(div, options)
 	{
+		var keyboardControl = new OpenLayers.Control.cdauth.LayerSwitcher();
 		OpenLayers.Map.prototype.initialize.apply(this, [ div, OpenLayers.Util.extend({
 			controls: [
 				new OpenLayers.Control.Navigation(),
 				new OpenLayers.Control.PanZoomBar(),
-				new OpenLayers.Control.cdauth.LayerSwitcher(),
+				keyboardControl,
 				new OpenLayers.Control.Attribution(),
 				new OpenLayers.Control.cdauth.KeyboardDefaults(),
 				new OpenLayers.Control.MousePosition(),
@@ -190,6 +191,9 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 		this.events.register("move", this, function(){ this.events.triggerEvent("newHash"); });
 		this.events.register("changebaselayer", this, function(){ this.events.triggerEvent("newHash"); });
 		this.events.register("changelayer", this, function(){ this.events.triggerEvent("newHash"); });
+
+		//OpenLayers.Event.observe(this.viewPortDiv, "mouseover", OpenLayers.Function.bindAsEventListener(function(){ keyboardControl.activate(); }, this));
+		//OpenLayers.Event.observe(this.viewPortDiv, "mouseout", OpenLayers.Function.bindAsEventListener(function(){ keyboardControl.deactivate(); }, this));
 	},
 
 	updateSize : function()
