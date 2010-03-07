@@ -14,8 +14,8 @@
 	You should have received a copy of the GNU Affero General Public License
 	along with cdauth’s map.  If not, see <http://www.gnu.org/licenses/>.
 
-	Obtain the source code from http://svn.cdauth.de/viewvc.cgi/Tools/osm/map/
-	or svn://svn.cdauth.de/tools/osm/map/.
+	Obtain the source code from http://gitorious.org/cdauths-map
+	or git://gitorious.org/cdauths-map/map.git.
 */
 
 /**
@@ -164,14 +164,14 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 
 	initialize : function(div, options)
 	{
-		var keyboardControl = new OpenLayers.Control.cdauth.LayerSwitcher();
+		var keyboardControl = new OpenLayers.Control.cdauth.KeyboardDefaults();
 		OpenLayers.Map.prototype.initialize.apply(this, [ div, OpenLayers.Util.extend({
 			controls: [
 				new OpenLayers.Control.Navigation(),
 				new OpenLayers.Control.PanZoomBar(),
-				keyboardControl,
+				new OpenLayers.Control.cdauth.LayerSwitcher(),
 				new OpenLayers.Control.Attribution(),
-				new OpenLayers.Control.cdauth.KeyboardDefaults(),
+				keyboardControl,
 				new OpenLayers.Control.MousePosition(),
 				new OpenLayers.Control.ScaleLine() ],
 			//maxExtent: new OpenLayers.Bounds(-180, -85, 180, 85), // FIXME: 4326 as projection does not seem to work
@@ -213,7 +213,38 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 		if(typeof layer.cdauthDefaultVisibility == "undefined")
 			layer.cdauthDefaultVisibility = layer.getVisibility();
 
+		layer.events.addEventType("queryObjectChanged");
+
+		if(layer.saveInPermalink)
+			layer.events.register("queryObjectChanged", this, function() { this.events.triggerEvent("newHash"); });
+
+		layer.getQueryObjectFixed = function() {
+			var ret = (this.getQueryObject == undefined || !this.saveInPermalink ? { } : this.getQueryObject());
+			if(!this.isBaseLayer && this.getVisibility() != this.cdauthDefaultVisibility)
+				ret.visibility = this.getVisibility();
+			return ret;
+		};
+
+		layer.setQueryObjectFixed = function(obj) {
+			if(!this.isBaseLayer)
+				this.setVisibility(typeof obj.visibility == "undefined" ? this.cdauthDefaultVisibility : (obj.visibility != "0"));
+			if(this.setQueryObject != undefined)
+				this.setQueryObject(obj);
+		};
+
 		layer.div.className = makeClassName(layer) + " " + layer.div.className;
+
+		if(layer.saveInPermalink && layer.removableInLayerSwitcher)
+			this.events.triggerEvent("newHash");
+	},
+
+	removeLayer : function(layer)
+	{
+		var trigger = (layer.saveInPermalink && layer.removableInLayerSwitcher);
+		var ret = OpenLayers.Map.prototype.removeLayer.apply(this, arguments);
+		if(trigger)
+			this.events.triggerEvent("newHash");
+		return ret;
 	},
 
 	addAllAvailableOSMLayers : function()
@@ -309,7 +340,7 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 		}
 
 		if(this.baseLayer == null)
-		{
+		{ // Activate first base layer
 			for(var i=0; i<this.layers.length; i++)
 			{
 				if(this.layers[i].isBaseLayer)
@@ -329,129 +360,88 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 			query.zoom = 2;
 		this.setCenter(new OpenLayers.LonLat(1*query.lon, 1*query.lat).transform(this.permalinkProjection, this.getProjectionObject()), 1*query.zoom);
 
-		// Set overlay visibility (overlays)
-		for(var i=0; i<this.layers.length; i++)
+		// Initialise removable layers
+		var removableLayers = { };
+		if(typeof query.r == "object")
 		{
-			if(this.layers[i].isBaseLayer || typeof this.layers[i].cdauthDefaultVisibility == "undefined" || typeof this.layers[i].shortName == "undefined")
-				continue;
-			if(query.overlays && typeof query.overlays[this.layers[i].shortName] != "undefined")
-				this.layers[i].setVisibility(query.overlays[this.layers[i].shortName] != "0");
-			else
-				this.layers[i].setVisibility(this.layers[i].cdauthDefaultVisibility);
-		}
-
-		// Set LonLat markers (mlon, mlat, mtitle)
-		var firstLayer = null;
-		for(var i=0; i<this.layers.length; i++)
-		{
-			if(this.layers[i] instanceof OpenLayers.Layer.cdauth.Markers.LonLat)
+			var redrawLayerSwitcher = false;
+			for(var i in query.r)
 			{
-				if(firstLayer == null)
-					firstLayer = this.layers[i];
-				this.layers[i].clearMarkers();
-			}
-		}
+				if(query.r[i]["class"] == undefined || query.r[i].name == undefined)
+					continue;
 
-		if(firstLayer != null && query.mlat && query.mlon && typeof query.mlat == "object" && typeof query.mlon == "object")
-		{
-			for(var i in query.mlat)
-			{
-				if(typeof query.mlon[i] == "undefined") continue;
+				removableLayers[i] = true;
 
-				if(typeof query.mlat[i] == "object")
+				var existingLayers = this.getLayersBy("shortName", i);
+				var alreadyExists = false;
+				for(var j=0; j<existingLayers.length; j++)
 				{
-					if(typeof query.mlon[i] != "object")
-						continue;
-					var thisLayer = this.getLayersBy("shortName", i);
-					if(thisLayer.length < 1)
-						continue;
-					for(var j in query.mlat[i])
-						thisLayer[0].addLonLatMarker(new OpenLayers.LonLat(1*query.mlon[i][j], 1*query.mlat[i][j]), (query.mtitle && typeof query.mtitle == "object" && query.mtitle[i] && typeof query.mtitle[i] == "object") ? htmlspecialchars(query.mtitle[i][j]) : null);
-				}
-				else
-					firstLayer.addLonLatMarker(new OpenLayers.LonLat(1*query.mlon[i], 1*query.mlat[i]), (query.mtitle && typeof query.mtitle == "object") ? htmlspecialchars(query.mtitle[i]) : null);
-			}
-
-			// Adding markers might have moved the map, reset map view
-			this.setCenter(new OpenLayers.LonLat(1*query.lon, 1*query.lat).transform(this.permalinkProjection, this.getProjectionObject()), 1*query.zoom);
-		}
-
-		// Perform GeoSearches (search, smopen)
-		firstLayer = null;
-		for(var i=0; i<this.layers.length; i++)
-		{
-			if(this.layers[i] instanceof OpenLayers.Layer.cdauth.Markers.GeoSearch)
-			{
-				if(firstLayer == null)
-					firstLayer = this.layers[i];
-				this.layers[i].geoSearch("");
-			}
-		}
-
-		if(firstLayer != null)
-		{
-			if(typeof query.search == "object")
-			{
-				for(var i in query.search)
-				{
-					var thisLayer = this.getLayersBy("shortName", i);
-					if(thisLayer.length < 1)
-						continue;
-
-					thisLayer[0].geoSearch(query.search[i], !search_may_zoom, (typeof query.smopen == "object" ? query.smopen[i] : null));
-				}
-			}
-			else
-				firstLayer.geoSearch(query.search, !search_may_zoom, query.smopen);
-		}
-
-		// Handle removable GPX layers (xml)
-		var xmlLayers = [ ];
-		for(var i=0; i<this.layers.length; i++)
-		{
-			if(!(this.layers[i] instanceof OpenLayers.Layer.cdauth.XML) || !this.layers[i].removableInLayerSwitcher)
-				continue;
-
-			var inside = false;
-			if(query.xml)
-			{
-				for(var j in query.xml)
-				{
-					if(query.xml[j] == this.layers[i].cdauthURL)
+					if(existingLayers[j].CLASS_NAME == "OpenLayers.Layer."+query.r[i]["class"])
 					{
-						inside = true;
-						break;
+						if(existingLayers[j].name != query.r[i].name)
+						{
+							existingLayers[j].name = query.r[i].name;
+							redrawLayerSwitcher = true;
+						}
+						alreadyExists = true;
 					}
+					else
+						this.removeLayer(existingLayers[j]);
 				}
-			}
 
-			if(!inside)
-			{
-				this.removeLayer(this.layers[i]);
-				this.layers[i].destroy();
-			}
-			else
-				xmlLayers.push(this.layers[i]);
-		}
+				if(alreadyExists)
+					continue;
 
-		if(query.xml)
-		{
-			for(var j in query.xml)
-			{
-				var inside = false;
-				for(var i=0; i<xmlLayers.length; i++)
+				var classNameParts = query.r[i]["class"].split(/\./);
+				var layerClass = OpenLayers.Layer;
+				for(var j=0; j<classNameParts.length; j++)
 				{
-					if(query.xml[j] == xmlLayers[i].cdauthURL)
-					{
-						inside = true;
+					layerClass = layerClass[classNameParts[j]];
+					if(!layerClass)
 						break;
-					}
 				}
+				if(!layerClass)
+					continue;
 
-				if(!inside)
-					this.addLayer(new OpenLayers.Layer.cdauth.XML(null, query.xml[j], { removableInLayerSwitcher: true }));
+				var layer = new layerClass(query.r[i].name);
+				layer.shortName = i;
+				layer.saveInPermalink = true;
+				layer.removableInLayerSwitcher = true;
+				this.addLayer(layer);
+				redrawLayerSwitcher = true;
+			}
+
+			if(redrawLayerSwitcher)
+			{ // Update the removableInLayerSwitcher links
+				for(var i=0; i<this.controls.length; i++)
+				{
+					if(this.controls[i] instanceof OpenLayers.Control.cdauth.LayerSwitcher)
+						this.controls[i].redraw(true);
+				}
 			}
 		}
+		// Remove removable layers that are not in the request
+		var removeLayers = [ ];
+		for(var i=0; i<this.layers.length; i++)
+		{
+			if(this.layers[i].removableInLayerSwitcher && !removableLayers[this.layers[i].shortName])
+				removeLayers.push(this.layers[i]);
+		}
+		for(var i=0; i<removeLayers.length; i++)
+			this.removeLayer(removeLayers[i]);
+
+		// Set layer properties
+		for(var i=0; i<this.layers.length; i++)
+		{
+			var obj = { };
+			if(typeof query.l == "object" && typeof query.l[this.layers[i].shortName] == "object")
+				obj = query.l[this.layers[i].shortName];
+
+			this.layers[i].setQueryObjectFixed(obj);
+		}
+
+		// Adding markers might have moved the map, reset map view
+		this.setCenter(new OpenLayers.LonLat(1*query.lon, 1*query.lat).transform(this.permalinkProjection, this.getProjectionObject()), 1*query.zoom);
 	},
 
 	/**
@@ -473,59 +463,19 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 			lat : Math.round(lonlat.lat*100000000)/100000000,
 			zoom : this.getZoom(),
 			layer : this.baseLayer.shortName,
-			mlon : { },
-			mlat : { },
-			mtitle : { },
-			smopen : { },
-			overlays : { },
-			xml : { },
-			search : { }
+			l : { },
+			r : { }
 		};
 
-		var xml_i = 0;
-
 		for(var i=0; i<this.layers.length; i++)
-		{ // Save overlay visibility
+		{
 			var l = this.layers[i];
-			if(l.isBaseLayer || l.shortName == null) continue;
-
-			if(l.getVisibility() != l.cdauthDefaultVisibility)
-				hashObject.overlays[l.shortName] = l.getVisibility() ? "1" : "0";
-
-			if(l instanceof OpenLayers.Layer.cdauth.XML && l.removableInLayerSwitcher)
-				hashObject.xml[xml_i++] = l.cdauthURL;
-
-			if(l instanceof OpenLayers.Layer.cdauth.Markers.GeoSearch && l.lastSearch)
-			{
-				hashObject.search[l.shortName] = l.lastSearch;
-				var smopen = "";
-				var smchanged = false;
-				for(var j=0; j<l.markers.length; j++)
-				{
-					var visible = l.markers[l.markers.length-1-j].cdauthFeature.popup ? l.markers[l.markers.length-1-j].cdauthFeature.popup.visible() : false;
-					smopen += visible ? "1" : "0";
-					if(visible != (j == 0))
-						smchanged = true;
-				}
-				if(smchanged)
-					hashObject.smopen[l.shortName] = smopen;
-			}
-
-			if(l instanceof OpenLayers.Layer.cdauth.Markers.LonLat)
-			{
-				hashObject.mlon[l.shortName] = { };
-				hashObject.mlat[l.shortName] = { };
-				hashObject.mtitle[l.shortName] = { };
-
-				for(var j=0; j<l.markers.length; j++)
-				{
-					var lonlat = l.markers[j].lonlat.clone().transform(this.getProjectionObject(), this.permalinkProjection);
-					hashObject.mlon[l.shortName][j] = Math.round(lonlat.lon*100000000)/100000000;
-					hashObject.mlat[l.shortName][j] = Math.round(lonlat.lat*100000000)/100000000;
-					if(l.markers[j].cdauthTitle)
-						hashObject.mtitle[l.shortName][j] = l.markers[j].cdauthTitle;
-				}
-			}
+			hashObject.l[l.shortName] = l.getQueryObjectFixed();
+			if(l.removableInLayerSwitcher && l.saveInPermalink)
+				hashObject.r[l.shortName] = {
+					"class" : l.CLASS_NAME.replace(/^OpenLayers\.Layer\./, ""),
+					name : l.name
+				};
 		}
 
 		return hashObject;
@@ -593,9 +543,11 @@ OpenLayers.Control.cdauth.LayerSwitcher = OpenLayers.Class(OpenLayers.Control.La
 		this.layersDiv.style.maxHeight = (this.map.size.h-100)+"px";
 	},
 
-	redraw : function() {
+	redraw : function(force) {
 		// Display “Zoom” and, if desired, “Remove” links for overlay layers.
 
+		if(force)
+			this.layerStates = [];
 		var ret = OpenLayers.Control.LayerSwitcher.prototype.redraw.apply(this, arguments);
 		this.onMapResize();
 
@@ -1155,8 +1107,8 @@ OpenLayers.Layer.cdauth.Markers.LonLat = OpenLayers.Class(OpenLayers.Layer.cdaut
 		this.events.addEventType("markerAdded");
 		this.events.addEventType("markerRemoved");
 
-		this.events.register("markerAdded", this, function(){ if(this.map) this.map.events.triggerEvent("newHash"); });
-		this.events.register("markerRemoved", this, function(){ if(this.map) this.map.events.triggerEvent("newHash"); });
+		this.events.register("markerAdded", this, function(){ this.events.triggerEvent("queryObjectChanged"); });
+		this.events.register("markerRemoved", this, function(){ this.events.triggerEvent("queryObjectChanged"); });
 	},
 	addLonLatMarker : function(lonlat, title, icon)
 	{
@@ -1190,6 +1142,30 @@ OpenLayers.Layer.cdauth.Markers.LonLat = OpenLayers.Class(OpenLayers.Layer.cdaut
 			this.markers[i].cdauthFeature.popup.setContentHTML(content);
 		}
 	},
+	getQueryObject : function() {
+		var obj = { };
+		for(var i=0; i<this.markers.length; i++)
+		{
+			var lonlat = this.markers[i].lonlat.clone().transform(this.map.getProjectionObject(), this.readableProjection);
+			obj[i] = {
+				lon : Math.round(lonlat.lon*100000000)/100000000,
+				lat : Math.round(lonlat.lat*100000000)/100000000
+			};
+			if(this.markers[i].cdauthTitle)
+				obj[i].title = this.markers[i].cdauthTitle;
+		}
+		return obj;
+	},
+	setQueryObject : function(obj) {
+		this.clearMarkers();
+		for(var i in obj)
+		{
+			if(obj[i].lon == undefined || obj[i].lat == undefined)
+				continue;
+			this.addLonLatMarker(new OpenLayers.LonLat(1*obj[i].lon, 1*obj[i].lat), (obj[i].title != undefined) ? htmlspecialchars(obj[i].title) : null);
+		}
+	},
+
 	CLASS_NAME : "OpenLayers.Layer.cdauth.Markers.LonLat"
 });
 
@@ -1283,8 +1259,8 @@ OpenLayers.Layer.cdauth.Markers.GeoSearch = OpenLayers.Class(OpenLayers.Layer.cd
 		this.events.addEventType("searchSuccess");
 		this.events.addEventType("searchFailure");
 
-		this.events.register("lastSearchChange", this, function(){ if(this.map) this.map.events.triggerEvent("newHash"); });
-		this.events.register("markersChanged", this, function(){ if(this.map) this.map.events.triggerEvent("newHash"); });
+		this.events.register("lastSearchChange", this, function(){ this.events.triggerEvent("queryObjectChanged"); });
+		this.events.register("markersChanged", this, function(){ this.events.triggerEvent("queryObjectChanged"); });
 	},
 
 	/**
@@ -1455,6 +1431,32 @@ OpenLayers.Layer.cdauth.Markers.GeoSearch = OpenLayers.Class(OpenLayers.Layer.cd
 		var eventType = (results.length == 0 ? "searchFailure" : "searchSuccess");
 		this.events.triggerEvent(eventType, { object : this, type : eventType, element: null, dontzoom: dontzoom, query: query });
 	},
+	getQueryObject : function() {
+		var obj = {
+		};
+
+		if(this.lastSearch)
+		{
+			obj.search = this.lastSearch;
+			var smopen = "";
+			var smchanged = false;
+			for(var i=0; i < this.markers.length; i++)
+			{
+				var visible = this.markers[i].cdauthFeature.popup ? this.markers[i].cdauthFeature.popup.visible() : false;
+				smopen = (visible ? "1" : "0") + smopen; // Reverse order, first marker is last in the list for z-index reasons
+				if(visible != (i == this.markers.length-1)) // First marker is open by default
+					smchanged = true;
+			}
+			if(smchanged)
+				obj.smopen = smopen;
+		}
+		return obj;
+	},
+	setQueryObject : function(obj) {
+		// If obj.search is undefined, call nevertheless to reset the search
+		this.geoSearch(obj.search, true, obj.smopen);
+	},
+
 	CLASS_NAME : "OpenLayers.Layer.cdauth.Markers.GeoSearch"
 });
 
@@ -1489,11 +1491,14 @@ OpenLayers.Layer.cdauth.XML = OpenLayers.Class(OpenLayers.Layer.GML, {
 				strokeOpacity: 0.5
 			},
 			projection: new OpenLayers.Projection("EPSG:4326"),
-			zoomableInLayerSwitcher: true
+			zoomableInLayerSwitcher: true,
+			shortName : "xml"+OpenLayers.Layer.cdauth.XML.shortNameI++
 		}, options) ]);
 	},
 	proxyURL : function(url)
 	{
+		if(!url)
+			return null;
 		if(OpenLayers.Layer.cdauth.XML.proxy)
 			return OpenLayers.Layer.cdauth.XML.proxy + (OpenLayers.Layer.cdauth.XML.proxy.match(/\?/) ? "&" : "?") + "url=" + encodeURIComponent(url);
 		else
@@ -1501,7 +1506,10 @@ OpenLayers.Layer.cdauth.XML = OpenLayers.Class(OpenLayers.Layer.GML, {
 	},
 	loadGML : function(url) {
 		if(!url)
-			OpenLayers.Layer.GML.prototype.loadGML.apply(this, [ ]);
+		{
+			if(this.url)
+				OpenLayers.Layer.GML.prototype.loadGML.apply(this, [ ]);
+		}
 		else
 		{
 			this.events.triggerEvent("loadstart");
@@ -1551,6 +1559,20 @@ OpenLayers.Layer.cdauth.XML = OpenLayers.Class(OpenLayers.Layer.GML, {
 			}
 		}
 	},
+	getQueryObject : function() {
+		var obj = { };
+		if(this.removableInLayerSwitcher)
+			obj.url = this.cdauthURL;
+		return obj;
+	},
+	setQueryObject : function(obj) {
+		if(obj.url != undefined && obj.url != this.cdauthURL)
+		{
+			this.cdauthUrl = obj.url;
+			this.setUrl(this.proxyURL(obj.url));
+		}
+	},
+
 	CLASS_NAME : "OpenLayers.Layer.cdauth.XML"
 });
 /**
@@ -1566,6 +1588,7 @@ OpenLayers.Layer.cdauth.XML.proxy = null;
 OpenLayers.Layer.cdauth.XML.relationURL = "http://www.openstreetmap.org/api/0.6/relation/${id}/full";
 
 OpenLayers.Layer.cdauth.XML.colourCounter = 1;
+OpenLayers.Layer.cdauth.XML.shortNameI = 1;
 
 /**
  * A class to control the URL hash part.
@@ -2036,10 +2059,10 @@ function decodeQueryString(str)
 		if(equal_sign < 1) continue;
 
 		var key = str_split[i].substr(0, equal_sign);
-		var arr_match = key.match(/(\[[^\]]*\])+$/);
+		var arr_match = key.match(/(\[[^\]]*\]|\.[^.]+)+$/);
 		if(arr_match)
 		{
-			var arr_indexes = arr_match[0].substring(1, arr_match[0].length-1).split("][");
+			var arr_indexes = arr_match[0].replace(/^[.\[]/, "").replace(/\]$/, "").split(/\]\[|\./);
 			arr_indexes.unshift(key.substr(0, key.length-arr_match[0].length));
 			var cur_el = obj;
 			for(var j=0; j<arr_indexes.length; j++)
@@ -2074,17 +2097,29 @@ function decodeQueryString(str)
 
 function encodeQueryString(obj, prefix, arr)
 {
+	if(obj == null)
+		return "";
+
 	if(!prefix)
 		arr = [ ];
 	for(var i in obj)
 	{
 		var key = encodeURIComponent(i);
 		if(prefix)
-			key = prefix+"["+key+"]";
-		if(typeof obj[i] == "object")
-			encodeQueryString(obj[i], key, arr);
-		else
-			arr.push(key+"="+encodeURIComponent(obj[i]));
+			key = prefix+"."+key;
+		switch(typeof obj[i])
+		{
+			case "object":
+				encodeQueryString(obj[i], key, arr);
+				break;
+			case "boolean":
+				arr.push(key+"="+(obj[i] ? "1" : "0"));
+				break;
+			case "undefined":
+				break;
+			default:
+				arr.push(key+"="+encodeURIComponent(obj[i]));
+		}
 	}
 	return arr.join(";");
 }
