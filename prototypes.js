@@ -192,8 +192,8 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 		this.events.register("changebaselayer", this, function(){ this.events.triggerEvent("newHash"); });
 		this.events.register("changelayer", this, function(){ this.events.triggerEvent("newHash"); });
 
-		//OpenLayers.Event.observe(this.viewPortDiv, "mouseover", OpenLayers.Function.bindAsEventListener(function(){ keyboardControl.activate(); }, this));
-		//OpenLayers.Event.observe(this.viewPortDiv, "mouseout", OpenLayers.Function.bindAsEventListener(function(){ keyboardControl.deactivate(); }, this));
+		OpenLayers.Event.observe(this.viewPortDiv, "mouseover", OpenLayers.Function.bindAsEventListener(function(){ keyboardControl.activate(); }, this));
+		OpenLayers.Event.observe(this.viewPortDiv, "mouseout", OpenLayers.Function.bindAsEventListener(function(){ keyboardControl.deactivate(); }, this));
 	},
 
 	updateSize : function()
