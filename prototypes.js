@@ -1298,8 +1298,7 @@ OpenLayers.Layer.cdauth.Markers.GeoSearch = OpenLayers.Class(OpenLayers.Layer.cd
 			var shortlink = decodeShortLink(query_match[2]);
 			results = [ {
 				zoom : shortlink.zoom,
-				lon : shortlink.lonlat.lon,
-				lat : shortlink.lonlat.lat,
+				lonlat : shortlink.lonlat,
 				info : OpenLayers.i18n("Coordinates"),
 				name : shortlink.lonlat.lat + ", " + shortlink.lonlat.lon
 			} ];
@@ -1309,24 +1308,23 @@ OpenLayers.Layer.cdauth.Markers.GeoSearch = OpenLayers.Class(OpenLayers.Layer.cd
 		{ // Coordinates
 			results = [ {
 				zoom : this.map.getZoom(),
-				lon : query_match[3].replace(",", ".").replace(/\s+/, ""),
-				lat : query_match[1].replace(",", ".").replace(/\s+/, ""),
+				lonlat : new OpenLayers.LonLat(query_match[3].replace(",", ".").replace(/\s+/, ""), query_match[1].replace(",", ".").replace(/\s+/, "")),
 				info : OpenLayers.i18n("Coordinates")
 			} ];
-			results[0].name = results[0].lat+","+results[0].lon;
+			results[0].name = results[0].lonlat.lat+","+results[0].lonlat.lon;
 			this.showResults(results, query, dontzoom, markersvisible);
 		}
 		else if((query_match = query.match(/^http:\/\/.*\?(.*)$/)) && typeof (query_urlPart = decodeQueryString(query_match[1])).lon != "undefined" && typeof query_urlPart.lat != "undefined")
 		{ // OpenStreetMap Permalink
 			results = [ {
-				lon : query_urlPart.lon,
-				lat : query_urlPart.lat,
-				info : OpenLayers.i18n("Coordinates")
+				lonlat : new OpenLayers.LonLat(query_urlPart.lon, query_urlPart.lat),
+				info : OpenLayers.i18n("Coordinates"),
+				name : query_urlPart.lat + ", " + query_urlPart.lon
 			} ];
 			if(typeof query_urlPart.zoom == "undefined")
 				results[0].zoom = this.map.getZoom();
 			else
-				results[0].zoom = query_urlPart.zoom;
+				results[0].zoom = 1*query_urlPart.zoom;
 			this.showResults(results, query, dontzoom, markersvisible);
 		}
 		else
@@ -1382,11 +1380,11 @@ OpenLayers.Layer.cdauth.Markers.GeoSearch = OpenLayers.Class(OpenLayers.Layer.cd
 			{
 				content_strong.appendChild(document.createTextNode(results[i].name));
 				content_heading.appendChild(content_strong);
-				content_heading.appendChild(document.createTextNode(" ("+(results[i].info ? results[i].info : OpenLayers.i18n("unknown"))+"), "));
+				content_heading.appendChild(document.createTextNode(" ("+(results[i].info ? results[i].info : OpenLayers.i18n("unknown"))+") "));
 			}
 			else
 			{
-				content_strong.appendChild(document.createTextNode(results[i].info ? results[i].info : OpenLayers.i18n("unknown")));
+				content_strong.appendChild(document.createTextNode((results[i].info ? results[i].info : OpenLayers.i18n("unknown"))+" "));
 				content_heading.appendChild(content_strong);
 			}
 
@@ -1394,14 +1392,17 @@ OpenLayers.Layer.cdauth.Markers.GeoSearch = OpenLayers.Class(OpenLayers.Layer.cd
 			content_zoom.href = "#";
 			(function(i){
 				content_zoom.onclick = function() {
-					layer.map.zoomToExtent(results[i].zoombox.clone().transform(new OpenLayers.Projection("EPSG:4326"), layer.map.getProjectionObject()));
+					if(results[i].zoombox)
+						layer.map.zoomToExtent(results[i].zoombox.clone().transform(new OpenLayers.Projection("EPSG:4326"), layer.map.getProjectionObject()));
+					else
+						layer.map.setCenter(results[i].lonlat.clone().transform(new OpenLayers.Projection("EPSG:4326"), layer.map.getProjectionObject()), results[i].zoom);
 					return false;
 				};
 			})(i);
 			content_zoom.appendChild(document.createTextNode(OpenLayers.i18n("[Zoom]")));
 			content_heading.appendChild(content_zoom);
 			content.appendChild(content_heading);
-			content.appendChild(makePermalinks(results[i].lonlat, results[i].zoom));
+			content.appendChild(makePermalinks(results[i].lonlat, results[i].zoom != undefined ? results[i].zoom : this.map.getZoomForExtent(results[i].zoombox.clone().transform(new OpenLayers.Projection("EPSG:4326"), layer.map.getProjectionObject()))));
 
 			var icon = null;
 			if(results[i].icon)
@@ -1420,7 +1421,12 @@ OpenLayers.Layer.cdauth.Markers.GeoSearch = OpenLayers.Class(OpenLayers.Layer.cd
 		if(!dontzoom)
 		{
 			if(results.length == 1)
-				layer.map.zoomToExtent(results[0].zoombox.clone().transform(new OpenLayers.Projection("EPSG:4326"), layer.map.getProjectionObject()));
+			{
+				if(results[0].zoombox)
+					layer.map.zoomToExtent(results[0].zoombox.clone().transform(new OpenLayers.Projection("EPSG:4326"), layer.map.getProjectionObject()));
+				else
+					layer.map.setCenter(results[0].lonlat.clone().transform(new OpenLayers.Projection("EPSG:4326"), layer.map.getProjectionObject()), results[0].zoom);
+			}
 			else if(results.length > 1)
 				this.map.zoomToExtent(this.getDataExtent());
 		}
@@ -2206,8 +2212,8 @@ var shortLinkCharArray = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01
 
 function encodeShortLink(lonlat, zoom)
 {
-    var x = Math.round((lonlat.lon + 180.0) * ((1 << 30) / 90.0));
-    var y = Math.round((lonlat.lat +  90.0) * ((1 << 30) / 45.0));
+    var x = Math.round((1*lonlat.lon + 180.0) * ((1 << 30) / 90.0));
+    var y = Math.round((1*lonlat.lat +  90.0) * ((1 << 30) / 45.0));
     // hack around the fact that JS apparently only allows 53-bit integers?!?
     // note that, although this reduces the accuracy of the process, it's fine for
     // z18 so we don't need to care for now.
