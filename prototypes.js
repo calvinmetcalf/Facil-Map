@@ -691,7 +691,7 @@ if(OpenLayers.Layer.OSM)
 	*/
 	OpenLayers.Layer.cdauth.OSM.OpenPisteMap = OpenLayers.Class(OpenLayers.Layer.OSM, {
 		initialize: function(name, options) {
-			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://openpistemap.org/tiles/contours/${z}/${x}/${y}.png", OpenLayers.Util.extend({numZoomLevels: 18, attribution: OpenLayers.String.format(OpenLayers.i18n("attribution-osm"), { rendering: "<a href=\"http://www.openpistemap.org/\">OpenPisteMap</a>" })}, options) ]);
+			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://tiles.openpistemap.org/contours/${z}/${x}/${y}.png", OpenLayers.Util.extend({numZoomLevels: 18, attribution: OpenLayers.String.format(OpenLayers.i18n("attribution-osm"), { rendering: "<a href=\"http://www.openpistemap.org/\">OpenPisteMap</a>" })}, options) ]);
 		},
 		CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.OpenPisteMap"
 	});
