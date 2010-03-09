@@ -928,6 +928,7 @@ if(OpenLayers.Layer.Yahoo && typeof YMap != "undefined")
 OpenLayers.Popup.FramedCloud.cdauth = OpenLayers.Class(OpenLayers.Popup.FramedCloud, {
 	contentDom: null,
 	autoSize: true,
+	_defaultZIndex : null,
 	initialize: function(id, lonlat, contentSize, contentDom, anchor, closeBox, closeBoxCallback) {
 		var closeCallback = function(e){ if(closeBoxCallback) closeBoxCallback(); OpenLayers.Event.stop(e); this.events.triggerEvent("close"); };
 		OpenLayers.Popup.FramedCloud.prototype.initialize.apply(this, [ id, lonlat, contentSize, null, anchor, closeBox, closeCallback ] );
@@ -972,11 +973,19 @@ OpenLayers.Popup.FramedCloud.cdauth = OpenLayers.Class(OpenLayers.Popup.FramedCl
 			this.opacity = opacity;
 
 		if(this.div != null)
+		{
 			OpenLayers.Util.modifyDOMElement(this.div, null, null, null, null, null, null, this.opacity);
+			if(this._defaultZIndex)
+				this.div.style.zIndex = this._defaultZIndex;
+		}
 	},
 	unsetOpacity: function() {
 		if(this.div != null)
+		{
+			this._defaultZIndex = this.div.style.zIndex;
 			OpenLayers.Util.modifyDOMElement(this.div, null, null, null, null, null, null, 1.0);
+			this.div.style.zIndex = 999;
+		}
 	},
 	destroy: function() {
 		this.contentDom = null;
