@@ -681,7 +681,7 @@ if(OpenLayers.Layer.OSM)
 	*/
 	OpenLayers.Layer.cdauth.OSM.OpenStreetBrowser = OpenLayers.Class(OpenLayers.Layer.OSM, {
 		initialize: function(name, options) {
-			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://openstreetbrowser.org/tiles/base/${z}/${x}/${y}.png", OpenLayers.Util.extend({numZoomLevels: 19, attribution: OpenLayers.String.format(OpenLayers.i18n("attribution-osm"), { rendering: "<a href=\"http://www.openstreetbrowser.org/\">OpenStreetBrowser</a>" })}, options) ]);
+			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://www.openstreetbrowser.org/tiles/base/${z}/${x}/${y}.png", OpenLayers.Util.extend({numZoomLevels: 19, attribution: OpenLayers.String.format(OpenLayers.i18n("attribution-osm"), { rendering: "<a href=\"http://www.openstreetbrowser.org/\">OpenStreetBrowser</a>" })}, options) ]);
 		},
 		CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.OpenStreetBrowser"
 	});
