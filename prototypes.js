@@ -72,7 +72,6 @@ OpenLayers.Lang.en = OpenLayers.Util.extend(OpenLayers.Lang.en, {
 	"Reit- und Wanderkarte" : "Reit- und Wanderkarte",
 	"OpenPisteMap" : "OpenPisteMap",
 	"ÖPNV-Karte" : "ÖPNV-Karte",
-	"Minutely Mapnik" : "Minutely Mapnik",
 	"Google Streets" : "Google Streets",
 	"Google Satellite" : "Google Satellite",
 	"Google Hybrid" : "Google Hybrid",
@@ -118,7 +117,6 @@ OpenLayers.Lang.de = OpenLayers.Util.extend(OpenLayers.Lang.de, {
 	"Reit- und Wanderkarte" : "Reit- und Wanderkarte",
 	"OpenPisteMap" : "OpenPisteMap",
 	"ÖPNV-Karte" : "ÖPNV-Karte",
-	"Minutely Mapnik" : "Minutely Mapnik",
 	"Google Streets" : "Google Karte",
 	"Google Satellite" : "Google Satellit",
 	"Google Hybrid" : "Google Hybrid",
@@ -270,8 +268,6 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 			this.addLayer(new OpenLayers.Layer.cdauth.OSM.OpenPisteMap(OpenLayers.i18n("OpenPisteMap"), { shortName : "OPis" }));
 		if(OpenLayers.Layer.cdauth.OSM.OPNVKarte)
 			this.addLayer(new OpenLayers.Layer.cdauth.OSM.OPNVKarte(OpenLayers.i18n("ÖPNV-Karte"), { shortName : "OPNV" }));
-		if(OpenLayers.Layer.cdauth.OSM.MinutelyMapnik)
-			this.addLayer(new OpenLayers.Layer.cdauth.OSM.MinutelyMapnik(OpenLayers.i18n("Minutely Mapnik"), { shortName : "MiMa" }));
 
 		if(OpenLayers.Layer.cdauth.OSM.OOMStreets)
 			this.addLayer(new OpenLayers.Layer.cdauth.OSM.OOMStreets(OpenLayers.i18n("Streets overlay"), { shortName : "OOMS", visibility : false }));
@@ -650,30 +646,6 @@ if(OpenLayers.Layer.OSM)
 			]);
         },
 		CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.CycleMap"
-	});
-
-	/**
-	 * Minutely Mapnik rendering of OpenStreetMap data by CloudMade. See http://matt.sandbox.cloudmade.com/.
-	*/
-	OpenLayers.Layer.cdauth.OSM.MinutelyMapnik = OpenLayers.Class(OpenLayers.Layer.OSM, {
-		initialize: function(name, options) {
-			OpenLayers.Layer.OSM.prototype.initialize.apply(
-				this,
-				[
-					name,
-					[
-						"http://a.matt.sandbox.cloudmade.com/123/3/256/${z}/${x}/${y}.png",
-						"http://b.matt.sandbox.cloudmade.com/123/3/256/${z}/${x}/${y}.png",
-						"http://c.matt.sandbox.cloudmade.com/123/3/256/${z}/${x}/${y}.png"
-					],
-					OpenLayers.Util.extend({
-						numZoomLevels: 19,
-						attribution: OpenLayers.String.format(OpenLayers.i18n("attribution-osm"), { rendering: "<a href=\"http://www.cloudmade.com/\">CloudMade</a>" })
-					}, options)
-				]
-			);
-		},
-		CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.MinutelyMapnik"
 	});
 
 	/**
