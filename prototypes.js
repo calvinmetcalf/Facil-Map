@@ -1197,6 +1197,131 @@ OpenLayers.Control.cdauth.CreateMarker = OpenLayers.Class(OpenLayers.Control, {
 	CLASS_NAME: "OpenLayers.Control.cdauth.CreateMarker"
 });
 
+if(OpenLayers.cdauth == undefined)
+	OpenLayers.cdauth = { };
+
+/**
+ * An abstract class whose implementations connect to a NameFinder.
+*/
+OpenLayers.cdauth.NameFinder = OpenLayers.Class({
+	/**
+	 * Perform a search through a NameFinder. This function itself does not connect to an actual NameFinder, it only finds one result if
+	 * the query String consists of coordinates encoded in a Lat,Lon string or an OpenStreetMap Permalink.
+	 * @param String query The query string.
+	 * @param Function callbackFunction A function that is executed when the search has been performed. The function takes one argument that
+	 *                                  contains an array with the results. It is undefined if an error has occurred. Each result is an object
+	 *                                  with the following properties:
+	 *                                  * OpenLayers.LonLat lonlat The coordinates of the result
+	 *                                  * String name: The title of the result.
+	 *                                  * String info: Some additional information about the result, such as the type.
+	 *                                  * String zoom: The zoom that the result should be shown at. Might be undefined.
+	 *                                  * OpenLayers.Bounds zoombox: The bounding box that the result should be shown in. Might be undefined.
+	 * @return void
+	*/
+	find : function(query, callbackFunction) {
+		query.replace(/^\s+/, "").replace(/\s+$/, "");
+		var query_match;
+		var query_urlPart;
+		if(query_match = query.match(/^http:\/\/(www\.)?osm\.org\/go\/([-A-Za-z0-9_@]+)/))
+		{ // Coordinates, shortlink
+			var shortlink = decodeShortLink(query_match[2]);
+			results = [ {
+				zoom : shortlink.zoom,
+				lonlat : shortlink.lonlat,
+				info : OpenLayers.i18n("Coordinates"),
+				name : shortlink.lonlat.lat + ", " + shortlink.lonlat.lon
+			} ];
+			callbackFunction(results);
+		}
+		else if(query_match = query.match(/^(-?\s*\d+([.,]\d+)?)\s*[,;]?\s*(-?\s*\d+([.,]\d+)?)$/))
+		{ // Coordinates
+			results = [ {
+				lonlat : new OpenLayers.LonLat(query_match[3].replace(",", ".").replace(/\s+/, ""), query_match[1].replace(",", ".").replace(/\s+/, "")),
+				info : OpenLayers.i18n("Coordinates"),
+				zoom : 15
+			} ];
+			results[0].name = results[0].lonlat.lat+","+results[0].lonlat.lon;
+			callbackFunction(results);
+		}
+		else if((query_match = query.match(/^http:\/\/.*\?(.*)$/)) && typeof (query_urlPart = decodeQueryString(query_match[1])).lon != "undefined" && typeof query_urlPart.lat != "undefined")
+		{ // OpenStreetMap Permalink
+			results = [ {
+				lonlat : new OpenLayers.LonLat(query_urlPart.lon, query_urlPart.lat),
+				info : OpenLayers.i18n("Coordinates"),
+				name : query_urlPart.lat + ", " + query_urlPart.lon
+			} ];
+			if(query_urlPart.zoom != undefined)
+				results[0].zoom = 1*query_urlPart.zoom;
+			callbackFunction(results);
+		}
+		else
+			callbackFunction([ ]);
+	}
+});
+
+/**
+ * An implementation of the NameFinder that contacts Nominatim (http://wiki.openstreetmap.org/wiki/Nominatim).
+*/
+OpenLayers.cdauth.NameFinder.Nominatim = OpenLayers.Class(OpenLayers.cdauth.NameFinder, {
+	nameFinderURL : "http://nominatim.openstreetmap.org/search",
+
+	/**
+	 * @param String nameFinderURL http://nominatim.openstreetmap.org/search. To work around the same origin policy, pass a wrapper that lives on your webspace.
+	*/
+	initialize : function(nameFinderURL) {
+		if(nameFinderURL)
+			this.nameFinderURL = nameFinderURL;
+	},
+	find : function(query, callbackFunction) {
+		query.replace(/^\s+/, "").replace(/\s+$/, "");
+
+		var nameFinder = this;
+
+		OpenLayers.cdauth.NameFinder.prototype.find.apply(this, [ query, function(results) {
+			if(results != undefined && results.length > 0)
+				callbackFunction(results);
+			else
+			{ // NameFinder
+				OpenLayers.Request.GET({
+					url : nameFinder.nameFinderURL,
+					params : { "q": query, "format" : "xml", "polygon" : "0", "addressdetails" : "0" },
+					success : function(request) {
+						var results = [ ];
+						if(request.responseXML)
+						{
+							var searchresults = request.responseXML.getElementsByTagName("searchresults");
+							if(searchresults.length > 0)
+							{
+								if(searchresults[0].getAttribute("findplace") == null || searchresults[0].getAttribute("findplace") == "" || searchresults[0].getAttribute("foundnearplace") == "yes")
+								{
+									var named = searchresults[0].childNodes;
+									for(var i=0; i<named.length; i++)
+									{
+										if(named[i].nodeType != 1) continue;
+
+										var box = named[i].getAttribute("boundingbox").split(",");
+										results.push({
+											zoombox : new OpenLayers.Bounds(box[2], box[1], box[3], box[0]),
+											lonlat : new OpenLayers.LonLat(named[i].getAttribute("lon"), named[i].getAttribute("lat")),
+											name : named[i].getAttribute("display_name"),
+											info : named[i].getAttribute("class"),
+											icon : named[i].getAttribute("icon")
+										});
+									}
+								}
+							}
+						}
+						callbackFunction(results);
+					},
+					failure : function() {
+						callbackFunction();
+					}
+				});
+			}
+		} ]);
+	}
+});
+
 /**
  * A markers layer to display the search results of the OpenStreetMap NameFinder.
  * @event lastSearchChange The value of lastSearch has changed.
@@ -1209,10 +1334,9 @@ OpenLayers.Layer.cdauth.Markers.GeoSearch = OpenLayers.Class(OpenLayers.Layer.cd
 	lastSearch : false,
 
 	/**
-	 * http://nominatim.openstreetmap.org/search. To work around the same origin policy, pass a wrapper that lives on your webspace.
-	 * @var String
+	 * @var OpenLayers.cdauth.NameFinder
 	*/
-	nameFinderURL : "http://nominatim.openstreetmap.org/search",
+	nameFinder : null,
 
 	/**
 	 * The marker icon to use for the first search result.
@@ -1232,8 +1356,15 @@ OpenLayers.Layer.cdauth.Markers.GeoSearch = OpenLayers.Class(OpenLayers.Layer.cd
 	*/
 	iconSize : 24,
 
-	initialize: function(name, options) {
-		OpenLayers.Layer.cdauth.Markers.prototype.initialize.apply(this, arguments);
+	/**
+	 * @param String name
+	 * @param OpenLayers.cdauth.NameFinder
+	 * @param Object options
+	*/
+	initialize: function(name, nameFinder, options) {
+		OpenLayers.Layer.cdauth.Markers.prototype.initialize.apply(this, [ name, options ]);
+
+		this.nameFinder = nameFinder;
 
 		this.events.addEventType("lastSearchChange");
 		this.events.addEventType("searchBegin");
@@ -1252,7 +1383,7 @@ OpenLayers.Layer.cdauth.Markers.GeoSearch = OpenLayers.Class(OpenLayers.Layer.cd
 	*/
 	geoSearch: function(query, dontzoom, markersvisible)
 	{
-		layer = this;
+		var layer = this;
 
 		if(typeof markersvisible == "string")
 		{
@@ -1271,83 +1402,7 @@ OpenLayers.Layer.cdauth.Markers.GeoSearch = OpenLayers.Class(OpenLayers.Layer.cd
 
 		this.events.triggerEvent("searchBegin");
 
-		query.replace(/^\s+/, "").replace(/\s+$/, "");
-		var query_match;
-		var query_urlPart;
-		if(query_match = query.match(/^http:\/\/(www\.)?osm\.org\/go\/([-A-Za-z0-9_@]+)/))
-		{ // Coordinates, shortlink
-			var shortlink = decodeShortLink(query_match[2]);
-			results = [ {
-				zoom : shortlink.zoom,
-				lonlat : shortlink.lonlat,
-				info : OpenLayers.i18n("Coordinates"),
-				name : shortlink.lonlat.lat + ", " + shortlink.lonlat.lon
-			} ];
-			this.showResults(results, query, dontzoom, markersvisible);
-		}
-		else if(query_match = query.match(/^(-?\s*\d+([.,]\d+)?)\s*[,;]?\s*(-?\s*\d+([.,]\d+)?)$/))
-		{ // Coordinates
-			results = [ {
-				zoom : this.map.getZoom(),
-				lonlat : new OpenLayers.LonLat(query_match[3].replace(",", ".").replace(/\s+/, ""), query_match[1].replace(",", ".").replace(/\s+/, "")),
-				info : OpenLayers.i18n("Coordinates")
-			} ];
-			results[0].name = results[0].lonlat.lat+","+results[0].lonlat.lon;
-			this.showResults(results, query, dontzoom, markersvisible);
-		}
-		else if((query_match = query.match(/^http:\/\/.*\?(.*)$/)) && typeof (query_urlPart = decodeQueryString(query_match[1])).lon != "undefined" && typeof query_urlPart.lat != "undefined")
-		{ // OpenStreetMap Permalink
-			results = [ {
-				lonlat : new OpenLayers.LonLat(query_urlPart.lon, query_urlPart.lat),
-				info : OpenLayers.i18n("Coordinates"),
-				name : query_urlPart.lat + ", " + query_urlPart.lon
-			} ];
-			if(typeof query_urlPart.zoom == "undefined")
-				results[0].zoom = this.map.getZoom();
-			else
-				results[0].zoom = 1*query_urlPart.zoom;
-			this.showResults(results, query, dontzoom, markersvisible);
-		}
-		else
-		{ // NameFinder
-			var layer = this;
-
-			OpenLayers.Request.GET({
-				url : this.nameFinderURL,
-				params : { "q": query, "format" : "xml", "polygon" : "0", "addressdetails" : "0" },
-				success : function(request) {
-					var results = [ ];
-					if(request.responseXML)
-					{
-						var searchresults = request.responseXML.getElementsByTagName("searchresults");
-						if(searchresults.length > 0)
-						{
-							if(searchresults[0].getAttribute("findplace") == null || searchresults[0].getAttribute("findplace") == "" || searchresults[0].getAttribute("foundnearplace") == "yes")
-							{
-								var named = searchresults[0].childNodes;
-								for(var i=0; i<named.length; i++)
-								{
-									if(named[i].nodeType != 1) continue;
-
-									var box = named[i].getAttribute("boundingbox").split(",");
-									results.push({
-										zoombox : new OpenLayers.Bounds(box[2], box[1], box[3], box[0]),
-										lonlat : new OpenLayers.LonLat(named[i].getAttribute("lon"), named[i].getAttribute("lat")),
-										name : named[i].getAttribute("display_name"),
-										info : named[i].getAttribute("class"),
-										icon : named[i].getAttribute("icon")
-									});
-								}
-							}
-						}
-					}
-					layer.showResults(results, query, dontzoom, markersvisible);
-				},
-				failure : function() {
-					layer.showResults([ ], query, dontzoom, markersvisible);
-				}
-			});
-		}
+		this.nameFinder.find(query, function(results){ layer.showResults(results == undefined ? [ ] : results, query, dontzoom, markersvisible); });
 	},
 	showResults : function(results, query, dontzoom, markersvisible) {
 		for(var i=results.length-1; i>=0; i--)
@@ -1383,7 +1438,14 @@ OpenLayers.Layer.cdauth.Markers.GeoSearch = OpenLayers.Class(OpenLayers.Layer.cd
 			content_zoom.appendChild(document.createTextNode(OpenLayers.i18n("[Zoom]")));
 			content_heading.appendChild(content_zoom);
 			content.appendChild(content_heading);
-			content.appendChild(makePermalinks(results[i].lonlat, results[i].zoom != undefined ? results[i].zoom : this.map.getZoomForExtent(results[i].zoombox.clone().transform(new OpenLayers.Projection("EPSG:4326"), layer.map.getProjectionObject()))));
+			var zoom;
+			if(results[i].zoom != undefined)
+				zoom = results[i].zoom;
+			else if(results[i].zoombox != undefined)
+				zoom = this.map.getZoomForExtent(results[i].zoombox.clone().transform(new OpenLayers.Projection("EPSG:4326"), layer.map.getProjectionObject()));
+			else
+				zoom = this.map.getZoom();
+			content.appendChild(makePermalinks(results[i].lonlat, zoom));
 
 			var icon = null;
 			if(results[i].icon)
