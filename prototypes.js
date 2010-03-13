@@ -956,7 +956,7 @@ OpenLayers.Popup.FramedCloud.cdauth = OpenLayers.Class(OpenLayers.Popup.FramedCl
 		{
 			this._defaultZIndex = this.div.style.zIndex;
 			OpenLayers.Util.modifyDOMElement(this.div, null, null, null, null, null, null, 1.0);
-			this.div.style.zIndex = 999;
+			this.div.style.zIndex = 2000;
 		}
 	},
 	destroy: function() {
@@ -1214,8 +1214,7 @@ OpenLayers.cdauth.NameFinder = OpenLayers.Class({
 	 *                                  * OpenLayers.LonLat lonlat The coordinates of the result
 	 *                                  * String name: The title of the result.
 	 *                                  * String info: Some additional information about the result, such as the type.
-	 *                                  * String zoom: The zoom that the result should be shown at. Might be undefined.
-	 *                                  * OpenLayers.Bounds zoombox: The bounding box that the result should be shown in. Might be undefined.
+	 *                                  * function getZoom(OpenLayers.Map): Returns the zoom level that the search result should be displayed at on the given map.
 	 * @return void
 	*/
 	find : function(query, callbackFunction) {
@@ -1226,10 +1225,12 @@ OpenLayers.cdauth.NameFinder = OpenLayers.Class({
 		{ // Coordinates, shortlink
 			var shortlink = decodeShortLink(query_match[2]);
 			results = [ {
-				zoom : shortlink.zoom,
 				lonlat : shortlink.lonlat,
 				info : OpenLayers.i18n("Coordinates"),
-				name : shortlink.lonlat.lat + ", " + shortlink.lonlat.lon
+				name : shortlink.lonlat.lat + ", " + shortlink.lonlat.lon,
+				getZoom : function(map) {
+					return shortlink.zoom;
+				}
 			} ];
 			callbackFunction(results);
 		}
@@ -1238,7 +1239,9 @@ OpenLayers.cdauth.NameFinder = OpenLayers.Class({
 			results = [ {
 				lonlat : new OpenLayers.LonLat(query_match[3].replace(",", ".").replace(/\s+/, ""), query_match[1].replace(",", ".").replace(/\s+/, "")),
 				info : OpenLayers.i18n("Coordinates"),
-				zoom : 15
+				getZoom : function(map) {
+					return 15;
+				}
 			} ];
 			results[0].name = results[0].lonlat.lat+","+results[0].lonlat.lon;
 			callbackFunction(results);
@@ -1248,10 +1251,14 @@ OpenLayers.cdauth.NameFinder = OpenLayers.Class({
 			results = [ {
 				lonlat : new OpenLayers.LonLat(query_urlPart.lon, query_urlPart.lat),
 				info : OpenLayers.i18n("Coordinates"),
-				name : query_urlPart.lat + ", " + query_urlPart.lon
+				name : query_urlPart.lat + ", " + query_urlPart.lon,
+				zoomCallback : function(map) {
+					if(query_urlPart.zoom == undefined)
+						return 15;
+					else
+						return 1*query_urlPart.zoom;
+				}
 			} ];
-			if(query_urlPart.zoom != undefined)
-				results[0].zoom = 1*query_urlPart.zoom;
 			callbackFunction(results);
 		}
 		else
@@ -1300,13 +1307,17 @@ OpenLayers.cdauth.NameFinder.Nominatim = OpenLayers.Class(OpenLayers.cdauth.Name
 										if(named[i].nodeType != 1) continue;
 
 										var box = named[i].getAttribute("boundingbox").split(",");
-										results.push({
-											zoombox : new OpenLayers.Bounds(box[2], box[1], box[3], box[0]),
-											lonlat : new OpenLayers.LonLat(named[i].getAttribute("lon"), named[i].getAttribute("lat")),
-											name : named[i].getAttribute("display_name"),
-											info : named[i].getAttribute("class"),
-											icon : named[i].getAttribute("icon")
-										});
+										(function(box) {
+											results.push({
+												lonlat : new OpenLayers.LonLat(named[i].getAttribute("lon"), named[i].getAttribute("lat")),
+												name : named[i].getAttribute("display_name"),
+												info : named[i].getAttribute("class"),
+												icon : named[i].getAttribute("icon"),
+												getZoom : function(map) {
+													return map.getZoomForExtent(box.clone().transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject()));
+												}
+											});
+										})(new OpenLayers.Bounds(box[2], box[1], box[3], box[0]));
 									}
 								}
 							}
@@ -1405,6 +1416,9 @@ OpenLayers.Layer.cdauth.Markers.GeoSearch = OpenLayers.Class(OpenLayers.Layer.cd
 		this.nameFinder.find(query, function(results){ layer.showResults(results == undefined ? [ ] : results, query, dontzoom, markersvisible); });
 	},
 	showResults : function(results, query, dontzoom, markersvisible) {
+		this.clearMarkers();
+		if(results == undefined)
+			results = [ ];
 		for(var i=results.length-1; i>=0; i--)
 		{
 			var layer = this;
@@ -1426,33 +1440,23 @@ OpenLayers.Layer.cdauth.Markers.GeoSearch = OpenLayers.Class(OpenLayers.Layer.cd
 
 			var content_zoom = document.createElement("a");
 			content_zoom.href = "#";
-			(function(i){
+			(function(result){
 				content_zoom.onclick = function() {
-					if(results[i].zoombox)
-						layer.map.zoomToExtent(results[i].zoombox.clone().transform(new OpenLayers.Projection("EPSG:4326"), layer.map.getProjectionObject()));
-					else
-						layer.map.setCenter(results[i].lonlat.clone().transform(new OpenLayers.Projection("EPSG:4326"), layer.map.getProjectionObject()), results[i].zoom);
+					layer.map.setCenter(result.lonlat.clone().transform(new OpenLayers.Projection("EPSG:4326"), layer.map.getProjectionObject()), result.getZoom(layer.map));
 					return false;
 				};
-			})(i);
+			})(results[i]);
 			content_zoom.appendChild(document.createTextNode(OpenLayers.i18n("[Zoom]")));
 			content_heading.appendChild(content_zoom);
 			content.appendChild(content_heading);
-			var zoom;
-			if(results[i].zoom != undefined)
-				zoom = results[i].zoom;
-			else if(results[i].zoombox != undefined)
-				zoom = this.map.getZoomForExtent(results[i].zoombox.clone().transform(new OpenLayers.Projection("EPSG:4326"), layer.map.getProjectionObject()));
-			else
-				zoom = this.map.getZoom();
-			content.appendChild(makePermalinks(results[i].lonlat, zoom));
+			content.appendChild(makePermalinks(results[i].lonlat, results[i].getZoom(layer.map)));
 
 			var icon = null;
 			if(results[i].icon)
 				icon = new OpenLayers.Icon(results[i].icon.replace(/\.p\.20\.png$/, "."+this.iconType+"."+this.iconSize+".png"), new OpenLayers.Size(this.iconSize, this.iconSize), new OpenLayers.Pixel(-this.iconSize/2, -this.iconSize/2));
 			else if(i == 0)
 				icon = this.highlightIcon.clone();
-			var marker = this.createMarker(
+			results[i].marker = this.createMarker(
 				results[i].lonlat,
 				content,
 				((markersvisible && typeof markersvisible[i] != "undefined" && markersvisible[i] != "0") || ((!markersvisible || typeof markersvisible[i] == "undefined") && i==0)),
@@ -1464,12 +1468,7 @@ OpenLayers.Layer.cdauth.Markers.GeoSearch = OpenLayers.Class(OpenLayers.Layer.cd
 		if(!dontzoom)
 		{
 			if(results.length == 1)
-			{
-				if(results[0].zoombox)
-					layer.map.zoomToExtent(results[0].zoombox.clone().transform(new OpenLayers.Projection("EPSG:4326"), layer.map.getProjectionObject()));
-				else
-					layer.map.setCenter(results[0].lonlat.clone().transform(new OpenLayers.Projection("EPSG:4326"), layer.map.getProjectionObject()), results[0].zoom);
-			}
+				this.map.setCenter(results[0].lonlat.clone().transform(new OpenLayers.Projection("EPSG:4326"), this.map.getProjectionObject()), results[0].getZoom(this.map));
 			else if(results.length > 1)
 				this.map.zoomToExtent(this.getDataExtent());
 		}
