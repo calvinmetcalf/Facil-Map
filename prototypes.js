@@ -974,8 +974,10 @@ OpenLayers.Popup.FramedCloud.cdauth = OpenLayers.Class(OpenLayers.Popup.FramedCl
 
 OpenLayers.Layer.cdauth.Markers = OpenLayers.Class(OpenLayers.Layer.Markers, {
 	defaultIcon : new OpenLayers.Icon('http://osm.cdauth.de/map/marker.png', new OpenLayers.Size(21,25), new OpenLayers.Pixel(-9, -25)),
-	openPopupsOnShow : [ ],
+	openPopupsOnShow : null,
 	initialize : function(name, options) {
+		this.openPopupsOnShow = [ ];
+
 		OpenLayers.Layer.Markers.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({zoomableInLayerSwitcher: true, projection: new OpenLayers.Projection("EPSG:4326")}, options) ]);
 		this.events.addEventType("markersChanged");
 
@@ -1517,10 +1519,11 @@ OpenLayers.Layer.cdauth.Markers.GeoSearch = OpenLayers.Class(OpenLayers.Layer.cd
 
 OpenLayers.Layer.cdauth.XML = OpenLayers.Class(OpenLayers.Layer.GML, {
 	cdauthURL : null,
-	relations : { },
+	relations : null,
 	colour : null,
 	initialize : function(name, url, options) {
 		this.cdauthURL = url;
+		this.relations = { };
 
 		if(this.colour == null)
 		{
@@ -2479,11 +2482,15 @@ OpenLayers.Layer.cdauth.CoordinateGrid = OpenLayers.Class(OpenLayers.Layer.Vecto
 	*/
 	labelStyleMapHighlight : { fontColor: "#666", fontSize: "10px", fontWeight: "bold" },
 
-	horizontalLines : { },
-	verticalLines : { },
-	degreeLabels : [ ],
+	horizontalLines : null,
+	verticalLines : null,
+	degreeLabels : null,
 
 	initialize : function(name, options) {
+		this.horizontalLines = { };
+		this.verticalLines = { };
+		this.degreeLabels = [ ];
+
 		if(typeof name == "undefined" || name == null)
 			name = OpenLayers.i18n("Coordinate grid");
 		options = OpenLayers.Util.extend(options, { projection : new OpenLayers.Projection("EPSG:4326") });
