@@ -15,8 +15,8 @@
 	You should have received a copy of the GNU Affero General Public License
 	along with cdauth’s map.  If not, see <http://www.gnu.org/licenses/>.
 
-	Obtain the source code from http://svn.cdauth.de/viewvc.cgi/Tools/osm/map/
-	or svn://svn.cdauth.de/tools/osm/map/.
+	Obtain the source code from http://gitorious.org/cdauths-map
+	or git://gitorious.org/cdauths-map/map.git.
 */
 
 	/**
