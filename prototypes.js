@@ -1512,6 +1512,7 @@ OpenLayers.Layer.cdauth.Markers.GeoSearch = OpenLayers.Class(OpenLayers.Layer.cd
  * Displays an XML file on the map (such as GPX, KML or OSM) using a proxy and with auto-determining of the format. The colour is
  * randomly assigned. Set OpenLayers.Layer.cdauth.XML.proxy to your proxy URL (the URL will be appended using the “url” GET parameter).
  * If you set OpenLayers.Layer.cdauth.XML.relationURL, OSM sub-relations will be loaded in additional requests.
+ * @event allloadend If an array of URL is passed, this is only called when the last URL is actually loaded.
 */
 
 OpenLayers.Layer.cdauth.XML = OpenLayers.Class(OpenLayers.Layer.GML, {
@@ -1542,6 +1543,8 @@ OpenLayers.Layer.cdauth.XML = OpenLayers.Class(OpenLayers.Layer.GML, {
 			zoomableInLayerSwitcher: true,
 			shortName : "xml"+OpenLayers.Layer.cdauth.XML.shortNameI++
 		}, options) ]);
+
+		this.events.addEventType("allloadend");
 	},
 	setUrl : function(url) {
 		OpenLayers.Layer.GML.prototype.setUrl.apply(this, [ this.proxyURL(url) ]);
@@ -1550,23 +1553,52 @@ OpenLayers.Layer.cdauth.XML = OpenLayers.Class(OpenLayers.Layer.GML, {
 		if(!url)
 			return null;
 		if(OpenLayers.Layer.cdauth.XML.proxy)
-			return OpenLayers.Layer.cdauth.XML.proxy + (OpenLayers.Layer.cdauth.XML.proxy.match(/\?/) ? "&" : "?") + "url=" + encodeURIComponent(url);
+		{
+			if(url instanceof Array)
+			{
+				var ret = [ ];
+				for(var i=0; i<url.length; i++)
+					ret.push(this.proxyURL(url[i]));
+				return ret;
+			}
+			else
+				return OpenLayers.Layer.cdauth.XML.proxy + (OpenLayers.Layer.cdauth.XML.proxy.match(/\?/) ? "&" : "?") + "url=" + encodeURIComponent(url);
+		}
 		else
 			return url;
 	},
 	loadGML : function(url) {
 		if(!url)
 		{
-			if(this.url)
-				OpenLayers.Layer.GML.prototype.loadGML.apply(this, [ ]);
+			if(!this.loaded)
+			{
+				url = this.url;
+				this.loaded = true;
+			}
+			else
+				return;
 		}
-		else
+
+		if(!(url instanceof Array))
+			url = [ url ];
+		var toLoad = url.length;
+		this.events.triggerEvent("loadstart");
+		for(var i=0; i<url.length; i++)
 		{
-			this.events.triggerEvent("loadstart");
+			if(!url[i])
+				continue;
 			OpenLayers.Request.GET({
-				url: url,
-				success: this.requestSuccess,
-				failure: this.requestFailure,
+				url: url[i],
+				success: function() {
+					this.requestSuccess.apply(this, arguments);
+					if(--toLoad == 0)
+						this.events.triggerEvent("allloadend");
+				},
+				failure: function() {
+					this.requestFailure.apply(this, arguments);
+					if(--toLoad == 0)
+						this.events.triggerEvent("allloadend");
+				},
 				scope: this
 			});
 		}
@@ -1654,6 +1686,7 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 
 	fromIcon : new OpenLayers.Icon('http://osm.cdauth.de/map/route-start.png', new OpenLayers.Size(20,34), new OpenLayers.Pixel(-10, -34)),
 	toIcon : new OpenLayers.Icon('http://osm.cdauth.de/map/route-stop.png', new OpenLayers.Size(20,34), new OpenLayers.Pixel(-10, -34)),
+	viaIcon : new OpenLayers.Icon('http://osm.cdauth.de/map/yellow.png', new OpenLayers.Size(20,34), new OpenLayers.Pixel(-10, -34)),
 
 	from : null,
 	to : null,
@@ -1663,6 +1696,7 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 
 	fromMarker : null,
 	toMarker : null,
+	viaMarkers : [ ],
 
 	zoomAtNextSuccess : false,
 	distance : null,
@@ -1690,6 +1724,21 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 					layer.setFrom(lonlat);
 				else if(marker == layer.toMarker)
 					layer.setTo(lonlat);
+				else
+				{
+					for(var i=0; i<layer.viaMarkers.length; i++)
+					{
+						if(marker == layer.viaMarkers[i])
+						{
+							if(lonlat.lon != layer.via[i].lon || lonlat.lat != layer.via[i].lat)
+							{
+								layer.via[i] = lonlat;
+								layer.updateRouting();
+							}
+							break;
+						}
+					}
+				}
 				layer.events.triggerEvent("draggedRoute");
 			}
 		});
@@ -1704,7 +1753,7 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 
 	getFeatureFromEvent : function(evt) {
 		// We don't want to drag the actual features, but the markers instead
-		var markers = [ this.fromMarker, this.toMarker ];
+		var markers = [ this.fromMarker, this.toMarker ].concat(this.viaMarkers);
 		for(var i=0; i<markers.length; i++)
 		{
 			if(markers[i] != null && markers[i].icon && markers[i].icon.imageDiv && evt.target == markers[i].icon.imageDiv.firstChild)
@@ -1783,24 +1832,6 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 		this.updateRouting(zoom);
 	},
 
-	getURLSuffix : function() {
-		if(this.from == null || this.to == null || this.medium == null || this.routingType == null)
-			return null;
-
-		var suffix = "?flat="+this.from.lat +
-			"&flon="+this.from.lon +
-			"&tlat="+this.to.lat +
-			"&tlon="+this.to.lon +
-			"&v="+this.routingMediumMapping[this.medium] +
-			"&fast="+this.routingTypeMapping[this.routingType];
-		for(var i=0; i<this.via.length; i++)
-		{
-			suffix += "&wlat="+this.via[i].lat +
-			          "&wlon="+this.via[i].lon;
-		}
-		return suffix;
-	},
-
 	updateRouting : function(zoom) {
 		if(this.fromMarker != null)
 		{
@@ -1826,12 +1857,36 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 			this.addMarker(this.toMarker);
 		}
 
-		var suffix = this.getURLSuffix();
-		if(suffix == null)
-			return;
+		for(var i=0; i<this.viaMarkers.length; i++)
+			this.removeMarker(this.viaMarkers[i]);
+		this.viaMarkers = [ ];
+		for(var i=0; i<this.via.length; i++)
+		{
+			this.viaMarkers[i] = new OpenLayers.Marker(this.via[i].clone().transform(new OpenLayers.Projection("EPSG:4326"), this.map.getProjectionObject()), this.viaIcon.clone())
+			this.viaMarkers[i].layer = this; // Required for the drag control
+			this.addMarker(this.viaMarkers[i]);
+		}
+
+		if(this.from == null || this.to == null || this.medium == null || this.routingType == null)
+			return null;
 
 		this.zoomAtNextSuccess = zoom;
-		this.setUrl(this.routingURL + suffix + "&format=kml");
+
+		var url = this.routingURL +
+			"?v="+this.routingMediumMapping[this.medium] +
+			"&fast="+this.routingTypeMapping[this.routingType] +
+			"&format=kml";
+		var urls = [ ];
+		var nodes = [ this.from ].concat(this.via).concat([ this.to ]);
+		for(var i=1; i<nodes.length; i++)
+		{
+			urls.push(url +
+				"&flat="+nodes[i-1].lat +
+				"&flon="+nodes[i-1].lon +
+				"&tlat="+nodes[i].lat +
+				"&tlon="+nodes[i].lon);
+		}
+		this.setUrl(urls);
 	},
 
 	/**
@@ -1839,10 +1894,21 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 	 * @return String A link to a web page or null if this route is not initialised yet.
 	*/
 	getDetailedLink : function() {
-		var suffix = this.getURLSuffix();
-		if(suffix == null)
+		if(this.from == null || this.to == null || this.medium == null || this.routingType == null)
 			return null;
-		return this.permalinkURL + suffix;
+
+		var url = this.permalinkURL + "?flat="+this.from.lat +
+			"&flon="+this.from.lon +
+			"&tlat="+this.to.lat +
+			"&tlon="+this.to.lon +
+			"&v="+this.routingMediumMapping[this.medium] +
+			"&fast="+this.routingTypeMapping[this.routingType];
+		for(var i=0; i<this.via.length; i++)
+		{
+			url += "&wlat="+this.via[i].lat +
+			          "&wlon="+this.via[i].lon;
+		}
+		return url;
 	},
 
 	getDistance : function() {
@@ -1877,7 +1943,21 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 		if(this.from == null || this.to == null || this.medium == null || this.routingType == null)
 			return { };
 		else
-			return { from : { lon : this.from.lon, lat : this.from.lat }, to : { lon : this.to.lon, lat : this.to.lat }, medium : this.medium, type : this.routingType };
+		{
+			var ret = {
+				from : { lon : this.from.lon, lat : this.from.lat },
+				to : { lon : this.to.lon, lat : this.to.lat },
+				medium : this.medium,
+				type : this.routingType
+			};
+			if(this.via.length > 0)
+			{
+				ret.via = { };
+				for(var i=0; i<this.via.length; i++)
+					ret.via[i] = { lon : this.via[i].lon, lat : this.via[i].lat };
+			}
+			return ret;
+		}
 	},
 
 	setQueryObject : function(obj) {
@@ -1901,6 +1981,28 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 		{
 			this.to = new OpenLayers.LonLat(obj.to.lon, obj.to.lat);
 			doUpdate = true;
+		}
+		if(obj.via != undefined)
+		{
+			var i = 0;
+			var wrong = false;
+			for(; obj.via[i] != undefined; i++)
+			{
+				if(obj.via[i].lon == undefined || obj.via[i].lat == undefined)
+					continue;
+				if(this.via[i] == undefined || this.via[i].lon != obj.via[i].lon || this.via[i].lat != obj.via[i].lat)
+				{
+					wrong = true;
+					break;
+				}
+			}
+			if(wrong || i != this.via.length)
+			{
+				this.via = [ ];
+				for(var i=0; obj.via[i] != undefined; i++)
+					this.via.push(new OpenLayers.LonLat(obj.via[i].lon, obj.via[i].lat));
+				doUpdate = true;
+			}
 		}
 		if(doUpdate)
 			this.updateRouting(false);
