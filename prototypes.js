@@ -1650,8 +1650,8 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 	routingMediumMapping : { "car" : "motorcar", "bicycle" : "bicycle", "foot" : "foot" },
 	routingTypeMapping : { "shortest" : "0", "fastest" : "1" },
 
-	startIcon : new OpenLayers.Icon('http://osm.cdauth.de/map/route-start.png', new OpenLayers.Size(20,34), new OpenLayers.Pixel(-10, -34)),
-	endIcon : new OpenLayers.Icon('http://osm.cdauth.de/map/route-stop.png', new OpenLayers.Size(20,34), new OpenLayers.Pixel(-10, -34)),
+	fromIcon : new OpenLayers.Icon('http://osm.cdauth.de/map/route-start.png', new OpenLayers.Size(20,34), new OpenLayers.Pixel(-10, -34)),
+	toIcon : new OpenLayers.Icon('http://osm.cdauth.de/map/route-stop.png', new OpenLayers.Size(20,34), new OpenLayers.Pixel(-10, -34)),
 
 	from : null,
 	to : null,
@@ -1659,8 +1659,13 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 	routingType : null,
 	via : [ ],
 
+	fromMarker : null,
+	toMarker : null,
+
 	zoomAtNextSuccess : false,
 	distance : null,
+	markers : [ ],
+	markersDrawn : false,
 
 	initialize : function(name, options) {
 		OpenLayers.Layer.cdauth.XML.prototype.initialize.apply(this, [ name, undefined, options ]);
@@ -1679,6 +1684,7 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 			return;
 		}
 		this.from = from;
+
 		this.events.triggerEvent("queryObjectChanged");
 		this.updateRouting(zoom);
 	},
@@ -1696,6 +1702,7 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 			return;
 		}
 		this.to = to;
+
 		this.events.triggerEvent("queryObjectChanged");
 		this.updateRouting(zoom);
 	},
@@ -1753,9 +1760,26 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 	},
 
 	updateRouting : function(zoom) {
+		if(this.fromMarker != null)
+		{
+			this.removeMarker(this.fromMarker);
+			this.fromMarker = null;
+		}
+		if(this.from != null)
+			this.addMarker(this.fromMarker = new OpenLayers.Marker(this.from.clone().transform(new OpenLayers.Projection("EPSG:4326"), this.map.getProjectionObject()), this.fromIcon.clone()));
+
+		if(this.toMarker != null)
+		{
+			this.removeMarker(this.toMarker);
+			this.toMarker = null;
+		}
+		if(this.to != null)
+			this.addMarker(this.toMarker = new OpenLayers.Marker(this.to.clone().transform(new OpenLayers.Projection("EPSG:4326"), this.map.getProjectionObject()), this.toIcon.clone()));
+
 		var suffix = this.getURLSuffix();
 		if(suffix == null)
 			return;
+
 		this.zoomAtNextSuccess = zoom;
 		this.setUrl(this.routingURL + suffix + "&format=kml");
 	},
@@ -1830,6 +1854,34 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 		}
 		if(doUpdate)
 			this.updateRouting(false);
+	},
+
+	drawMarker : function(marker) {
+		var px = this.map.getPixelFromLonLat(marker.lonlat);
+		if(px == null)
+			marker.display(false);
+		else
+		{
+			if(!marker.isDrawn())
+			{
+				var markerImg = marker.draw(px);
+				this.div.appendChild(markerImg);
+			}
+			else if(marker.icon)
+				marker.icon.moveTo(px);
+		}
+	},
+	addMarker : OpenLayers.Layer.Markers.prototype.addMarker,
+	removeMarker : OpenLayers.Layer.Markers.prototype.removeMarker,
+	clearMarkers : OpenLayers.Layer.Markers.prototype.clearMarkers,
+	moveTo : function(bounds, zoomChanged, dragging) {
+		OpenLayers.Layer.cdauth.XML.prototype.moveTo.apply(this, arguments);
+		if(zoomChanged || !this.markersDrawn || !dragging)
+		{
+			for(var i=0, len=this.markers.length; i<len; i++)
+				this.drawMarker(this.markers[i]);
+            this.markersDrawn = true;
+		}
 	}
 });
 
