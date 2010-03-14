@@ -1640,67 +1640,163 @@ OpenLayers.Layer.cdauth.XML.relationURL = "http://www.openstreetmap.org/api/0.6/
 OpenLayers.Layer.cdauth.XML.colourCounter = 1;
 OpenLayers.Layer.cdauth.XML.shortNameI = 1;
 
+/**
+ * Shows a calculated route on the map. Add this layer to a map and set the different paramters using the set* functions. As soon as all
+ * parameters are set, the route will be displayed. The parameters can be updated then and the route will be recalculated.
+*/
 OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.XML, {
 	routingURL : "http://www.yournavigation.org/api/1.0/gosmore.php",
+	permalinkURL : "http://www.yournavigation.org/",
 	routingMediumMapping : { "car" : "motorcar", "bicycle" : "bicycle", "foot" : "foot" },
 	routingTypeMapping : { "shortest" : "0", "fastest" : "1" },
+
+	startIcon : new OpenLayers.Icon('http://osm.cdauth.de/map/route-start.png', new OpenLayers.Size(20,34), new OpenLayers.Pixel(-10, -34)),
+	endIcon : new OpenLayers.Icon('http://osm.cdauth.de/map/route-stop.png', new OpenLayers.Size(20,34), new OpenLayers.Pixel(-10, -34)),
 
 	from : null,
 	to : null,
 	medium : null,
 	routingType : null,
+	via : [ ],
 
 	zoomAtNextSuccess : false,
+	distance : null,
 
 	initialize : function(name, options) {
 		OpenLayers.Layer.cdauth.XML.prototype.initialize.apply(this, [ name, undefined, options ]);
 	},
 
+	/**
+	 * Set the start point of this route. Recalculates the route.
+	 * @param OpenLayers.LonLat from The start point to set for this route.
+	 * @param boolean zoom Zoom the map to this route after it has been loaded?
+	 * @return void
+	*/
 	setFrom : function(from, zoom) {
+		if(from == this.from)
+		{
+			if(zoom) this.zoomMap();
+			return;
+		}
 		this.from = from;
 		this.events.triggerEvent("queryObjectChanged");
 		this.updateRouting(zoom);
 	},
 
+	/**
+	 * Set the destination point of this route. Recalculates the route.
+	 * @param OpenLayers.LonLat to The destination point to set for this route.
+	 * @param boolean zoom Zoom the map to this route after it has been loaded?
+	 * @return void
+	*/
 	setTo : function(to, zoom) {
+		if(to == this.to)
+		{
+			if(zoom) this.zoomMap();
+			return;
+		}
 		this.to = to;
 		this.events.triggerEvent("queryObjectChanged");
 		this.updateRouting(zoom);
 	},
 
+	/**
+	 * Set the means of transportation for this route. Recalculates the route.
+	 * @param OpenLayers.Layer.cdauth.XML.Routing.Medium medium The means of transportation to use for this route.
+	 * @param boolean zoom Zoom the map to this route after it has been loaded?
+	 * @return void
+	*/
 	setMedium : function(medium, zoom) {
+		if(medium == this.medium)
+		{
+			if(zoom) this.zoomMap();
+			return;
+		}
 		this.medium = medium;
 		this.events.triggerEvent("queryObjectChanged");
 		this.updateRouting(zoom);
 	},
 
+	/**
+	 * Set the route calculation mechanism for this route. Recalculates the route.
+	 * @param OpenLayers.Layer.cdauth.XML.Routing.Type type The route calculation mechanism to use for this route.
+	 * @param boolean zoom Zoom the map to this route after it has been loaded?
+	 * @return void
+	*/
 	setType : function(type, zoom) {
+		if(type == this.type)
+		{
+			if(zoom) this.zoomMap();
+			return;
+		}
 		this.routingType = type;
 		this.events.triggerEvent("queryObjectChanged");
 		this.updateRouting(zoom);
 	},
 
-	updateRouting : function(zoom) {
+	getURLSuffix : function() {
 		if(this.from == null || this.to == null || this.medium == null || this.routingType == null)
-			return;
+			return null;
 
-		var url = this.routingURL +
-			"?flat="+this.from.lat +
+		var suffix = "?flat="+this.from.lat +
 			"&flon="+this.from.lon +
 			"&tlat="+this.to.lat +
 			"&tlon="+this.to.lon +
 			"&v="+this.routingMediumMapping[this.medium] +
-			"&fast="+this.routingTypeMapping[this.routingType] +
-			"&format=kml";
-		this.zoomAtNextSuccess = zoom;
-		this.setUrl(url);
+			"&fast="+this.routingTypeMapping[this.routingType];
+		for(var i=0; i<this.via.length; i++)
+		{
+			suffix += "&wlat="+this.via[i].lat +
+			          "&wlon="+this.via[i].lon;
+		}
+		return suffix;
 	},
 
-	requestSuccess : function() {
+	updateRouting : function(zoom) {
+		var suffix = this.getURLSuffix();
+		if(suffix == null)
+			return;
+		this.zoomAtNextSuccess = zoom;
+		this.setUrl(this.routingURL + suffix + "&format=kml");
+	},
+
+	/**
+	 * Returns a link to a web page displaying detailed information about the route, such as driving instructions.
+	 * @return String A link to a web page or null if this route is not initialised yet.
+	*/
+	getDetailedLink : function() {
+		var suffix = this.getURLSuffix();
+		if(suffix == null)
+			return null;
+		return this.permalinkURL + suffix;
+	},
+
+	getDistance : function() {
+		return this.distance;
+	},
+
+	requestSuccess : function(request) {
+		if(request.responseXML)
+		{ // Do this before calling the parent function as that invokes the loadend event
+			var distanceEls = request.responseXML.getElementsByTagName("distance");
+			if(distanceEls.length > 0)
+				this.distance = 1*distanceEls[0].firstChild.data;
+			else
+				this.distance = null;
+		}
+		else
+			this.distance = null;
+
 		OpenLayers.Layer.cdauth.XML.prototype.requestSuccess.apply(this, arguments);
 
 		if(this.zoomAtNextSuccess)
-			this.map.zoomToExtent(this.getDataExtent());
+			this.zoomMap();
+	},
+
+	zoomMap : function() {
+		var extent = this.getDataExtent();
+		if(extent != null)
+			this.map.zoomToExtent(extent);
 	},
 
 	getQueryObject : function() {
@@ -1711,24 +1807,44 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 	},
 
 	setQueryObject : function(obj) {
-		if(obj.from != undefined && obj.from.lat != undefined && obj.from.lon != undefined)
-			this.from = new OpenLayers.LonLat(obj.from.lon, obj.from.lat);
-		if(obj.to != undefined && obj.to.lat != undefined && obj.to.lon != undefined)
-			this.to = new OpenLayers.LonLat(obj.to.lon, obj.to.lat);
-		if(obj.medium != undefined)
+		var doUpdate = false;
+		if(obj.medium != undefined && obj.medium != this.medium)
+		{
 			this.medium = obj.medium;
-		if(obj.type != undefined)
+			doUpdate = true;
+		}
+		if(obj.type != undefined && obj.type != this.routingType)
+		{
 			this.routingType = obj.type;
-		this.updateRouting(false);
+			doUpdate = true;
+		}
+		if(obj.from != undefined && obj.from.lat != undefined && obj.from.lon != undefined && (this.from == null || obj.from.lat != this.from.lat || obj.from.lon != this.from.lon))
+		{
+			this.from = new OpenLayers.LonLat(obj.from.lon, obj.from.lat);
+			doUpdate = true;
+		}
+		if(obj.to != undefined && obj.to.lat != undefined && obj.to.lon != undefined && (this.to == null || obj.to.lat != this.to.lat || obj.to.lon != this.to.lon))
+		{
+			this.to = new OpenLayers.LonLat(obj.to.lon, obj.to.lat);
+			doUpdate = true;
+		}
+		if(doUpdate)
+			this.updateRouting(false);
 	}
 });
 
+/**
+ * Means of transportation.
+*/
 OpenLayers.Layer.cdauth.XML.Routing.Medium = {
 	CAR : "car",
 	BICYCLE : "bicycle",
 	FOOT : "foot"
 };
 
+/**
+ * Route calculation mechanisms.
+*/
 OpenLayers.Layer.cdauth.XML.Routing.Type = {
 	FASTEST : "fastest",
 	SHORTEST : "shortest"
