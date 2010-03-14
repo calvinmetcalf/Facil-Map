@@ -1543,8 +1543,10 @@ OpenLayers.Layer.cdauth.XML = OpenLayers.Class(OpenLayers.Layer.GML, {
 			shortName : "xml"+OpenLayers.Layer.cdauth.XML.shortNameI++
 		}, options) ]);
 	},
-	proxyURL : function(url)
-	{
+	setUrl : function(url) {
+		OpenLayers.Layer.GML.prototype.setUrl.apply(this, [ this.proxyURL(url) ]);
+	},
+	proxyURL : function(url) {
 		if(!url)
 			return null;
 		if(OpenLayers.Layer.cdauth.XML.proxy)
@@ -1637,6 +1639,100 @@ OpenLayers.Layer.cdauth.XML.relationURL = "http://www.openstreetmap.org/api/0.6/
 
 OpenLayers.Layer.cdauth.XML.colourCounter = 1;
 OpenLayers.Layer.cdauth.XML.shortNameI = 1;
+
+OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.XML, {
+	routingURL : "http://www.yournavigation.org/api/1.0/gosmore.php",
+	routingMediumMapping : { "car" : "motorcar", "bicycle" : "bicycle", "foot" : "foot" },
+	routingTypeMapping : { "shortest" : "0", "fastest" : "1" },
+
+	from : null,
+	to : null,
+	medium : null,
+	routingType : null,
+
+	zoomAtNextSuccess : false,
+
+	initialize : function(name, options) {
+		OpenLayers.Layer.cdauth.XML.prototype.initialize.apply(this, [ name, undefined, options ]);
+	},
+
+	setFrom : function(from, zoom) {
+		this.from = from;
+		this.events.triggerEvent("queryObjectChanged");
+		this.updateRouting(zoom);
+	},
+
+	setTo : function(to, zoom) {
+		this.to = to;
+		this.events.triggerEvent("queryObjectChanged");
+		this.updateRouting(zoom);
+	},
+
+	setMedium : function(medium, zoom) {
+		this.medium = medium;
+		this.events.triggerEvent("queryObjectChanged");
+		this.updateRouting(zoom);
+	},
+
+	setType : function(type, zoom) {
+		this.routingType = type;
+		this.events.triggerEvent("queryObjectChanged");
+		this.updateRouting(zoom);
+	},
+
+	updateRouting : function(zoom) {
+		if(this.from == null || this.to == null || this.medium == null || this.routingType == null)
+			return;
+
+		var url = this.routingURL +
+			"?flat="+this.from.lat +
+			"&flon="+this.from.lon +
+			"&tlat="+this.to.lat +
+			"&tlon="+this.to.lon +
+			"&v="+this.routingMediumMapping[this.medium] +
+			"&fast="+this.routingTypeMapping[this.routingType] +
+			"&format=kml";
+		this.zoomAtNextSuccess = zoom;
+		this.setUrl(url);
+	},
+
+	requestSuccess : function() {
+		OpenLayers.Layer.cdauth.XML.prototype.requestSuccess.apply(this, arguments);
+
+		if(this.zoomAtNextSuccess)
+			this.map.zoomToExtent(this.getDataExtent());
+	},
+
+	getQueryObject : function() {
+		if(this.from == null || this.to == null || this.medium == null || this.routingType == null)
+			return { };
+		else
+			return { from : { lon : this.from.lon, lat : this.from.lat }, to : { lon : this.to.lon, lat : this.to.lat }, medium : this.medium, type : this.routingType };
+	},
+
+	setQueryObject : function(obj) {
+		if(obj.from != undefined && obj.from.lat != undefined && obj.from.lon != undefined)
+			this.from = new OpenLayers.LonLat(obj.from.lon, obj.from.lat);
+		if(obj.to != undefined && obj.to.lat != undefined && obj.to.lon != undefined)
+			this.to = new OpenLayers.LonLat(obj.to.lon, obj.to.lat);
+		if(obj.medium != undefined)
+			this.medium = obj.medium;
+		if(obj.type != undefined)
+			this.routingType = obj.type;
+		this.updateRouting(false);
+	}
+});
+
+OpenLayers.Layer.cdauth.XML.Routing.Medium = {
+	CAR : "car",
+	BICYCLE : "bicycle",
+	FOOT : "foot"
+};
+
+OpenLayers.Layer.cdauth.XML.Routing.Type = {
+	FASTEST : "fastest",
+	SHORTEST : "shortest"
+};
 
 /**
  * A class to control the URL hash part.
