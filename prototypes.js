@@ -1643,6 +1643,8 @@ OpenLayers.Layer.cdauth.XML.shortNameI = 1;
 /**
  * Shows a calculated route on the map. Add this layer to a map and set the different paramters using the set* functions. As soon as all
  * parameters are set, the route will be displayed. The parameters can be updated then and the route will be recalculated.
+
+ * @event draggedRoute The route was changed using drag and drop.
 */
 OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.XML, {
 	routingURL : "http://www.yournavigation.org/api/1.0/gosmore.php",
@@ -1667,8 +1669,48 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 	markers : [ ],
 	markersDrawn : false,
 
+	dragFeature : null,
+
 	initialize : function(name, options) {
 		OpenLayers.Layer.cdauth.XML.prototype.initialize.apply(this, [ name, undefined, options ]);
+
+		this.events.addEventType("draggedRoute");
+
+		var layer = this;
+		this.dragFeature = new OpenLayers.Control.DragFeature(this, {
+			dragCallbacks : { move : function(pixel) {
+				// this.feature is the marker
+				var newPx = new OpenLayers.Pixel(this.feature.icon.px.x + (pixel.x - this.lastPixel.x), this.feature.icon.px.y - (this.lastPixel.y - pixel.y));
+				this.lastPixel = pixel;
+				this.feature.draw(newPx);
+			} },
+			onComplete : function(marker, pixel) {
+				var lonlat = this.map.getLonLatFromPixel(this.feature.icon.px).transform(this.map.getProjectionObject(), new OpenLayers.Projection("EPSG:4326"));
+				if(marker == layer.fromMarker)
+					layer.setFrom(lonlat);
+				else if(marker == layer.toMarker)
+					layer.setTo(lonlat);
+				layer.events.triggerEvent("draggedRoute");
+			}
+		});
+	},
+
+	setMap : function(map) {
+		OpenLayers.Layer.cdauth.XML.prototype.setMap.apply(this, arguments);
+
+		map.addControl(this.dragFeature);
+		this.dragFeature.activate();
+	},
+
+	getFeatureFromEvent : function(evt) {
+		// We don't want to drag the actual features, but the markers instead
+		var markers = [ this.fromMarker, this.toMarker ];
+		for(var i=0; i<markers.length; i++)
+		{
+			if(markers[i] != null && markers[i].icon && markers[i].icon.imageDiv && evt.target == markers[i].icon.imageDiv.firstChild)
+				return markers[i];
+		}
+		return null;
 	},
 
 	/**
@@ -1766,7 +1808,11 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 			this.fromMarker = null;
 		}
 		if(this.from != null)
-			this.addMarker(this.fromMarker = new OpenLayers.Marker(this.from.clone().transform(new OpenLayers.Projection("EPSG:4326"), this.map.getProjectionObject()), this.fromIcon.clone()));
+		{
+			this.fromMarker = new OpenLayers.Marker(this.from.clone().transform(new OpenLayers.Projection("EPSG:4326"), this.map.getProjectionObject()), this.fromIcon.clone())
+			this.fromMarker.layer = this; // Required for the drag control
+			this.addMarker(this.fromMarker);
+		}
 
 		if(this.toMarker != null)
 		{
@@ -1774,7 +1820,11 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 			this.toMarker = null;
 		}
 		if(this.to != null)
-			this.addMarker(this.toMarker = new OpenLayers.Marker(this.to.clone().transform(new OpenLayers.Projection("EPSG:4326"), this.map.getProjectionObject()), this.toIcon.clone()));
+		{
+			this.toMarker = new OpenLayers.Marker(this.to.clone().transform(new OpenLayers.Projection("EPSG:4326"), this.map.getProjectionObject()), this.toIcon.clone())
+			this.toMarker.layer = this; // Required for the drag control
+			this.addMarker(this.toMarker);
+		}
 
 		var suffix = this.getURLSuffix();
 		if(suffix == null)
