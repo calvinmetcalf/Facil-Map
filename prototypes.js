@@ -514,6 +514,8 @@ OpenLayers.Control.cdauth.KeyboardDefaults = OpenLayers.Class(OpenLayers.Control
 	defaultKeyPress : function(evt) {
 		if(evt.target && evt.target.nodeName && (evt.target.nodeName.toLowerCase() == "input" && evt.target.type.toLowerCase() != "checkbox" && evt.target.type.toLowerCase() != "button" && evt.target.type.toLowerCase() != "submit" && evt.target.type.toLowerCase() != "clear" || evt.target.tagName.toLowerCase() == "textarea" || evt.target.tagName.toLowerCase() == "select"))
 			return true;
+		if(evt.altKey || evt.ctrlKey || evt.shiftKey)
+			return true;
 		OpenLayers.Control.KeyboardDefaults.prototype.defaultKeyPress.apply(this, [ evt ]);
 	},
 	CLASS_NAME : "OpenLayers.Control.cdauth.KeyboardDefaults"
