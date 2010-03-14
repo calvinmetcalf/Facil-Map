@@ -1679,7 +1679,9 @@ OpenLayers.Layer.cdauth.XML.shortNameI = 1;
  * @event draggedRoute The route was changed using drag and drop.
 */
 OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.XML, {
-	routingURL : "http://www.yournavigation.org/api/1.0/gosmore.php",
+	HOVER_MIN_DISTANCE : 500,
+
+	routingURL : "http://www.yournavigation.org/api/dev/gosmore.php",
 	permalinkURL : "http://www.yournavigation.org/",
 	routingMediumMapping : { "car" : "motorcar", "bicycle" : "bicycle", "foot" : "foot" },
 	routingTypeMapping : { "shortest" : "0", "fastest" : "1" },
@@ -1692,25 +1694,31 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 	to : null,
 	medium : null,
 	routingType : null,
-	via : [ ],
+	via : null,
 
 	fromMarker : null,
 	toMarker : null,
-	viaMarkers : [ ],
+	viaMarkers : null,
 
 	zoomAtNextSuccess : false,
 	distance : null,
-	markers : [ ],
+	markers : null,
 	markersDrawn : false,
 
 	dragFeature : null,
+	featureHandler : null,
+	temporaryViaMarker : null,
 
 	initialize : function(name, options) {
 		OpenLayers.Layer.cdauth.XML.prototype.initialize.apply(this, [ name, undefined, options ]);
 
+		this.via = [ ];
+		this.viaMarkers = [ ];
+		this.markers = [ ];
+
 		this.events.addEventType("draggedRoute");
 
-		var layer = this;
+		var routingLayer = this;
 		this.dragFeature = new OpenLayers.Control.DragFeature(this, {
 			dragCallbacks : { move : function(pixel) {
 				// this.feature is the marker
@@ -1720,26 +1728,79 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 			} },
 			onComplete : function(marker, pixel) {
 				var lonlat = this.map.getLonLatFromPixel(this.feature.icon.px).transform(this.map.getProjectionObject(), new OpenLayers.Projection("EPSG:4326"));
-				if(marker == layer.fromMarker)
-					layer.setFrom(lonlat);
-				else if(marker == layer.toMarker)
-					layer.setTo(lonlat);
+				if(marker == routingLayer.fromMarker)
+					routingLayer.setFrom(lonlat);
+				else if(marker == routingLayer.toMarker)
+					routingLayer.setTo(lonlat);
 				else
 				{
-					for(var i=0; i<layer.viaMarkers.length; i++)
+					for(var i=0; i<routingLayer.viaMarkers.length; i++)
 					{
-						if(marker == layer.viaMarkers[i])
+						if(marker == routingLayer.viaMarkers[i])
 						{
-							if(lonlat.lon != layer.via[i].lon || lonlat.lat != layer.via[i].lat)
+							if(lonlat.lon != routingLayer.via[i].lon || lonlat.lat != routingLayer.via[i].lat)
 							{
-								layer.via[i] = lonlat;
-								layer.updateRouting();
+								routingLayer.via[i] = lonlat;
+								routingLayer.updateRouting();
 							}
 							break;
 						}
 					}
 				}
-				layer.events.triggerEvent("draggedRoute");
+				routingLayer.events.triggerEvent("draggedRoute");
+			}
+		});
+		this.featureHandler = OpenLayers.Util.extend(new OpenLayers.Handler({ map : null }), {
+			lastPoint : null,
+			mousemove : function(evt) {
+				var point = routingLayer.getPointFromMousePosition(evt.xy);
+				if(point != null)
+				{
+					if(routingLayer.temporaryViaMarker == null)
+					{
+						routingLayer.temporaryViaMarker = new OpenLayers.Marker(new OpenLayers.LonLat(0, 0), routingLayer.viaIcon.clone());
+						routingLayer.temporaryViaMarker.layer = routingLayer;
+						routingLayer.addMarker(routingLayer.temporaryViaMarker);
+					}
+					routingLayer.temporaryViaMarker.lonlat = point.lonlat;
+					routingLayer.drawMarker(routingLayer.temporaryViaMarker);
+					this.lastPoint = point;
+				}
+				else if(routingLayer.temporaryViaMarker != null)
+				{
+					routingLayer.removeMarker(routingLayer.temporaryViaMarker);
+					routingLayer.temporaryViaMarker.destroy();
+					routingLayer.temporaryViaMarker = null;
+					this.lastPoint = null;
+				}
+			},
+			mousedown : function(evt) {
+				if(this.lastPoint != null)
+				{
+					var newIndex = routingLayer.via.length;
+					while(newIndex > 0)
+					{
+						var thisPoint = routingLayer.getPointFromLonLat(routingLayer.via[newIndex-1].clone().transform(new OpenLayers.Projection("EPSG:4326"), routingLayer.map.getProjectionObject()));
+						if(thisPoint == null || thisPoint.index > this.lastPoint.index)
+						{
+							routingLayer.via[newIndex] = routingLayer.via[newIndex-1];
+							routingLayer.viaMarkers[newIndex] = routingLayer.viaMarkers[newIndex-1];
+							newIndex--;
+						}
+						else
+							break;
+					}
+					routingLayer.via[newIndex] = this.lastPoint.lonlat;
+					routingLayer.viaMarkers[newIndex] = routingLayer.temporaryViaMarker;
+					routingLayer.temporaryViaMarker = null;
+					this.lastPoint = null;
+
+					routingLayer.dragFeature.handlers.feature.mousemove({ type : "mousemove", target : routingLayer.viaMarkers[newIndex].icon.imageDiv.firstChild });
+					routingLayer.dragFeature.handlers.drag.mousedown(evt);
+
+					OpenLayers.Event.stop(evt);
+					return false;
+				}
 			}
 		});
 	},
@@ -1749,6 +1810,9 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 
 		map.addControl(this.dragFeature);
 		this.dragFeature.activate();
+
+		this.featureHandler.setMap(map);
+		this.featureHandler.activate();
 	},
 
 	getFeatureFromEvent : function(evt) {
@@ -1760,6 +1824,48 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 				return markers[i];
 		}
 		return null;
+	},
+
+	getPointFromMousePosition : function(xy) {
+		if(this.map == null)
+			return null;
+		var lonlat = this.map.getLonLatFromPixel(xy);
+		return this.getPointFromLonLat(lonlat);
+	},
+
+	getPointFromLonLat : function(lonlat) {
+		if(!this.features)
+			return null;
+		var smallestDistance = null;
+		var smallestDistancePoint = null;
+		var index = 0;
+		for(var j=0; j<this.features.length; j++)
+		{
+			if(!this.features[j] || !this.features[j].geometry || !this.features[j].geometry.components)
+				continue;
+
+			var points = this.features[j].geometry.components;
+			for(var i=0; i<points.length; i++,index++)
+			{
+				var distanceX = Math.abs(points[i].x-lonlat.lon);
+				var distanceY = Math.abs(points[i].y-lonlat.lat);
+				if(distanceX > this.HOVER_MIN_DISTANCE || distanceY > this.HOVER_MIN_DISTANCE)
+					continue;
+				var distance = Math.sqrt(Math.pow(distanceX, 2) + Math.pow(distanceY, 2));
+				if(distance > this.HOVER_MIN_DISTANCE)
+					continue;
+				if(smallestDistance == null || distance < smallestDistance)
+				{
+					smallestDistancePoint = [ index, points[i] ];
+					smallestDistance = distance;
+				}
+			}
+		}
+
+		if(smallestDistancePoint != null)
+			return { index : smallestDistancePoint[0], lonlat : new OpenLayers.LonLat(smallestDistancePoint[1].x, smallestDistancePoint[1].y) };
+		else
+			return null;
 	},
 
 	/**
@@ -1858,7 +1964,10 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 		}
 
 		for(var i=0; i<this.viaMarkers.length; i++)
+		{
 			this.removeMarker(this.viaMarkers[i]);
+			this.viaMarkers[i].destroy();
+		}
 		this.viaMarkers = [ ];
 		for(var i=0; i<this.via.length; i++)
 		{
@@ -1962,30 +2071,41 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 
 	setQueryObject : function(obj) {
 		var doUpdate = false;
-		if(obj.medium != undefined && obj.medium != this.medium)
+		if(obj.medium != this.medium)
 		{
 			this.medium = obj.medium;
 			doUpdate = true;
 		}
-		if(obj.type != undefined && obj.type != this.routingType)
+		if(obj.type != this.routingType)
 		{
 			this.routingType = obj.type;
 			doUpdate = true;
 		}
-		if(obj.from != undefined && obj.from.lat != undefined && obj.from.lon != undefined && (this.from == null || obj.from.lat != this.from.lat || obj.from.lon != this.from.lon))
+		if(obj.from == undefined && this.from != null)
+		{
+			this.from = null;
+			doUpdate = true;
+		}
+		else if(obj.from != undefined && obj.from.lat != undefined && obj.from.lon != undefined && (this.from == null || obj.from.lat != this.from.lat || obj.from.lon != this.from.lon))
 		{
 			this.from = new OpenLayers.LonLat(obj.from.lon, obj.from.lat);
 			doUpdate = true;
 		}
-		if(obj.to != undefined && obj.to.lat != undefined && obj.to.lon != undefined && (this.to == null || obj.to.lat != this.to.lat || obj.to.lon != this.to.lon))
+		if(obj.to == undefined && this.to != null)
+		{
+			this.to = null;
+			doUpdate = true;
+		}
+		else if(obj.to != undefined && obj.to.lat != undefined && obj.to.lon != undefined && (this.to == null || obj.to.lat != this.to.lat || obj.to.lon != this.to.lon))
 		{
 			this.to = new OpenLayers.LonLat(obj.to.lon, obj.to.lat);
 			doUpdate = true;
 		}
+
+		var i = 0;
+		var wrong = false;
 		if(obj.via != undefined)
 		{
-			var i = 0;
-			var wrong = false;
 			for(; obj.via[i] != undefined; i++)
 			{
 				if(obj.via[i].lon == undefined || obj.via[i].lat == undefined)
@@ -1996,14 +2116,18 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 					break;
 				}
 			}
-			if(wrong || i != this.via.length)
+		}
+		if(wrong || i != this.via.length)
+		{
+			this.via = [ ];
+			if(obj.via != undefined)
 			{
-				this.via = [ ];
 				for(var i=0; obj.via[i] != undefined; i++)
 					this.via.push(new OpenLayers.LonLat(obj.via[i].lon, obj.via[i].lat));
-				doUpdate = true;
 			}
+			doUpdate = true;
 		}
+
 		if(doUpdate)
 			this.updateRouting(false);
 	},
