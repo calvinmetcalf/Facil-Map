@@ -1693,6 +1693,8 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 	toIcon : new OpenLayers.Icon('http://osm.cdauth.de/map/route-stop.png', new OpenLayers.Size(20,34), new OpenLayers.Pixel(-10, -34)),
 	viaIcon : new OpenLayers.Icon('http://osm.cdauth.de/map/yellow.png', new OpenLayers.Size(20,34), new OpenLayers.Pixel(-10, -34)),
 
+	colour : "blue",
+
 	from : null,
 	to : null,
 	medium : null,
