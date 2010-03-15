@@ -1755,6 +1755,7 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 		});
 		this.featureHandler = OpenLayers.Util.extend(new OpenLayers.Handler({ map : null }), {
 			lastPoint : null,
+			lastXY : null,
 			mousemove : function(evt) {
 				var point = routingLayer.getPointFromMousePosition(evt.xy);
 				if(point != null)
@@ -1768,6 +1769,7 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 					routingLayer.temporaryViaMarker.lonlat = point.lonlat;
 					routingLayer.drawMarker(routingLayer.temporaryViaMarker);
 					this.lastPoint = point;
+					this.lastXY = evt.xy;
 				}
 				else if(routingLayer.temporaryViaMarker != null)
 				{
@@ -1793,6 +1795,7 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 						else
 							break;
 					}
+					routingLayer.temporaryViaMarker.draw(new OpenLayers.Pixel(this.lastXY.x, this.lastXY.y+2));
 					routingLayer.via[newIndex] = this.lastPoint.lonlat;
 					routingLayer.viaMarkers[newIndex] = routingLayer.temporaryViaMarker;
 					routingLayer.temporaryViaMarker = null;
