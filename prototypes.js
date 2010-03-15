@@ -1682,7 +1682,7 @@ OpenLayers.Layer.cdauth.XML.shortNameI = 1;
  * @event draggedRoute The route was changed using drag and drop.
 */
 OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.XML, {
-	HOVER_MIN_DISTANCE : 500,
+	HOVER_MAX_DISTANCE : 10,
 
 	routingURL : "http://www.yournavigation.org/api/dev/gosmore.php",
 	permalinkURL : "http://www.yournavigation.org/",
@@ -1847,6 +1847,7 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 		var smallestDistance = null;
 		var smallestDistancePoint = null;
 		var index = 0;
+		var maxDistance = this.HOVER_MAX_DISTANCE * this.map.getResolution();
 		for(var j=0; j<this.features.length; j++)
 		{
 			if(!this.features[j] || !this.features[j].geometry || !this.features[j].geometry.components)
@@ -1857,10 +1858,10 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 			{
 				var distanceX = Math.abs(points[i].x-lonlat.lon);
 				var distanceY = Math.abs(points[i].y-lonlat.lat);
-				if(distanceX > this.HOVER_MIN_DISTANCE || distanceY > this.HOVER_MIN_DISTANCE)
+				if(distanceX > maxDistance || distanceY > maxDistance)
 					continue;
 				var distance = Math.sqrt(Math.pow(distanceX, 2) + Math.pow(distanceY, 2));
-				if(distance > this.HOVER_MIN_DISTANCE)
+				if(distance > maxDistance)
 					continue;
 				if(smallestDistance == null || distance < smallestDistance)
 				{
