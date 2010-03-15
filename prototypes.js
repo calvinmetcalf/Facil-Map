@@ -1983,6 +1983,7 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 			return null;
 
 		this.zoomAtNextSuccess = zoom;
+		this.distance = null;
 
 		var url = this.routingURL +
 			"?v="+this.routingMediumMapping[this.medium] +
@@ -2032,12 +2033,8 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 		{ // Do this before calling the parent function as that invokes the loadend event
 			var distanceEls = request.responseXML.getElementsByTagName("distance");
 			if(distanceEls.length > 0)
-				this.distance = 1*distanceEls[0].firstChild.data;
-			else
-				this.distance = null;
+				this.distance = (this.distance == null ? 0 : this.distance) + 1*distanceEls[0].firstChild.data;
 		}
-		else
-			this.distance = null;
 
 		OpenLayers.Layer.cdauth.XML.prototype.requestSuccess.apply(this, arguments);
 
