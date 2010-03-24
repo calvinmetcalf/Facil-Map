@@ -83,6 +83,7 @@ OpenLayers.Lang.en = OpenLayers.Util.extend(OpenLayers.Lang.en, {
 	"Yahoo Hybrid" : "Yahoo Hybrid",
 	"Relief" : "Relief",
 	"Coordinate grid" : "Coordinate grid",
+	"Izometrická 3D mapa ČR" : "Izometrická 3D mapa ČR",
 	"Streets overlay" : "Streets overlay",
 	"Labels overlay" : "Labels overlay"
 });
@@ -128,6 +129,7 @@ OpenLayers.Lang.de = OpenLayers.Util.extend(OpenLayers.Lang.de, {
 	"Yahoo Hybrid" : "Yahoo Hybrid",
 	"Relief" : "Relief",
 	"Coordinate grid" : "Koordinatensystem",
+	"Izometrická 3D mapa ČR" : "Izometrická 3D mapa ČR",
 	"Streets overlay" : "Straßen-Hybrid",
 	"Labels overlay" : "Beschriftungen"
 });
@@ -268,6 +270,8 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 			this.addLayer(new OpenLayers.Layer.cdauth.OSM.OpenPisteMap(OpenLayers.i18n("OpenPisteMap"), { shortName : "OPis" }));
 		if(OpenLayers.Layer.cdauth.OSM.OPNVKarte)
 			this.addLayer(new OpenLayers.Layer.cdauth.OSM.OPNVKarte(OpenLayers.i18n("ÖPNV-Karte"), { shortName : "OPNV" }));
+		//if(OpenLayers.Layer.cdauth.OSM.Kybl3DMap)
+		//	this.addLayer(new OpenLayers.Layer.cdauth.OSM.Kybl3DMap(OpenLayers.i18n("Izometrická 3D mapa ČR"), { shortName : "kybl" }));
 
 		if(OpenLayers.Layer.cdauth.OSM.OOMStreets)
 			this.addLayer(new OpenLayers.Layer.cdauth.OSM.OOMStreets(OpenLayers.i18n("Streets overlay"), { shortName : "OOMS", visibility : false }));
@@ -719,6 +723,17 @@ if(OpenLayers.Layer.OSM)
 	});
 
 	/**
+	 * Izometrická 3D mapa ČR (http://osm.kyblsoft.cz/3dmapa/).
+	*/
+	OpenLayers.Layer.cdauth.OSM.Kybl3DMap = OpenLayers.Class(OpenLayers.Layer.OSM, {
+		attribution : OpenLayers.String.format(OpenLayers.i18n("attribution-osm"), { rendering: "<a href=\"http://osm.kyblsoft.cz/3dmapa/\">OpenKyblMap</a>" }),
+		initialize : function(name, options) {
+			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://osm.kyblsoft.cz/3dmapa/tiles/${z}/${x}/${y}.jpg", OpenLayers.Util.extend({ numZoomLevels: 18 }, options) ]);
+		},
+		CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.Kybl3DMap"
+	});
+
+	/**
 	 * OpenOrienteeringMap (http://oobrien.com/oom/) Street-O overlay.
 	*/
 	OpenLayers.Layer.cdauth.OSM.OOMStreets = OpenLayers.Class(OpenLayers.Layer.OSM, {
@@ -741,8 +756,6 @@ if(OpenLayers.Layer.OSM)
 		},
 		CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.OOMLabels"
 	});
-
-
 }
 
 
