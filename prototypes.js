@@ -324,7 +324,7 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 	},
 
 	/**
-	 * Zoom to the specified query object. Remember to add your layers and to eventually set OpenLayers.Layer.cdauth.XML.proxy before running
+	 * Zoom to the specified query object. Remember to add your layers and to eventually set OpenLayers.ProxyHost before running
 	 * this method.
 	 * @param Object query Usually decodeQueryString(location.hash.replace(/^#/, ""))
 	*/
@@ -1530,10 +1530,12 @@ OpenLayers.Layer.cdauth.Markers.GeoSearch = OpenLayers.Class(OpenLayers.Layer.cd
 });
 
 /**
- * Displays an XML file on the map (such as GPX, KML or OSM) using a proxy and with auto-determining of the format. The colour is
- * randomly assigned. Set OpenLayers.Layer.cdauth.XML.proxy to your proxy URL (the URL will be appended using the “url” GET parameter).
+ * Displays an XML file on the map (such as GPX, KML or OSM) auto-determining of the format. The colour is
+ * randomly assigned.
  * If you set OpenLayers.Layer.cdauth.XML.relationURL, OSM sub-relations will be loaded in additional requests.
  * Include the JavaScript http://osm.cdauth.eu/ajax-proxy/ajax-proxy.js to "disable" the Same Origin Policy.
+ * Otherwise, you might have to set OpenLayers.ProxyHost to a URL on your server. The actual URL will be appended
+ * to that in encoded form.
 */
 
 OpenLayers.Layer.cdauth.XML = OpenLayers.Class(OpenLayers.Layer.GML, {
@@ -1554,7 +1556,7 @@ OpenLayers.Layer.cdauth.XML = OpenLayers.Class(OpenLayers.Layer.GML, {
 			}
 		}
 
-		OpenLayers.Layer.GML.prototype.initialize.apply(this, [ name ? name : url, this.proxyURL(url), OpenLayers.Util.extend({
+		OpenLayers.Layer.GML.prototype.initialize.apply(this, [ name ? name : url, url, OpenLayers.Util.extend({
 			style: {
 				strokeColor: this.colour,
 				strokeWidth: 3,
@@ -1564,15 +1566,6 @@ OpenLayers.Layer.cdauth.XML = OpenLayers.Class(OpenLayers.Layer.GML, {
 			zoomableInLayerSwitcher: true,
 			shortName : "xml"+OpenLayers.Layer.cdauth.XML.shortNameI++
 		}, options) ]);
-	},
-	proxyURL : function(url)
-	{
-		if(!url)
-			return null;
-		if(OpenLayers.Layer.cdauth.XML.proxy)
-			return OpenLayers.Layer.cdauth.XML.proxy + (OpenLayers.Layer.cdauth.XML.proxy.match(/\?/) ? "&" : "?") + "url=" + encodeURIComponent(url);
-		else
-			return url;
 	},
 	loadGML : function(url) {
 		if(!url)
@@ -1622,7 +1615,7 @@ OpenLayers.Layer.cdauth.XML = OpenLayers.Class(OpenLayers.Layer.GML, {
 					continue;
 				this.relations[id] = true;
 
-				var url = this.proxyURL(OpenLayers.String.format(OpenLayers.Layer.cdauth.XML.relationURL, {"id": id}));
+				var url = OpenLayers.String.format(OpenLayers.Layer.cdauth.XML.relationURL, {"id": id});
 				if(url == this.url)
 					continue;
 				this.loadGML(url);
@@ -1639,20 +1632,15 @@ OpenLayers.Layer.cdauth.XML = OpenLayers.Class(OpenLayers.Layer.GML, {
 		if(obj.url != undefined && obj.url != this.cdauthURL)
 		{
 			this.cdauthUrl = obj.url;
-			this.setUrl(this.proxyURL(obj.url));
+			this.setUrl(obj.url);
 		}
 	},
 
 	CLASS_NAME : "OpenLayers.Layer.cdauth.XML"
 });
-/**
- * Set this to a local proxy for XML files. The GET parameter “url” will be appended to this URL with the URL of the XML file.
- * @var String
-*/
-OpenLayers.Layer.cdauth.XML.proxy = null;
+
 /**
  * Set this to the XML URL that shall be loaded for relations referenced in OSM files. “${id}" will be replaced by the ID of the relation.
- * Use the real URL here, not that of your proxy.
  * @var String
 */
 OpenLayers.Layer.cdauth.XML.relationURL = "http://www.openstreetmap.org/api/0.6/relation/${id}/full";
