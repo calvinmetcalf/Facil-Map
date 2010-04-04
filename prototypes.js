@@ -143,6 +143,11 @@ OpenLayers.Class = function() {
 };
 OpenLayers.Class.isPrototype = OpenLayers.cdauthClassBackup.isPrototype;
 
+// Make use of ajax-proxy (http://gitorious.org/cdauths-map/ajax-proxy)
+// Include http://osm.cdauth.eu/ajax-proxy/ajax-proxy.js to "disable" the Same Origin Policy.
+if(window.ajaxProxyXMLHttpRequest != undefined)
+	OpenLayers.Request.XMLHttpRequest = ajaxProxyXMLHttpRequest;
+
 /**
  * A map with the default values needed for OpenStreetMap and other world maps.
  * If you plan to use the getQueryMethod() function, remember to set the visibility of your overlay layers _before_ adding them to the map.
@@ -1528,6 +1533,7 @@ OpenLayers.Layer.cdauth.Markers.GeoSearch = OpenLayers.Class(OpenLayers.Layer.cd
  * Displays an XML file on the map (such as GPX, KML or OSM) using a proxy and with auto-determining of the format. The colour is
  * randomly assigned. Set OpenLayers.Layer.cdauth.XML.proxy to your proxy URL (the URL will be appended using the “url” GET parameter).
  * If you set OpenLayers.Layer.cdauth.XML.relationURL, OSM sub-relations will be loaded in additional requests.
+ * Include the JavaScript http://osm.cdauth.eu/ajax-proxy/ajax-proxy.js to "disable" the Same Origin Policy.
 */
 
 OpenLayers.Layer.cdauth.XML = OpenLayers.Class(OpenLayers.Layer.GML, {
