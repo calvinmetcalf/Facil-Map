@@ -145,7 +145,7 @@ OpenLayers.Class.isPrototype = OpenLayers.cdauthClassBackup.isPrototype;
 
 // Make use of ajax-proxy (http://gitorious.org/ajax-proxy/ajax-proxy)
 // Include http://osm.cdauth.eu/ajax-proxy/ajax-proxy.js to "disable" the Same Origin Policy.
-if(window.ajaxProxyXMLHttpRequest != undefined)
+if(window.AjaxProxyXMLHttpRequest != undefined)
 	OpenLayers.Request.XMLHttpRequest = AjaxProxyXMLHttpRequest;
 
 /**
