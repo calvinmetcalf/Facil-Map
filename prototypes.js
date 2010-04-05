@@ -143,10 +143,10 @@ OpenLayers.Class = function() {
 };
 OpenLayers.Class.isPrototype = OpenLayers.cdauthClassBackup.isPrototype;
 
-// Make use of ajax-proxy (http://gitorious.org/cdauths-map/ajax-proxy)
+// Make use of ajax-proxy (http://gitorious.org/ajax-proxy/ajax-proxy)
 // Include http://osm.cdauth.eu/ajax-proxy/ajax-proxy.js to "disable" the Same Origin Policy.
 if(window.ajaxProxyXMLHttpRequest != undefined)
-	OpenLayers.Request.XMLHttpRequest = ajaxProxyXMLHttpRequest;
+	OpenLayers.Request.XMLHttpRequest = AjaxProxyXMLHttpRequest;
 
 /**
  * A map with the default values needed for OpenStreetMap and other world maps.
