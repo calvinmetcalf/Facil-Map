@@ -83,6 +83,7 @@ OpenLayers.Lang.en = OpenLayers.Util.extend(OpenLayers.Lang.en, {
 	"Yahoo Hybrid" : "Yahoo Hybrid",
 	"Relief" : "Relief",
 	"Coordinate grid" : "Coordinate grid",
+	"Izometrická 3D mapa ČR" : "Izometrická 3D mapa ČR",
 	"Streets overlay" : "Streets overlay",
 	"Labels overlay" : "Labels overlay"
 });
@@ -128,18 +129,86 @@ OpenLayers.Lang.de = OpenLayers.Util.extend(OpenLayers.Lang.de, {
 	"Yahoo Hybrid" : "Yahoo Hybrid",
 	"Relief" : "Relief",
 	"Coordinate grid" : "Koordinatensystem",
+	"Izometrická 3D mapa ČR" : "Izometrická 3D mapa ČR",
 	"Streets overlay" : "Straßen-Hybrid",
 	"Labels overlay" : "Beschriftungen"
 });
 
+OpenLayers.cdauthBackup = { };
+
 // Save parent classes in class objects, needed for makeClassName()
-OpenLayers.cdauthClassBackup = OpenLayers.Class;
+OpenLayers.cdauthBackup.Class = OpenLayers.Class;
 OpenLayers.Class = function() {
-	var ret = OpenLayers.cdauthClassBackup.apply(this, arguments);
+	var ret = OpenLayers.cdauthBackup.Class.apply(this, arguments);
 	ret.prototype.cdauthParentClasses = arguments;
 	return ret;
 };
-OpenLayers.Class.isPrototype = OpenLayers.cdauthClassBackup.isPrototype;
+OpenLayers.Class.isPrototype = OpenLayers.cdauthBackup.Class.isPrototype;
+
+// Make use of ajax-proxy (http://gitorious.org/ajax-proxy/ajax-proxy)
+// Include http://osm.cdauth.eu/ajax-proxy/ajax-proxy.js to "disable" the Same Origin Policy.
+if(window.AjaxProxyXMLHttpRequest != undefined)
+	OpenLayers.Request.XMLHttpRequest = AjaxProxyXMLHttpRequest;
+
+// Fix displayClass in OpenLayers Controls to also use parent class names
+OpenLayers.cdauthBackup.Control = {
+	initialize : OpenLayers.Control.prototype.initialize,
+	activate : OpenLayers.Control.prototype.activate,
+	deactivate : OpenLayers.Control.prototype.deactivate
+};
+
+OpenLayers.Control.prototype.initialize = function() {
+	OpenLayers.cdauthBackup.Control.initialize.apply(this, arguments);
+	this.displayClass = makeClassName(this);
+};
+
+// Workaround for http://trac.openlayers.org/ticket/2607
+OpenLayers.Control.prototype.activate = function() {
+	var ret = OpenLayers.cdauthBackup.Control.activate.apply(this, arguments);
+	if(this.map)
+	{
+		var classNames = this.displayClass.split(/\s+/);
+		for(var i=0; i<classNames.length; i++)
+		{
+			OpenLayers.Element.addClass(
+				this.map.viewPortDiv,
+				classNames[i] + "Active"
+			);
+		}
+	}
+	return ret;
+};
+
+OpenLayers.Control.prototype.deactivate = function() {
+	var ret = OpenLayers.cdauthBackup.Control.deactivate.apply(this, arguments);
+	if(this.map)
+	{
+		var classNames = this.displayClass.split(/\s+/);
+		for(var i=0; i<classNames.length; i++)
+		{
+			OpenLayers.Element.removeClass(
+				this.map.viewPortDiv,
+				classNames[i] + "Active"
+			);
+		}
+	}
+	return ret;
+};
+
+OpenLayers.Control.Panel.prototype.redraw = function() {
+	this.div.innerHTML = "";
+	if (this.active) {
+		for (var i=0, len=this.controls.length; i<len; i++) {
+			var element = this.controls[i].panel_div;
+			if (this.controls[i].active) {
+				element.className = this.controls[i].displayClass.replace(/(\s+|$)/g, "ItemActive$1");
+			} else {
+				element.className = this.controls[i].displayClass.replace(/(\s+|$)/g, "ItemInactive$1");
+			}
+			this.div.appendChild(element);
+		}
+	}
+};
 
 /**
  * A map with the default values needed for OpenStreetMap and other world maps.
@@ -268,6 +337,8 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 			this.addLayer(new OpenLayers.Layer.cdauth.OSM.OpenPisteMap(OpenLayers.i18n("OpenPisteMap"), { shortName : "OPis" }));
 		if(OpenLayers.Layer.cdauth.OSM.OPNVKarte)
 			this.addLayer(new OpenLayers.Layer.cdauth.OSM.OPNVKarte(OpenLayers.i18n("ÖPNV-Karte"), { shortName : "OPNV" }));
+		//if(OpenLayers.Layer.cdauth.OSM.Kybl3DMap)
+		//	this.addLayer(new OpenLayers.Layer.cdauth.OSM.Kybl3DMap(OpenLayers.i18n("Izometrická 3D mapa ČR"), { shortName : "kybl" }));
 
 		if(OpenLayers.Layer.cdauth.OSM.OOMStreets)
 			this.addLayer(new OpenLayers.Layer.cdauth.OSM.OOMStreets(OpenLayers.i18n("Streets overlay"), { shortName : "OOMS", visibility : false }));
@@ -315,7 +386,7 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 	},
 
 	/**
-	 * Zoom to the specified query object. Remember to add your layers and to eventually set OpenLayers.Layer.cdauth.XML.proxy before running
+	 * Zoom to the specified query object. Remember to add your layers and to eventually set OpenLayers.ProxyHost before running
 	 * this method.
 	 * @param Object query Usually decodeQueryString(location.hash.replace(/^#/, ""))
 	*/
@@ -513,6 +584,8 @@ OpenLayers.Control.cdauth = { };
 OpenLayers.Control.cdauth.KeyboardDefaults = OpenLayers.Class(OpenLayers.Control.KeyboardDefaults, {
 	defaultKeyPress : function(evt) {
 		if(evt.target && evt.target.nodeName && (evt.target.nodeName.toLowerCase() == "input" && evt.target.type.toLowerCase() != "checkbox" && evt.target.type.toLowerCase() != "button" && evt.target.type.toLowerCase() != "submit" && evt.target.type.toLowerCase() != "clear" || evt.target.tagName.toLowerCase() == "textarea" || evt.target.tagName.toLowerCase() == "select"))
+			return true;
+		if(evt.altKey || evt.ctrlKey || evt.shiftKey)
 			return true;
 		OpenLayers.Control.KeyboardDefaults.prototype.defaultKeyPress.apply(this, [ evt ]);
 	},
@@ -717,6 +790,17 @@ if(OpenLayers.Layer.OSM)
 	});
 
 	/**
+	 * Izometrická 3D mapa ČR (http://osm.kyblsoft.cz/3dmapa/).
+	*/
+	OpenLayers.Layer.cdauth.OSM.Kybl3DMap = OpenLayers.Class(OpenLayers.Layer.OSM, {
+		attribution : OpenLayers.String.format(OpenLayers.i18n("attribution-osm"), { rendering: "<a href=\"http://osm.kyblsoft.cz/3dmapa/\">OpenKyblMap</a>" }),
+		initialize : function(name, options) {
+			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://osm.kyblsoft.cz/3dmapa/tiles/${z}/${x}/${y}.jpg", OpenLayers.Util.extend({ numZoomLevels: 18 }, options) ]);
+		},
+		CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.Kybl3DMap"
+	});
+
+	/**
 	 * OpenOrienteeringMap (http://oobrien.com/oom/) Street-O overlay.
 	*/
 	OpenLayers.Layer.cdauth.OSM.OOMStreets = OpenLayers.Class(OpenLayers.Layer.OSM, {
@@ -739,8 +823,6 @@ if(OpenLayers.Layer.OSM)
 		},
 		CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.OOMLabels"
 	});
-
-
 }
 
 
@@ -1511,9 +1593,12 @@ OpenLayers.Layer.cdauth.Markers.GeoSearch = OpenLayers.Class(OpenLayers.Layer.cd
 });
 
 /**
- * Displays an XML file on the map (such as GPX, KML or OSM) using a proxy and with auto-determining of the format. The colour is
- * randomly assigned. Set OpenLayers.Layer.cdauth.XML.proxy to your proxy URL (the URL will be appended using the “url” GET parameter).
+ * Displays an XML file on the map (such as GPX, KML or OSM) auto-determining of the format. The colour is
+ * randomly assigned.
  * If you set OpenLayers.Layer.cdauth.XML.relationURL, OSM sub-relations will be loaded in additional requests.
+ * Include the JavaScript http://osm.cdauth.eu/ajax-proxy/ajax-proxy.js to "disable" the Same Origin Policy.
+ * Otherwise, you might have to set OpenLayers.ProxyHost to a URL on your server. The actual URL will be appended
+ * to that in encoded form.
  * @event allloadend If an array of URL is passed, this is only called when the last URL is actually loaded.
 */
 
@@ -1536,7 +1621,7 @@ OpenLayers.Layer.cdauth.XML = OpenLayers.Class(OpenLayers.Layer.GML, {
 			}
 		}
 
-		OpenLayers.Layer.GML.prototype.initialize.apply(this, [ name ? name : url, this.proxyURL(url), OpenLayers.Util.extend({
+		OpenLayers.Layer.GML.prototype.initialize.apply(this, [ name ? name : url, url, OpenLayers.Util.extend({
 			style: {
 				strokeColor: this.colour,
 				strokeWidth: 3,
@@ -1548,27 +1633,6 @@ OpenLayers.Layer.cdauth.XML = OpenLayers.Class(OpenLayers.Layer.GML, {
 		}, options) ]);
 
 		this.events.addEventType("allloadend");
-	},
-	setUrl : function(url) {
-		OpenLayers.Layer.GML.prototype.setUrl.apply(this, [ this.proxyURL(url) ]);
-	},
-	proxyURL : function(url) {
-		if(!url)
-			return null;
-		if(OpenLayers.Layer.cdauth.XML.proxy)
-		{
-			if(url instanceof Array)
-			{
-				var ret = [ ];
-				for(var i=0; i<url.length; i++)
-					ret.push(this.proxyURL(url[i]));
-				return ret;
-			}
-			else
-				return OpenLayers.Layer.cdauth.XML.proxy + (OpenLayers.Layer.cdauth.XML.proxy.match(/\?/) ? "&" : "?") + "url=" + encodeURIComponent(url);
-		}
-		else
-			return url;
 	},
 	loadGML : function(url) {
 		if(!url)
@@ -1637,7 +1701,7 @@ OpenLayers.Layer.cdauth.XML = OpenLayers.Class(OpenLayers.Layer.GML, {
 					continue;
 				this.relations[id] = true;
 
-				var url = this.proxyURL(OpenLayers.String.format(OpenLayers.Layer.cdauth.XML.relationURL, {"id": id}));
+				var url = OpenLayers.String.format(OpenLayers.Layer.cdauth.XML.relationURL, {"id": id});
 				if(url == this.url)
 					continue;
 				this.loadGML(url);
@@ -1654,20 +1718,15 @@ OpenLayers.Layer.cdauth.XML = OpenLayers.Class(OpenLayers.Layer.GML, {
 		if(obj.url != undefined && obj.url != this.cdauthURL)
 		{
 			this.cdauthUrl = obj.url;
-			this.setUrl(this.proxyURL(obj.url));
+			this.setUrl(obj.url);
 		}
 	},
 
 	CLASS_NAME : "OpenLayers.Layer.cdauth.XML"
 });
-/**
- * Set this to a local proxy for XML files. The GET parameter “url” will be appended to this URL with the URL of the XML file.
- * @var String
-*/
-OpenLayers.Layer.cdauth.XML.proxy = null;
+
 /**
  * Set this to the XML URL that shall be loaded for relations referenced in OSM files. “${id}" will be replaced by the ID of the relation.
- * Use the real URL here, not that of your proxy.
  * @var String
 */
 OpenLayers.Layer.cdauth.XML.relationURL = "http://www.openstreetmap.org/api/0.6/relation/${id}/full";
