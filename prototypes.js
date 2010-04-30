@@ -134,19 +134,81 @@ OpenLayers.Lang.de = OpenLayers.Util.extend(OpenLayers.Lang.de, {
 	"Labels overlay" : "Beschriftungen"
 });
 
+OpenLayers.cdauthBackup = { };
+
 // Save parent classes in class objects, needed for makeClassName()
-OpenLayers.cdauthClassBackup = OpenLayers.Class;
+OpenLayers.cdauthBackup.Class = OpenLayers.Class;
 OpenLayers.Class = function() {
-	var ret = OpenLayers.cdauthClassBackup.apply(this, arguments);
+	var ret = OpenLayers.cdauthBackup.Class.apply(this, arguments);
 	ret.prototype.cdauthParentClasses = arguments;
 	return ret;
 };
-OpenLayers.Class.isPrototype = OpenLayers.cdauthClassBackup.isPrototype;
+OpenLayers.Class.isPrototype = OpenLayers.cdauthBackup.Class.isPrototype;
 
 // Make use of ajax-proxy (http://gitorious.org/ajax-proxy/ajax-proxy)
 // Include http://osm.cdauth.eu/ajax-proxy/ajax-proxy.js to "disable" the Same Origin Policy.
 if(window.AjaxProxyXMLHttpRequest != undefined)
 	OpenLayers.Request.XMLHttpRequest = AjaxProxyXMLHttpRequest;
+
+// Fix displayClass in OpenLayers Controls to also use parent class names
+OpenLayers.cdauthBackup.Control = {
+	initialize : OpenLayers.Control.prototype.initialize,
+	activate : OpenLayers.Control.prototype.activate,
+	deactivate : OpenLayers.Control.prototype.deactivate
+};
+
+OpenLayers.Control.prototype.initialize = function() {
+	OpenLayers.cdauthBackup.Control.initialize.apply(this, arguments);
+	this.displayClass = makeClassName(this);
+};
+
+// Workaround for http://trac.openlayers.org/ticket/2607
+OpenLayers.Control.prototype.activate = function() {
+	var ret = OpenLayers.cdauthBackup.Control.activate.apply(this, arguments);
+	if(this.map)
+	{
+		var classNames = this.displayClass.split(/\s+/);
+		for(var i=0; i<classNames.length; i++)
+		{
+			OpenLayers.Element.addClass(
+				this.map.viewPortDiv,
+				classNames[i] + "Active"
+			);
+		}
+	}
+	return ret;
+};
+
+OpenLayers.Control.prototype.deactivate = function() {
+	var ret = OpenLayers.cdauthBackup.Control.deactivate.apply(this, arguments);
+	if(this.map)
+	{
+		var classNames = this.displayClass.split(/\s+/);
+		for(var i=0; i<classNames.length; i++)
+		{
+			OpenLayers.Element.removeClass(
+				this.map.viewPortDiv,
+				classNames[i] + "Active"
+			);
+		}
+	}
+	return ret;
+};
+
+OpenLayers.Control.Panel.prototype.redraw = function() {
+	this.div.innerHTML = "";
+	if (this.active) {
+		for (var i=0, len=this.controls.length; i<len; i++) {
+			var element = this.controls[i].panel_div;
+			if (this.controls[i].active) {
+				element.className = this.controls[i].displayClass.replace(/(\s+|$)/g, "ItemActive$1");
+			} else {
+				element.className = this.controls[i].displayClass.replace(/(\s+|$)/g, "ItemInactive$1");
+			}
+			this.div.appendChild(element);
+		}
+	}
+};
 
 /**
  * A map with the default values needed for OpenStreetMap and other world maps.
