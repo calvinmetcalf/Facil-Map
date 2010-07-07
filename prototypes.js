@@ -46,7 +46,7 @@ OpenLayers.Lang.en = OpenLayers.Util.extend(OpenLayers.Lang.en, {
 	"[Zoom]" : "[Zoom]",
 	"[Remove]" : "[Remove]",
 	"attribution-osm" : "Rendering CC-by-SA by ${rendering}, Data CC-by-SA by <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>",
-	"attribution-relief" : "Relief by <a href=\"http://openrouteservice.org/\">Kartografie Universität Bonn</a>/<a href=\"http://srtm.csi.cgiar.org/\">CIAT-CSI SRTM</a> (<a href=\"http://data.giub.uni-bonn.de/openrouteservice/contact.php#disclaimer\">Terms of Use</a>)",
+	"attribution-relief" : "Relief by <a href=\"http://hikebikemap.de/\">Hike &amp; Bike Map</a>/<a href=\"http://srtm.csi.cgiar.org/\">CIAT-CSI SRTM</a>",
 	"attribution-oom-streets" : "Streets overlay CC-by-SA by <a href=\"http://oobrien.com/oom/\">OpenOrienteeringMap</a>/<a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a> data",
 	"attribution-oom-labels" : "Labels overlay CC-by-SA by <a href=\"http://oobrien.com/oom/\">OpenOrienteeringMap</a>/<a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a> data",
 	"Create a marker" : "Create a marker",
@@ -92,7 +92,7 @@ OpenLayers.Lang.de = OpenLayers.Util.extend(OpenLayers.Lang.de, {
 	"[Zoom]" : "[Zoom]",
 	"[Remove]" : "[Entfernen]",
 	"attribution-osm" : "Darstellung: ${rendering} (CC-by-SA), Daten: <a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a> (CC-by-SA)",
-	"attribution-relief" : "Reliefdarstellung: <a href=\"http://openrouteservice.org/\">Kartografie Universität Bonn</a>/<a href=\"http://srtm.csi.cgiar.org/\">CIAT-CSI SRTM</a> (<a href=\"http://data.giub.uni-bonn.de/openrouteservice/contact.php#disclaimer\">Nutzungsbedingungen</a>)",
+	"attribution-relief" : "Reliefdarstellung: <a href=\"http://hikebikemap.de/\">Hike &amp; Bike Map</a>/<a href=\"http://srtm.csi.cgiar.org/\">CIAT-CSI SRTM</a>",
 	"attribution-oom-streets" : "Straßenhybrid von <a href=\"http://oobrien.com/oom/\">OpenOrienteeringMap</a> (<a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>-Daten, CC-by-SA)",
 	"attribution-oom-labels" : "Beschriftungen von <a href=\"http://oobrien.com/oom/\">OpenOrienteeringMap</a> (<a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>-Daten, CC-by-SA)",
 	"Create a marker" : "Marker anlegen",
@@ -823,18 +823,13 @@ if(OpenLayers.Layer.OSM)
 		},
 		CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.OOMLabels"
 	});
-}
 
-
-if(OpenLayers.Layer.WMS)
-{
 	/**
-	 * Relief rendering from Kartografie Universität Bonn / OpenRouteService
+	 * Relief rendering from Hike & Bike map (http://hikebikemap.de/)
 	*/
-
-	OpenLayers.Layer.cdauth.other.Relief = OpenLayers.Class(OpenLayers.Layer.WMS, {
+	OpenLayers.Layer.cdauth.other.Relief = OpenLayers.Class(OpenLayers.Layer.OSM, {
 		initialize: function(name, options) {
-			OpenLayers.Layer.WMS.prototype.initialize.apply(this, [ name, "http://services.giub.uni-bonn.de/hillshade?", {layers: 'europe_wms:hs_srtm_europa',srs: 'EPSG:900913', format: 'image/JPEG', transparent: 'true' }, OpenLayers.Util.extend({attribution: OpenLayers.i18n("attribution-relief"), opacity: 0.2 }, options) ]);
+			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://toolserver.org/~cmarqu/hill/${z}/${x}/${y}.png", OpenLayers.Util.extend({isBaseLayer: false, attribution: OpenLayers.i18n("attribution-relief") }, options) ]);
 		},
 		CLASS_NAME : "OpenLayers.Layer.cdauth.other.Relief"
 	});
