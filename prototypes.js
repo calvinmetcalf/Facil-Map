@@ -49,6 +49,7 @@ OpenLayers.Lang.en = OpenLayers.Util.extend(OpenLayers.Lang.en, {
 	"attribution-relief" : "Relief by <a href=\"http://hikebikemap.de/\">Hike &amp; Bike Map</a>/<a href=\"http://srtm.csi.cgiar.org/\">CIAT-CSI SRTM</a>",
 	"attribution-oom-streets" : "Streets overlay CC-by-SA by <a href=\"http://oobrien.com/oom/\">OpenOrienteeringMap</a>/<a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a> data",
 	"attribution-oom-labels" : "Labels overlay CC-by-SA by <a href=\"http://oobrien.com/oom/\">OpenOrienteeringMap</a>/<a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a> data",
+	"attribution-hiking" : "Hiking symbols overlay CC-by-SA by <a href=\"http://osm.lonvia.de/world_hiking.html\">Lonvia's Hiking Map</a>/<a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a> data",
 	"Create a marker" : "Create a marker",
 	"Coordinates" : "Coordinates",
 	"unknown" : "unknown",
@@ -82,6 +83,7 @@ OpenLayers.Lang.en = OpenLayers.Util.extend(OpenLayers.Lang.en, {
 	"Yahoo Satellite" : "Yahoo Satellite",
 	"Yahoo Hybrid" : "Yahoo Hybrid",
 	"Relief" : "Relief",
+	"Hiking symbols" : "Hiking symbols",
 	"Coordinate grid" : "Coordinate grid",
 	"Izometrická 3D mapa ČR" : "Izometrická 3D mapa ČR",
 	"Streets overlay" : "Streets overlay",
@@ -95,6 +97,7 @@ OpenLayers.Lang.de = OpenLayers.Util.extend(OpenLayers.Lang.de, {
 	"attribution-relief" : "Reliefdarstellung: <a href=\"http://hikebikemap.de/\">Hike &amp; Bike Map</a>/<a href=\"http://srtm.csi.cgiar.org/\">CIAT-CSI SRTM</a>",
 	"attribution-oom-streets" : "Straßenhybrid von <a href=\"http://oobrien.com/oom/\">OpenOrienteeringMap</a> (<a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>-Daten, CC-by-SA)",
 	"attribution-oom-labels" : "Beschriftungen von <a href=\"http://oobrien.com/oom/\">OpenOrienteeringMap</a> (<a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>-Daten, CC-by-SA)",
+	"attribution-hiking" : "Wanderbeschilderung von <a href=\"http://osm.lonvia.de/world_hiking.html\">Lonvia's Hiking Map</a>/<a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>-Daten, CC-by-SA",
 	"Create a marker" : "Marker anlegen",
 	"Coordinates" : "Koordinaten",
 	"unknown" : "unbekannt",
@@ -128,6 +131,7 @@ OpenLayers.Lang.de = OpenLayers.Util.extend(OpenLayers.Lang.de, {
 	"Yahoo Satellite" : "Yahoo Satellit",
 	"Yahoo Hybrid" : "Yahoo Hybrid",
 	"Relief" : "Relief",
+	"Hiking symbols" : "Wanderbeschilderung",
 	"Coordinate grid" : "Koordinatensystem",
 	"Izometrická 3D mapa ČR" : "Izometrická 3D mapa ČR",
 	"Streets overlay" : "Straßen-Hybrid",
@@ -379,6 +383,9 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 	{
 		if(OpenLayers.Layer.cdauth.other.Relief)
 			this.addLayer(new OpenLayers.Layer.cdauth.other.Relief(OpenLayers.i18n("Relief"), { visibility: false, shortName : "Rlie" }));
+
+		if(OpenLayers.Layer.cdauth.other.Hiking)
+			this.addLayer(new OpenLayers.Layer.cdauth.other.Hiking(OpenLayers.i18n("Hiking symbols"), { visibility: false, shortName : "Hike" }));
 
 		this.addAllAvailableOSMLayers();
 		this.addAllAvailableGoogleLayers();
@@ -832,6 +839,15 @@ if(OpenLayers.Layer.OSM)
 			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://toolserver.org/~cmarqu/hill/${z}/${x}/${y}.png", OpenLayers.Util.extend({isBaseLayer: false, attribution: OpenLayers.i18n("attribution-relief") }, options) ]);
 		},
 		CLASS_NAME : "OpenLayers.Layer.cdauth.other.Relief"
+	});
+
+	/**
+	 * Hiking symbol overlay by Lonvia (http://osm.lonvia.de/)
+	*/
+	OpenLayers.Layer.cdauth.other.Hiking = OpenLayers.Class(OpenLayers.Layer.OSM, {
+		initialize: function(name, options) {
+			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://osm.lonvia.de/hiking/${z}/${x}/${y}.png", OpenLayers.Util.extend({ isBaseLayer: false, attribution: OpenLayers.i18n("attribution-hiking") }, options) ]);
+		}
 	});
 }
 
