@@ -71,6 +71,7 @@ OpenLayers.Lang.en = OpenLayers.Util.extend(OpenLayers.Lang.en, {
 	"Osmarender" : "Osmarender",
 	"OpenCycleMap" : "OpenCycleMap",
 	"Reit- und Wanderkarte" : "Reit- und Wanderkarte",
+	"Hike & Bike Map" : "Hike & Bike Map",
 	"OpenPisteMap" : "OpenPisteMap",
 	"ÖPNV-Karte" : "ÖPNV-Karte",
 	"Google Streets" : "Google Streets",
@@ -119,6 +120,7 @@ OpenLayers.Lang.de = OpenLayers.Util.extend(OpenLayers.Lang.de, {
 	"Osmarender" : "Osmarender",
 	"OpenCycleMap" : "OpenCycleMap",
 	"Reit- und Wanderkarte" : "Reit- und Wanderkarte",
+	"Hike & Bike Map" : "Hike & Bike Map",
 	"OpenPisteMap" : "OpenPisteMap",
 	"ÖPNV-Karte" : "ÖPNV-Karte",
 	"Google Streets" : "Google Karte",
@@ -335,8 +337,10 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 			this.addLayer(new OpenLayers.Layer.cdauth.OSM.Osmarender(OpenLayers.i18n("Osmarender"), { shortName : "Osmr" }));
 		if(OpenLayers.Layer.cdauth.OSM.CycleMap)
 			this.addLayer(new OpenLayers.Layer.cdauth.OSM.CycleMap(OpenLayers.i18n("OpenCycleMap"), { shortName : "OCyc" }));
-		if(OpenLayers.Layer.cdauth.OSM.Wanderkarte)
-			this.addLayer(new OpenLayers.Layer.cdauth.OSM.Wanderkarte(OpenLayers.i18n("Reit- und Wanderkarte"), { shortName : "OSMC" }));
+		//if(OpenLayers.Layer.cdauth.OSM.Wanderkarte)
+		//	this.addLayer(new OpenLayers.Layer.cdauth.OSM.Wanderkarte(OpenLayers.i18n("Reit- und Wanderkarte"), { shortName : "OSMC" }));
+		if(OpenLayers.Layer.cdauth.OSM.HikeAndBike)
+			this.addLayer(new OpenLayers.Layer.cdauth.OSM.HikeAndBike(OpenLayers.i18n("Hike & Bike Map"), { shortName : "HiBi" }));
 		if(OpenLayers.Layer.cdauth.OSM.OpenPisteMap)
 			this.addLayer(new OpenLayers.Layer.cdauth.OSM.OpenPisteMap(OpenLayers.i18n("OpenPisteMap"), { shortName : "OPis" }));
 		if(OpenLayers.Layer.cdauth.OSM.OPNVKarte)
@@ -756,6 +760,15 @@ if(OpenLayers.Layer.OSM)
 			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://topo.geofabrik.de/trails/${z}/${x}/${y}.png", OpenLayers.Util.extend({minZoomLevel: 8, maxZoomLevel: 15, attribution: OpenLayers.String.format(OpenLayers.i18n("attribution-osm"), { rendering: "<a href=\"http://osmc.broadbox.de/\">OSMC Reit- und Wanderkarte</a>" })}, options) ]);
 		},
 		CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.Wanderkarte"
+	});
+
+	/**
+	 * Hike & Bike Map (http://hikebikemap.de/)
+	*/
+	OpenLayers.Layer.cdauth.OSM.HikeAndBike = OpenLayers.Class(OpenLayers.Layer.OSM, {
+		initialize: function(name, options) {
+			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://toolserver.org/tiles/hikebike/${z}/${x}/${y}.png", OpenLayers.Util.extend({attribution: OpenLayers.String.format(OpenLayers.i18n("attribution-osm"), { rendering: "<a href=\"http://hikebikemap.de/\">Hike &amp; Bike Map</a>" })}, options) ]);
+		}
 	});
 
 	/**
