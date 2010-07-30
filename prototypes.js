@@ -1871,9 +1871,11 @@ OpenLayers.cdauth.Routing.YOURS = OpenLayers.Class(OpenLayers.cdauth.Routing, {
 	},
 
 	getRouteLength : function(dom) {
+		var distance = 0;
 		var distanceEls = dom.getElementsByTagName("distance");
 		if(distanceEls.length > 0)
-			this.distance = (this.distance == null ? 0 : this.distance) + 1*distanceEls[0].firstChild.data;
+			distance += 1*distanceEls[0].firstChild.data;
+		return distance;
 	}
 });
 
@@ -1899,15 +1901,18 @@ OpenLayers.cdauth.Routing.Cloudmade = OpenLayers.Class(OpenLayers.cdauth.Routing
 	},
 
 	getRouteLength : function(dom) {
+		var distance = 0;
 		var distanceEls = dom.getElementsByTagName("distance");
 		if(distanceEls.length > 0)
-			this.distance = (this.distance == null ? 0 : this.distance) + 1*distanceEls[0].firstChild.data;
+			distance += 1*distanceEls[0].firstChild.data;
+		return distance/1000;
 	},
 
 	getRouteDuration : function(dom) {
-		var distanceEls = dom.getElementsByTagName("time");
-		if(distanceEls.length > 0)
-			this.distance = (this.distance == null ? 0 : this.distance) + 1*distanceEls[0].firstChild.data;
+		var duration = 0;
+		var durationEls = dom.getElementsByTagName("time");
+		if(durationEls.length > 0)
+			duration += 1*durationEls[0].firstChild.data;
 	}
 });
 
