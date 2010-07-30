@@ -49,6 +49,8 @@ OpenLayers.Lang.en = OpenLayers.Util.extend(OpenLayers.Lang.en, {
 	"attribution-relief" : "Relief by <a href=\"http://openrouteservice.org/\">Kartografie Universität Bonn</a>/<a href=\"http://srtm.csi.cgiar.org/\">CIAT-CSI SRTM</a> (<a href=\"http://data.giub.uni-bonn.de/openrouteservice/contact.php#disclaimer\">Terms of Use</a>)",
 	"attribution-oom-streets" : "Streets overlay CC-by-SA by <a href=\"http://oobrien.com/oom/\">OpenOrienteeringMap</a>/<a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a> data",
 	"attribution-oom-labels" : "Labels overlay CC-by-SA by <a href=\"http://oobrien.com/oom/\">OpenOrienteeringMap</a>/<a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a> data",
+	"attribution-routing-yours" : "Routing CC-by-SA by <a href=\"http://www.yournavigation.org/\"><acronym title=\"Yet Another OpenStreetMap Routing Service\">YOURS</acronym></a>/<a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a> data",
+	"attribution-routing-cloudmade" : "Routing CC-by-SA by <a href=\"http://cloudmade.com/\">CloudMade</a>/<a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a> data",
 	"Create a marker" : "Create a marker",
 	"Coordinates" : "Coordinates",
 	"unknown" : "unknown",
@@ -95,6 +97,8 @@ OpenLayers.Lang.de = OpenLayers.Util.extend(OpenLayers.Lang.de, {
 	"attribution-relief" : "Reliefdarstellung: <a href=\"http://openrouteservice.org/\">Kartografie Universität Bonn</a>/<a href=\"http://srtm.csi.cgiar.org/\">CIAT-CSI SRTM</a> (<a href=\"http://data.giub.uni-bonn.de/openrouteservice/contact.php#disclaimer\">Nutzungsbedingungen</a>)",
 	"attribution-oom-streets" : "Straßenhybrid von <a href=\"http://oobrien.com/oom/\">OpenOrienteeringMap</a> (<a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>-Daten, CC-by-SA)",
 	"attribution-oom-labels" : "Beschriftungen von <a href=\"http://oobrien.com/oom/\">OpenOrienteeringMap</a> (<a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>-Daten, CC-by-SA)",
+	"attribution-routing-yours" : "Route von <a href=\"http://www.yournavigation.org/\"><acronym title=\"Yet Another OpenStreetMap Routing Service\">YOURS</acronym></a> (<a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>-Daten, CC-by-SA)",
+	"attribution-routing-cloudmade" : "Route von <a href=\"http://cloudmade.com/\">CloudMade</a> (<a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>-Daten, CC-by-SA)",
 	"Create a marker" : "Marker anlegen",
 	"Coordinates" : "Koordinaten",
 	"unknown" : "unbekannt",
@@ -1675,7 +1679,12 @@ OpenLayers.Layer.cdauth.XML = OpenLayers.Class(OpenLayers.Layer.GML, {
 		{
 			switch(request.responseXML.documentElement.tagName)
 			{
-				case "gpx": this.format = OpenLayers.Format.GPX; break;
+				case "gpx":
+					if(request.responseXML.firstChild.getAttribute("creator") == "CloudMade")
+						this.format = OpenLayers.cdauth.Routing.Cloudmade.Format;
+					else
+						this.format = OpenLayers.Format.GPX;
+					break;
 				case "osm": this.format = OpenLayers.Format.OSM; break;
 				case "kml": this.format = OpenLayers.Format.KML; break;
 			}
@@ -1734,6 +1743,199 @@ OpenLayers.Layer.cdauth.XML.relationURL = "http://www.openstreetmap.org/api/0.6/
 OpenLayers.Layer.cdauth.XML.colourCounter = 1;
 OpenLayers.Layer.cdauth.XML.shortNameI = 1;
 
+OpenLayers.cdauth.Routing = OpenLayers.Class({
+	/**
+	 * The start coordinates in WGS-84
+	 * @var OpenLayers.LonLat
+	*/
+	from : null,
+	/**
+	 * The target coordinates in WGS-84
+	 * @var OpenLayers.LonLat
+	*/
+	to : null,
+	/**
+	 * The means of transport
+	 * @var OpenLayers.cdauth.Routing.Medium
+	*/
+	medium : null,
+	/**
+	 * The routing type, either fastest or shortest.
+	 * @var OpenLayers.cdauth.Routing.Type
+	*/
+	routingType : null,
+	/**
+	 * An array of via points in WGS-84.
+	 * @var Array[OpenLayers.LonLat]
+	*/
+	via : [ ],
+
+	initialize : function() {
+	},
+
+	/**
+	 * Returns the URL of the GPX file containing the route with the set parameters. May return an array of URLs if multiple files
+	 * have to be loaded.
+	 * @return String|Array[String]
+	*/
+	getGPXURL : function() {
+		return null;
+	},
+
+	/**
+	 * Returns a Permalink to the original page that created the route or null if not appropriate.
+	 * @return String
+	*/
+	getPermalinkURL : function() {
+		return null;
+	},
+
+	/**
+	 * Extracts the length of the route in kilometers from the GPX DOM tree.
+	 * @param Document dom
+	 * @return Number
+	*/
+	getRouteLength : function(dom) {
+		return null;
+	},
+
+	/**
+	 * Extracts the duration of the route in hours from the GPX DOM tree.
+	 * @param Document dom
+	 * @return Number
+	*/
+	getRouteDuration : function(dom) {
+		return null;
+	}
+});
+
+/**
+ * Means of transportation.
+*/
+OpenLayers.cdauth.Routing.Medium = {
+	CAR : "car",
+	BICYCLE : "bicycle",
+	FOOT : "foot"
+};
+
+/**
+ * Route calculation mechanisms.
+*/
+OpenLayers.cdauth.Routing.Type = {
+	FASTEST : "fastest",
+	SHORTEST : "shortest"
+};
+
+OpenLayers.cdauth.Routing.YOURS = OpenLayers.Class(OpenLayers.cdauth.Routing, {
+	routingURL : "http://www.yournavigation.org/api/dev/gosmore.php",
+	permalinkURL : "http://www.yournavigation.org/",
+	routingMediumMapping : { "car" : "motorcar", "bicycle" : "bicycle", "foot" : "foot" },
+	routingTypeMapping : { "shortest" : "0", "fastest" : "1" },
+	attribution : OpenLayers.i18n("attribution-routing-yours"),
+
+	getGPXURL : function() {
+		if(this.from == null || this.to == null || this.medium == null || this.routingType == null)
+			return null;
+
+		var url = this.routingURL +
+			"?v="+this.routingMediumMapping[this.medium] +
+			"&fast="+this.routingTypeMapping[this.routingType] +
+			"&format=kml";
+		var urls = [ ];
+		var nodes = [ this.from ].concat(this.via).concat([ this.to ]);
+		for(var i=1; i<nodes.length; i++)
+		{
+			urls.push(url +
+				"&flat="+nodes[i-1].lat +
+				"&flon="+nodes[i-1].lon +
+				"&tlat="+nodes[i].lat +
+				"&tlon="+nodes[i].lon);
+		}
+		return urls;
+	},
+
+	getPermalinkURL : function() {
+		if(this.from == null || this.to == null || this.medium == null || this.routingType == null)
+			return null;
+
+		var url = this.permalinkURL + "?flat="+this.from.lat +
+			"&flon="+this.from.lon +
+			"&tlat="+this.to.lat +
+			"&tlon="+this.to.lon +
+			"&v="+this.routingMediumMapping[this.medium] +
+			"&fast="+this.routingTypeMapping[this.routingType];
+		for(var i=0; i<this.via.length; i++)
+		{
+			url += "&wlat="+this.via[i].lat +
+			          "&wlon="+this.via[i].lon;
+		}
+		return url;
+	},
+
+	getRouteLength : function(dom) {
+		var distanceEls = dom.getElementsByTagName("distance");
+		if(distanceEls.length > 0)
+			this.distance = (this.distance == null ? 0 : this.distance) + 1*distanceEls[0].firstChild.data;
+	}
+});
+
+OpenLayers.cdauth.Routing.Cloudmade = OpenLayers.Class(OpenLayers.cdauth.Routing, {
+	routingURL : "http://routes.cloudmade.com/0abc333ea36c4c34bc67a72442d9770b/api/0.3/",
+	attribution : OpenLayers.i18n("attribution-routing-cloudmade"),
+
+	getGPXURL : function() {
+		if(this.from == null || this.to == null || this.medium == null || this.routingType == null)
+			return null;
+
+		var url = this.routingURL +
+		          this.from.lat + "," + this.from.lon;
+		for(var i=0; i<this.via.length; i++)
+			url += (i == 0 ? "[" : ",") + this.via[i].lat + "," + this.via[i].lon;
+		if(this.via.length > 0)
+			url += "]";
+		url += "," + this.to.lat + "," + this.to.lon +
+		       "/" + this.medium +
+		       "/" + this.routingType +
+		       ".gpx?units=km";
+		return url;
+	},
+
+	getRouteLength : function(dom) {
+		var distanceEls = dom.getElementsByTagName("distance");
+		if(distanceEls.length > 0)
+			this.distance = (this.distance == null ? 0 : this.distance) + 1*distanceEls[0].firstChild.data;
+	},
+
+	getRouteDuration : function(dom) {
+		var distanceEls = dom.getElementsByTagName("time");
+		if(distanceEls.length > 0)
+			this.distance = (this.distance == null ? 0 : this.distance) + 1*distanceEls[0].firstChild.data;
+	}
+});
+
+OpenLayers.cdauth.Routing.Cloudmade.Format = OpenLayers.Class(OpenLayers.Format.GPX, {
+	read : function(doc) {
+		if (typeof doc == "string") {
+			doc = OpenLayers.Format.XML.prototype.read.apply(this, [doc]);
+		}
+
+		var points = doc.getElementsByTagName("wpt");
+        var point_features = [];
+        for (var i = 0, len = points.length; i < len; i++) {
+            point_features.push(new OpenLayers.Geometry.Point(points[i].getAttribute("lon"), points[i].getAttribute("lat")));
+        }
+		features = [ new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LineString(point_features), null) ];
+
+		if (this.internalProjection && this.externalProjection) {
+			for (var g = 0, featLength = features.length; g < featLength; g++) {
+				features[g].geometry.transform(this.externalProjection, this.internalProjection);
+			}
+		}
+
+		return features;
+	}
+});
+
 /**
  * Shows a calculated route on the map. Add this layer to a map and set the different paramters using the set* functions. As soon as all
  * parameters are set, the route will be displayed. The parameters can be updated then and the route will be recalculated.
@@ -1743,22 +1945,13 @@ OpenLayers.Layer.cdauth.XML.shortNameI = 1;
 OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.XML, {
 	HOVER_MAX_DISTANCE : 10,
 
-	routingURL : "http://www.yournavigation.org/api/dev/gosmore.php",
-	permalinkURL : "http://www.yournavigation.org/",
-	routingMediumMapping : { "car" : "motorcar", "bicycle" : "bicycle", "foot" : "foot" },
-	routingTypeMapping : { "shortest" : "0", "fastest" : "1" },
-
 	fromIcon : new OpenLayers.Icon('http://osm.cdauth.de/map/route-start.png', new OpenLayers.Size(20,34), new OpenLayers.Pixel(-10, -34)),
 	toIcon : new OpenLayers.Icon('http://osm.cdauth.de/map/route-stop.png', new OpenLayers.Size(20,34), new OpenLayers.Pixel(-10, -34)),
 	viaIcon : new OpenLayers.Icon('http://osm.cdauth.de/map/yellow.png', new OpenLayers.Size(20,34), new OpenLayers.Pixel(-10, -34)),
 
 	colour : "blue",
 
-	from : null,
-	to : null,
-	medium : null,
-	routingType : null,
-	via : null,
+	provider : new OpenLayers.cdauth.Routing.Cloudmade(),
 
 	fromMarker : null,
 	toMarker : null,
@@ -1776,7 +1969,8 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 	initialize : function(name, options) {
 		OpenLayers.Layer.cdauth.XML.prototype.initialize.apply(this, [ name, undefined, options ]);
 
-		this.via = [ ];
+		this.attribution = this.provider.attribution;
+
 		this.viaMarkers = [ ];
 		this.markers = [ ];
 
@@ -1802,9 +1996,9 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 					{
 						if(marker == routingLayer.viaMarkers[i])
 						{
-							if(lonlat.lon != routingLayer.via[i].lon || lonlat.lat != routingLayer.via[i].lat)
+							if(lonlat.lon != routingLayer.provider.via[i].lon || lonlat.lat != routingLayer.provider.via[i].lat)
 							{
-								routingLayer.via[i] = lonlat;
+								routingLayer.provider.via[i] = lonlat;
 								routingLayer.updateRouting();
 							}
 							break;
@@ -1846,10 +2040,10 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 					var newIndex = routingLayer.via.length;
 					while(newIndex > 0)
 					{
-						var thisPoint = routingLayer.getPointFromLonLat(routingLayer.via[newIndex-1].clone().transform(new OpenLayers.Projection("EPSG:4326"), routingLayer.map.getProjectionObject()));
+						var thisPoint = routingLayer.getPointFromLonLat(routingLayer.provider.via[newIndex-1].clone().transform(new OpenLayers.Projection("EPSG:4326"), routingLayer.map.getProjectionObject()));
 						if(thisPoint == null || thisPoint.index > this.lastPoint.index)
 						{
-							routingLayer.via[newIndex] = routingLayer.via[newIndex-1];
+							routingLayer.provider.via[newIndex] = routingLayer.provider.via[newIndex-1];
 							routingLayer.viaMarkers[newIndex] = routingLayer.viaMarkers[newIndex-1];
 							newIndex--;
 						}
@@ -1857,7 +2051,7 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 							break;
 					}
 					routingLayer.temporaryViaMarker.draw(new OpenLayers.Pixel(this.lastXY.x, this.lastXY.y+2));
-					routingLayer.via[newIndex] = this.lastPoint.lonlat;
+					routingLayer.provider.via[newIndex] = this.lastPoint.lonlat;
 					routingLayer.viaMarkers[newIndex] = routingLayer.temporaryViaMarker;
 					routingLayer.temporaryViaMarker = null;
 					this.lastPoint = null;
@@ -1943,12 +2137,12 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 	 * @return void
 	*/
 	setFrom : function(from, zoom) {
-		if(from == this.from)
+		if(from == this.provider.from)
 		{
 			if(zoom) this.zoomMap();
 			return;
 		}
-		this.from = from;
+		this.provider.from = from;
 
 		this.events.triggerEvent("queryObjectChanged");
 		this.updateRouting(zoom);
@@ -1961,12 +2155,12 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 	 * @return void
 	*/
 	setTo : function(to, zoom) {
-		if(to == this.to)
+		if(to == this.provider.to)
 		{
 			if(zoom) this.zoomMap();
 			return;
 		}
-		this.to = to;
+		this.provider.to = to;
 
 		this.events.triggerEvent("queryObjectChanged");
 		this.updateRouting(zoom);
@@ -1979,12 +2173,12 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 	 * @return void
 	*/
 	setMedium : function(medium, zoom) {
-		if(medium == this.medium)
+		if(medium == this.provider.medium)
 		{
 			if(zoom) this.zoomMap();
 			return;
 		}
-		this.medium = medium;
+		this.provider.medium = medium;
 		this.events.triggerEvent("queryObjectChanged");
 		this.updateRouting(zoom);
 	},
@@ -1996,12 +2190,12 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 	 * @return void
 	*/
 	setType : function(type, zoom) {
-		if(type == this.type)
+		if(type == this.provider.routingType)
 		{
 			if(zoom) this.zoomMap();
 			return;
 		}
-		this.routingType = type;
+		this.provider.routingType = type;
 		this.events.triggerEvent("queryObjectChanged");
 		this.updateRouting(zoom);
 	},
@@ -2014,7 +2208,7 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 		}
 		if(this.from != null)
 		{
-			this.fromMarker = new OpenLayers.Marker(this.from.clone().transform(new OpenLayers.Projection("EPSG:4326"), this.map.getProjectionObject()), this.fromIcon.clone())
+			this.fromMarker = new OpenLayers.Marker(this.provider.from.clone().transform(new OpenLayers.Projection("EPSG:4326"), this.map.getProjectionObject()), this.fromIcon.clone())
 			this.fromMarker.layer = this; // Required for the drag control
 			this.addMarker(this.fromMarker);
 		}
@@ -2026,7 +2220,7 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 		}
 		if(this.to != null)
 		{
-			this.toMarker = new OpenLayers.Marker(this.to.clone().transform(new OpenLayers.Projection("EPSG:4326"), this.map.getProjectionObject()), this.toIcon.clone())
+			this.toMarker = new OpenLayers.Marker(this.provider.to.clone().transform(new OpenLayers.Projection("EPSG:4326"), this.map.getProjectionObject()), this.toIcon.clone())
 			this.toMarker.layer = this; // Required for the drag control
 			this.addMarker(this.toMarker);
 		}
@@ -2037,34 +2231,20 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 			this.viaMarkers[i].destroy();
 		}
 		this.viaMarkers = [ ];
-		for(var i=0; i<this.via.length; i++)
+		for(var i=0; i<this.provider.via.length; i++)
 		{
-			this.viaMarkers[i] = new OpenLayers.Marker(this.via[i].clone().transform(new OpenLayers.Projection("EPSG:4326"), this.map.getProjectionObject()), this.viaIcon.clone())
+			this.viaMarkers[i] = new OpenLayers.Marker(this.provider.via[i].clone().transform(new OpenLayers.Projection("EPSG:4326"), this.map.getProjectionObject()), this.viaIcon.clone())
 			this.viaMarkers[i].layer = this; // Required for the drag control
 			this.addMarker(this.viaMarkers[i]);
 		}
 
-		if(this.from == null || this.to == null || this.medium == null || this.routingType == null)
+		if(this.provider.from == null || this.provider.to == null || this.provider.medium == null || this.provider.routingType == null)
 			return null;
 
 		this.zoomAtNextSuccess = zoom;
 		this.distance = null;
 
-		var url = this.routingURL +
-			"?v="+this.routingMediumMapping[this.medium] +
-			"&fast="+this.routingTypeMapping[this.routingType] +
-			"&format=kml";
-		var urls = [ ];
-		var nodes = [ this.from ].concat(this.via).concat([ this.to ]);
-		for(var i=1; i<nodes.length; i++)
-		{
-			urls.push(url +
-				"&flat="+nodes[i-1].lat +
-				"&flon="+nodes[i-1].lon +
-				"&tlat="+nodes[i].lat +
-				"&tlon="+nodes[i].lon);
-		}
-		this.setUrl(urls);
+		this.setUrl(this.provider.getGPXURL());
 	},
 
 	/**
@@ -2072,21 +2252,7 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 	 * @return String A link to a web page or null if this route is not initialised yet.
 	*/
 	getDetailedLink : function() {
-		if(this.from == null || this.to == null || this.medium == null || this.routingType == null)
-			return null;
-
-		var url = this.permalinkURL + "?flat="+this.from.lat +
-			"&flon="+this.from.lon +
-			"&tlat="+this.to.lat +
-			"&tlon="+this.to.lon +
-			"&v="+this.routingMediumMapping[this.medium] +
-			"&fast="+this.routingTypeMapping[this.routingType];
-		for(var i=0; i<this.via.length; i++)
-		{
-			url += "&wlat="+this.via[i].lat +
-			          "&wlon="+this.via[i].lon;
-		}
-		return url;
+		return this.provider.getPermalinkURL();
 	},
 
 	getDistance : function() {
@@ -2096,9 +2262,7 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 	requestSuccess : function(request) {
 		if(request.responseXML)
 		{ // Do this before calling the parent function as that invokes the loadend event
-			var distanceEls = request.responseXML.getElementsByTagName("distance");
-			if(distanceEls.length > 0)
-				this.distance = (this.distance == null ? 0 : this.distance) + 1*distanceEls[0].firstChild.data;
+			this.distance = this.provider.getRouteLength(request.responseXML);
 		}
 
 		OpenLayers.Layer.cdauth.XML.prototype.requestSuccess.apply(this, arguments);
@@ -2114,21 +2278,21 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 	},
 
 	getQueryObject : function() {
-		if(this.from == null || this.to == null || this.medium == null || this.routingType == null)
+		if(this.provider.from == null || this.provider.to == null || this.provider.medium == null || this.provider.routingType == null)
 			return { };
 		else
 		{
 			var ret = {
-				from : { lon : this.from.lon, lat : this.from.lat },
-				to : { lon : this.to.lon, lat : this.to.lat },
-				medium : this.medium,
-				type : this.routingType
+				from : { lon : this.provider.from.lon, lat : this.provider.from.lat },
+				to : { lon : this.provider.to.lon, lat : this.provider.to.lat },
+				medium : this.provider.medium,
+				type : this.provider.routingType
 			};
-			if(this.via.length > 0)
+			if(this.provider.via.length > 0)
 			{
 				ret.via = { };
-				for(var i=0; i<this.via.length; i++)
-					ret.via[i] = { lon : this.via[i].lon, lat : this.via[i].lat };
+				for(var i=0; i<this.provider.via.length; i++)
+					ret.via[i] = { lon : this.provider.via[i].lon, lat : this.provider.via[i].lat };
 			}
 			return ret;
 		}
@@ -2136,34 +2300,34 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 
 	setQueryObject : function(obj) {
 		var doUpdate = false;
-		if(obj.medium != this.medium)
+		if(obj.medium != this.provider.medium)
 		{
-			this.medium = obj.medium;
+			this.provider.medium = obj.medium;
 			doUpdate = true;
 		}
-		if(obj.type != this.routingType)
+		if(obj.type != this.provider.routingType)
 		{
-			this.routingType = obj.type;
+			this.provider.routingType = obj.type;
 			doUpdate = true;
 		}
-		if(obj.from == undefined && this.from != null)
+		if(obj.from == undefined && this.provider.from != null)
 		{
-			this.from = null;
+			this.provider.from = null;
 			doUpdate = true;
 		}
-		else if(obj.from != undefined && obj.from.lat != undefined && obj.from.lon != undefined && (this.from == null || obj.from.lat != this.from.lat || obj.from.lon != this.from.lon))
+		else if(obj.from != undefined && obj.from.lat != undefined && obj.from.lon != undefined && (this.provider.from == null || obj.from.lat != this.provider.from.lat || obj.from.lon != this.provider.from.lon))
 		{
-			this.from = new OpenLayers.LonLat(obj.from.lon, obj.from.lat);
+			this.provider.from = new OpenLayers.LonLat(obj.from.lon, obj.from.lat);
 			doUpdate = true;
 		}
-		if(obj.to == undefined && this.to != null)
+		if(obj.to == undefined && this.provider.to != null)
 		{
-			this.to = null;
+			this.provider.to = null;
 			doUpdate = true;
 		}
-		else if(obj.to != undefined && obj.to.lat != undefined && obj.to.lon != undefined && (this.to == null || obj.to.lat != this.to.lat || obj.to.lon != this.to.lon))
+		else if(obj.to != undefined && obj.to.lat != undefined && obj.to.lon != undefined && (this.provider.to == null || obj.to.lat != this.provider.to.lat || obj.to.lon != this.provider.to.lon))
 		{
-			this.to = new OpenLayers.LonLat(obj.to.lon, obj.to.lat);
+			this.provider.to = new OpenLayers.LonLat(obj.to.lon, obj.to.lat);
 			doUpdate = true;
 		}
 
@@ -2175,20 +2339,20 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 			{
 				if(obj.via[i].lon == undefined || obj.via[i].lat == undefined)
 					continue;
-				if(this.via[i] == undefined || this.via[i].lon != obj.via[i].lon || this.via[i].lat != obj.via[i].lat)
+				if(this.provider.via[i] == undefined || this.provider.via[i].lon != obj.via[i].lon || this.provider.via[i].lat != obj.via[i].lat)
 				{
 					wrong = true;
 					break;
 				}
 			}
 		}
-		if(wrong || i != this.via.length)
+		if(wrong || i != this.provider.via.length)
 		{
 			this.via = [ ];
 			if(obj.via != undefined)
 			{
 				for(var i=0; obj.via[i] != undefined; i++)
-					this.via.push(new OpenLayers.LonLat(obj.via[i].lon, obj.via[i].lat));
+					this.provider.via.push(new OpenLayers.LonLat(obj.via[i].lon, obj.via[i].lat));
 			}
 			doUpdate = true;
 		}
@@ -2225,23 +2389,6 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 		}
 	}
 });
-
-/**
- * Means of transportation.
-*/
-OpenLayers.Layer.cdauth.XML.Routing.Medium = {
-	CAR : "car",
-	BICYCLE : "bicycle",
-	FOOT : "foot"
-};
-
-/**
- * Route calculation mechanisms.
-*/
-OpenLayers.Layer.cdauth.XML.Routing.Type = {
-	FASTEST : "fastest",
-	SHORTEST : "shortest"
-};
 
 /**
  * A class to control the URL hash part.
