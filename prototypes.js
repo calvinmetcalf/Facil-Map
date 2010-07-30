@@ -1766,9 +1766,10 @@ OpenLayers.cdauth.Routing = OpenLayers.Class({
 	 * An array of via points in WGS-84.
 	 * @var Array[OpenLayers.LonLat]
 	*/
-	via : [ ],
+	via : null,
 
 	initialize : function() {
+		this.via = [ ];
 	},
 
 	/**
@@ -1961,7 +1962,7 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 
 	colour : "blue",
 
-	provider : new OpenLayers.cdauth.Routing.Cloudmade(),
+	provider : OpenLayers.cdauth.Routing.Cloudmade, // is instantiated in the initialize() function
 
 	fromMarker : null,
 	toMarker : null,
@@ -1980,6 +1981,7 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 	initialize : function(name, options) {
 		OpenLayers.Layer.cdauth.XML.prototype.initialize.apply(this, [ name, undefined, options ]);
 
+		this.provider = new this.provider();
 		this.attribution = this.provider.attribution;
 
 		this.viaMarkers = [ ];
