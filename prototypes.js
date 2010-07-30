@@ -2077,6 +2077,25 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 					OpenLayers.Event.stop(evt);
 					return false;
 				}
+			},
+			dblclick : function(evt) {
+				var feature = routingLayer.getFeatureFromEvent(evt);
+				if(feature == null)
+					return true;
+
+				for(var i=0; i<routingLayer.viaMarkers.length; i++)
+				{
+					if(routingLayer.viaMarkers[i] == feature)
+					{
+						routingLayer.provider.via.splice(i, 1);
+						routingLayer.updateRouting();
+						routingLayer.events.triggerEvent("queryObjectChanged");
+						routingLayer.events.triggerEvent("draggedRoute");
+						return false;
+					}
+				}
+
+				return true;
 			}
 		});
 	},
