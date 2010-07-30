@@ -1871,11 +1871,11 @@ OpenLayers.cdauth.Routing.YOURS = OpenLayers.Class(OpenLayers.cdauth.Routing, {
 	},
 
 	getRouteLength : function(dom) {
-		var distance = 0;
 		var distanceEls = dom.getElementsByTagName("distance");
 		if(distanceEls.length > 0)
-			distance += 1*distanceEls[0].firstChild.data;
-		return distance;
+			return 1*distanceEls[0].firstChild.data;
+		else
+			return null;
 	}
 });
 
@@ -1901,18 +1901,25 @@ OpenLayers.cdauth.Routing.Cloudmade = OpenLayers.Class(OpenLayers.cdauth.Routing
 	},
 
 	getRouteLength : function(dom) {
-		var distance = 0;
-		var distanceEls = dom.getElementsByTagName("distance");
-		if(distanceEls.length > 0)
-			distance += 1*distanceEls[0].firstChild.data;
-		return distance/1000;
+		var extensions = dom.getElementsByTagName("extensions");
+		if(extensions.length > 0)
+		{
+			var distance = extensions[0].getElementsByTagName("distance");
+			if(distance.length > 0)
+				return distance[0].firstChild.data/1000;
+		}
+		return null;
 	},
 
 	getRouteDuration : function(dom) {
-		var duration = 0;
-		var durationEls = dom.getElementsByTagName("time");
-		if(durationEls.length > 0)
-			duration += 1*durationEls[0].firstChild.data;
+		var extensions = dom.getElementsByTagName("extensions");
+		if(extensions.length > 0)
+		{
+			var duration = extensions[0].getElementsByTagName("time");
+			if(duration.length > 0)
+				return duration[0].firstChild.data/3600;
+		}
+		return null;
 	}
 });
 
@@ -1962,6 +1969,7 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 
 	zoomAtNextSuccess : false,
 	distance : null,
+	duration : null,
 	markers : null,
 	markersDrawn : false,
 
@@ -2246,6 +2254,7 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 
 		this.zoomAtNextSuccess = zoom;
 		this.distance = null;
+		this.duration = null;
 
 		this.setUrl(this.provider.getGPXURL());
 	},
@@ -2262,10 +2271,15 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 		return this.distance;
 	},
 
+	getDuration : function() {
+		return this.duration;
+	},
+
 	requestSuccess : function(request) {
 		if(request.responseXML)
 		{ // Do this before calling the parent function as that invokes the loadend event
 			this.distance = this.provider.getRouteLength(request.responseXML);
+			this.duration = this.provider.getRouteDuration(request.responseXML);
 		}
 
 		OpenLayers.Layer.cdauth.XML.prototype.requestSuccess.apply(this, arguments);
