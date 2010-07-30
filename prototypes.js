@@ -2028,7 +2028,7 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 			lastXY : null,
 			mousemove : function(evt) {
 				var point = routingLayer.getPointFromMousePosition(evt.xy);
-				if(point != null)
+				if(point != null && !routingLayer.dragFeature.handlers.drag.active)
 				{
 					if(routingLayer.temporaryViaMarker == null)
 					{
