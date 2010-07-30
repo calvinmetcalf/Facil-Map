@@ -1890,7 +1890,7 @@ OpenLayers.cdauth.Routing.Cloudmade = OpenLayers.Class(OpenLayers.cdauth.Routing
 		var url = this.routingURL +
 		          this.from.lat + "," + this.from.lon;
 		for(var i=0; i<this.via.length; i++)
-			url += (i == 0 ? "[" : ",") + this.via[i].lat + "," + this.via[i].lon;
+			url += (i == 0 ? ",[" : ",") + this.via[i].lat + "," + this.via[i].lon;
 		if(this.via.length > 0)
 			url += "]";
 		url += "," + this.to.lat + "," + this.to.lon +
@@ -1955,9 +1955,9 @@ OpenLayers.cdauth.Routing.Cloudmade.Format = OpenLayers.Class(OpenLayers.Format.
 OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.XML, {
 	HOVER_MAX_DISTANCE : 10,
 
-	fromIcon : new OpenLayers.Icon('http://osm.cdauth.de/map/route-start.png', new OpenLayers.Size(20,34), new OpenLayers.Pixel(-10, -34)),
-	toIcon : new OpenLayers.Icon('http://osm.cdauth.de/map/route-stop.png', new OpenLayers.Size(20,34), new OpenLayers.Pixel(-10, -34)),
-	viaIcon : new OpenLayers.Icon('http://osm.cdauth.de/map/yellow.png', new OpenLayers.Size(20,34), new OpenLayers.Pixel(-10, -34)),
+	fromIcon : new OpenLayers.Icon('http://osm.cdauth.eu/map/route-start.png', new OpenLayers.Size(20,34), new OpenLayers.Pixel(-10, -34)),
+	toIcon : new OpenLayers.Icon('http://osm.cdauth.eu/map/route-stop.png', new OpenLayers.Size(20,34), new OpenLayers.Pixel(-10, -34)),
+	viaIcon : new OpenLayers.Icon('http://osm.cdauth.eu/map/yellow.png', new OpenLayers.Size(20,34), new OpenLayers.Pixel(-10, -34)),
 
 	colour : "blue",
 
@@ -2048,7 +2048,7 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 			mousedown : function(evt) {
 				if(this.lastPoint != null)
 				{
-					var newIndex = routingLayer.via.length;
+					var newIndex = routingLayer.provider.via.length;
 					while(newIndex > 0)
 					{
 						var thisPoint = routingLayer.getPointFromLonLat(routingLayer.provider.via[newIndex-1].clone().transform(new OpenLayers.Projection("EPSG:4326"), routingLayer.map.getProjectionObject()));
@@ -2217,7 +2217,7 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 			this.removeMarker(this.fromMarker);
 			this.fromMarker = null;
 		}
-		if(this.from != null)
+		if(this.provider.from != null)
 		{
 			this.fromMarker = new OpenLayers.Marker(this.provider.from.clone().transform(new OpenLayers.Projection("EPSG:4326"), this.map.getProjectionObject()), this.fromIcon.clone())
 			this.fromMarker.layer = this; // Required for the drag control
@@ -2229,7 +2229,7 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 			this.removeMarker(this.toMarker);
 			this.toMarker = null;
 		}
-		if(this.to != null)
+		if(this.provider.to != null)
 		{
 			this.toMarker = new OpenLayers.Marker(this.provider.to.clone().transform(new OpenLayers.Projection("EPSG:4326"), this.map.getProjectionObject()), this.toIcon.clone())
 			this.toMarker.layer = this; // Required for the drag control
