@@ -1826,7 +1826,7 @@ OpenLayers.cdauth.Routing.Type = {
 };
 
 OpenLayers.cdauth.Routing.YOURS = OpenLayers.Class(OpenLayers.cdauth.Routing, {
-	routingURL : "http://www.yournavigation.org/api/dev/gosmore.php",
+	routingURL : "http://www.yournavigation.org/api/1.0/gosmore.php",
 	permalinkURL : "http://www.yournavigation.org/",
 	routingMediumMapping : { "car" : "motorcar", "bicycle" : "bicycle", "foot" : "foot" },
 	routingTypeMapping : { "shortest" : "0", "fastest" : "1" },
