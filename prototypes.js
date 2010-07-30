@@ -57,7 +57,6 @@ OpenLayers.Lang.en = OpenLayers.Util.extend(OpenLayers.Lang.en, {
 	"Error parsing file." : "Error parsing file.",
 	"Latitude" : "Latitude",
 	"Longitude" : "Longitude",
-	"Get directions (OpenRouteService)" : "Get directions (OpenRouteService)",
 	"OpenStreetMap Permalink" : "OpenStreetMap Permalink",
 	"OpenStreetMap Shortlink" : "OpenStreetMap Shortlink",
 	"Google Maps Permalink" : "Google Maps Permalink",
@@ -105,7 +104,6 @@ OpenLayers.Lang.de = OpenLayers.Util.extend(OpenLayers.Lang.de, {
 	"Error parsing file." : "Fehler beim Parsen der Datei.",
 	"Latitude" : "Breite",
 	"Longitude" : "Länge",
-	"Get directions (OpenRouteService)" : "Route berechnen (OpenRouteService)",
 	"OpenStreetMap Permalink" : "OpenStreetMap Permalink",
 	"OpenStreetMap Shortlink" : "OpenStreetMap Shortlink",
 	"Google Maps Permalink" : "Google Maps Permalink",
@@ -2975,7 +2973,6 @@ function makePermalinks(lonlat, zoom)
 	div.appendChild(dl);
 
 	var ul = document.createElement("ul");
-	ul.appendChild(makeEntry("http://data.giub.uni-bonn.de/openrouteservice/index.php?end="+lonlat.lon+","+lonlat.lat+"&lat="+lonlat.lat+"&lon="+lonlat.lon+"&zoom="+zoom, "Get directions (OpenRouteService)"));
 	ul.appendChild(makeEntry("http://www.openstreetmap.org/?mlat="+lonlat.lat+"&mlon="+lonlat.lon+"&zoom="+zoom, "OpenStreetMap Permalink"));
 	ul.appendChild(makeEntry("http://osm.org/go/"+encodeShortLink(lonlat, zoom)+"?m", "OpenStreetMap Shortlink"));
 	ul.appendChild(makeEntry("http://maps.google.com/?q="+lonlat.lat+","+lonlat.lon, "Google Maps Permalink"));
