@@ -2133,7 +2133,7 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 			return null;
 		var smallestDistance = null;
 		var smallestDistancePoint = null;
-		var index = 0;
+		var index = 0; // Index is used to find out the position of the point in the ordered list of points
 		var maxDistance = this.HOVER_MAX_DISTANCE * this.map.getResolution();
 		for(var j=0; j<this.features.length; j++)
 		{
@@ -2141,10 +2141,21 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 				continue;
 
 			var points = this.features[j].geometry.components;
-			for(var i=0; i<points.length; i++,index++)
+			var p1,p2,d,u,px;
+			for(var i=0; i<points.length-1; i++,index++)
 			{
-				var distanceX = Math.abs(points[i].x-lonlat.lon);
-				var distanceY = Math.abs(points[i].y-lonlat.lat);
+				p1 = points[i];
+				p2 = points[i+1];
+				d = { x : p2.x-p1.x, y : p2.y-p1.y };
+				u = ((lonlat.lon-p1.x)*d.x + (lonlat.lat-p1.y)*d.y) / (d.x*d.x + d.y*d.y); // See http://local.wasp.uwa.edu.au/~pbourke/geometry/pointline/
+
+				if(u < 0 || u > 1)
+					continue;
+
+				px = { x : p1.x+u*d.x, y : p1.y+u*d.y };
+
+				var distanceX = Math.abs(px.x-lonlat.lon);
+				var distanceY = Math.abs(px.y-lonlat.lat);
 				if(distanceX > maxDistance || distanceY > maxDistance)
 					continue;
 				var distance = Math.sqrt(Math.pow(distanceX, 2) + Math.pow(distanceY, 2));
@@ -2152,7 +2163,7 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 					continue;
 				if(smallestDistance == null || distance < smallestDistance)
 				{
-					smallestDistancePoint = [ index, points[i] ];
+					smallestDistancePoint = [ index+u, px ];
 					smallestDistance = distance;
 				}
 			}
