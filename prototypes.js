@@ -1894,10 +1894,12 @@ OpenLayers.cdauth.Routing.Cloudmade = OpenLayers.Class(OpenLayers.cdauth.Routing
 			url += (i == 0 ? ",[" : ",") + this.via[i].lat + "," + this.via[i].lon;
 		if(this.via.length > 0)
 			url += "]";
-		url += "," + this.to.lat + "," + this.to.lon +
-		       "/" + this.medium +
-		       "/" + this.routingType +
-		       ".gpx?units=km";
+		url += "," + this.to.lat + "," + this.to.lon + "/" + this.medium;
+		if(this.medium == "foot" || this.medium == "bicycle")
+			url += "/fastest";
+		else
+			url += "/" + this.routingType;
+		url += ".gpx?units=km";
 		return url;
 	},
 
