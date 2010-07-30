@@ -1991,6 +1991,7 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 		this.dragFeature = new OpenLayers.Control.DragFeature(this, {
 			dragCallbacks : { move : function(pixel) {
 				// this.feature is the marker
+				// FIXME: Sometimes after creating two via points, this.feature.icon is null
 				var newPx = new OpenLayers.Pixel(this.feature.icon.px.x + (pixel.x - this.lastPixel.x), this.feature.icon.px.y - (this.lastPixel.y - pixel.y));
 				this.lastPixel = pixel;
 				this.feature.draw(newPx);
@@ -2015,6 +2016,7 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 							break;
 						}
 					}
+					routingLayer.events.triggerEvent("queryObjectChanged");
 				}
 				routingLayer.events.triggerEvent("draggedRoute");
 			}
