@@ -1678,7 +1678,7 @@ OpenLayers.Layer.cdauth.XML = OpenLayers.Class(OpenLayers.Layer.GML, {
 			switch(request.responseXML.documentElement.tagName)
 			{
 				case "gpx":
-					if(request.responseXML.firstChild.getAttribute("creator") == "CloudMade")
+					if(request.responseXML.documentElement.getAttribute("creator") == "CloudMade")
 						this.format = OpenLayers.cdauth.Routing.Cloudmade.Format;
 					else
 						this.format = OpenLayers.Format.GPX;
