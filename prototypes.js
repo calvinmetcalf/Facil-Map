@@ -86,7 +86,9 @@ OpenLayers.Lang.en = OpenLayers.Util.extend(OpenLayers.Lang.en, {
 	"Coordinate grid" : "Coordinate grid",
 	"Izometrická 3D mapa ČR" : "Izometrická 3D mapa ČR",
 	"Streets overlay" : "Streets overlay",
-	"Labels overlay" : "Labels overlay"
+	"Labels overlay" : "Labels overlay",
+	"Links to other maps" : "Links to other maps",
+	"Tags" : "Tags"
 });
 
 OpenLayers.Lang.de = OpenLayers.Util.extend(OpenLayers.Lang.de, {
@@ -133,7 +135,9 @@ OpenLayers.Lang.de = OpenLayers.Util.extend(OpenLayers.Lang.de, {
 	"Coordinate grid" : "Koordinatensystem",
 	"Izometrická 3D mapa ČR" : "Izometrická 3D mapa ČR",
 	"Streets overlay" : "Straßen-Hybrid",
-	"Labels overlay" : "Beschriftungen"
+	"Labels overlay" : "Beschriftungen",
+	"Links to other maps" : "Auf andere Karten",
+	"Tags" : "Attribute"
 });
 
 OpenLayers.cdauthBackup = { };
@@ -983,7 +987,8 @@ if(OpenLayers.Layer.Yahoo && typeof YMap != "undefined")
 
 OpenLayers.Popup.FramedCloud.cdauth = OpenLayers.Class(OpenLayers.Popup.FramedCloud, {
 	contentDom: null,
-	autoSize: true,
+	autoSize: false,
+	minSize: new OpenLayers.Size(300, 200),
 	_defaultZIndex : null,
 	initialize: function(id, lonlat, contentSize, contentDom, anchor, closeBox, closeBoxCallback) {
 		var closeCallback = function(e){ if(closeBoxCallback) closeBoxCallback(); OpenLayers.Event.stop(e); this.events.triggerEvent("close"); };
@@ -1137,7 +1142,7 @@ OpenLayers.Layer.cdauth.Markers = OpenLayers.Class(OpenLayers.Layer.Markers, {
 				this.marker.events.triggerEvent(this.popup.visible() ? "open" : "close");
 				layer.events.triggerEvent("markersChanged");
 			});
-			marker.events.register("mouseover", feature.popup, function(){this.unsetOpacity()});
+			marker.events.register("mouseover", feature.popup, function(){this.unsetOpacity()}); // FIXME: Fade opacity
 			marker.events.register("mouseout", feature.popup, function(){this.setOpacity()});
 		}
 		marker.cdauthFeature = feature;
@@ -1301,6 +1306,7 @@ OpenLayers.cdauth.NameFinder = OpenLayers.Class({
 	 *                                  * String name: The title of the result.
 	 *                                  * String info: Some additional information about the result, such as the type.
 	 *                                  * function getZoom(OpenLayers.Map): Returns the zoom level that the search result should be displayed at on the given map.
+	 *                                  * Node osm: The associated OSM object or null.
 	 * @return void
 	*/
 	find : function(query, callbackFunction) {
@@ -1383,6 +1389,7 @@ OpenLayers.cdauth.NameFinder.Nominatim = OpenLayers.Class(OpenLayers.cdauth.Name
 						if(request.responseXML)
 						{
 							var searchresults = request.responseXML.getElementsByTagName("searchresults");
+
 							if(searchresults.length > 0)
 							{
 								if(searchresults[0].getAttribute("findplace") == null || searchresults[0].getAttribute("findplace") == "" || searchresults[0].getAttribute("foundnearplace") == "yes")
@@ -1401,13 +1408,15 @@ OpenLayers.cdauth.NameFinder.Nominatim = OpenLayers.Class(OpenLayers.cdauth.Name
 												icon : named[i].getAttribute("icon"),
 												getZoom : function(map) {
 													return map.getZoomForExtent(box.clone().transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject()));
-												}
+												},
+												osm : null
 											});
 										})(new OpenLayers.Bounds(box[2], box[1], box[3], box[0]));
 									}
 								}
 							}
 						}
+
 						callbackFunction(results);
 					},
 					failure : function() {
@@ -1535,7 +1544,8 @@ OpenLayers.Layer.cdauth.Markers.GeoSearch = OpenLayers.Class(OpenLayers.Layer.cd
 			content_zoom.appendChild(document.createTextNode(OpenLayers.i18n("[Zoom]")));
 			content_heading.appendChild(content_zoom);
 			content.appendChild(content_heading);
-			content.appendChild(makePermalinks(results[i].lonlat, results[i].getZoom(layer.map)));
+
+			content.appendChild(makePermalinks(results[i].lonlat, results[i].getZoom(layer.map), results[i].osm));
 
 			var icon = null;
 			if(results[i].icon)
@@ -2995,21 +3005,15 @@ function htmlspecialchars(str)
  * Returns HTML code with Permalinks to various Map services at the specified position with the specified zoom level.
  * @param OpenLayers.LonLat lonlat
  * @param Number zoom
+ * @param DOMElement osm An XML OpenStreetMap object to show the tags of.
  * @return DOMElement
 */
 
-function makePermalinks(lonlat, zoom)
+function makePermalinks(lonlat, zoom, osm)
 {
 	var div = document.createElement("div");
-	var makeEntry = function(href, text)
-	{
-		var li = document.createElement("li");
-		var link = document.createElement("a");
-		link.href = href;
-		link.appendChild(document.createTextNode(OpenLayers.i18n(text)));
-		li.appendChild(link);
-		return li;
-	};
+
+	// Latitude and Longitude
 
 	var dl = document.createElement("dl");
 	var el;
@@ -3027,14 +3031,70 @@ function makePermalinks(lonlat, zoom)
 	dl.appendChild(el);
 	div.appendChild(dl);
 
+	// Links to other maps
+
+	var fieldset = document.createElement("fieldset");
+	fieldset.className = "content-hidden";
+	var legend = document.createElement("legend");
+	var legendLink = document.createElement("a");
+	legendLink.href = "javascript:";
+	legendLink.onclick = function() { fieldset.className = (fieldset.className == "content-hidden" ? "content-visible" : "content-hidden"); };
+	legendLink.appendChild(document.createTextNode(OpenLayers.i18n("Links to other maps")));
+	legend.appendChild(legendLink);
+	fieldset.appendChild(legend);
+
+	var makeEntry = function(href, text)
+	{
+		var li = document.createElement("li");
+		var link = document.createElement("a");
+		link.href = href;
+		link.appendChild(document.createTextNode(OpenLayers.i18n(text)));
+		li.appendChild(link);
+		return li;
+	};
+
 	var ul = document.createElement("ul");
+	ul.className = "fieldset-content";
 	ul.appendChild(makeEntry("http://www.openstreetmap.org/?mlat="+lonlat.lat+"&mlon="+lonlat.lon+"&zoom="+zoom, "OpenStreetMap Permalink"));
 	ul.appendChild(makeEntry("http://osm.org/go/"+encodeShortLink(lonlat, zoom)+"?m", "OpenStreetMap Shortlink"));
 	ul.appendChild(makeEntry("http://maps.google.com/?q="+lonlat.lat+","+lonlat.lon, "Google Maps Permalink"));
 	ul.appendChild(makeEntry("http://maps.yahoo.com/broadband/#lat="+lonlat.lat+"&lon="+lonlat.lon+"&zoom="+zoom, "Yahoo Maps Permalink"));
 	ul.appendChild(makeEntry("http://osmtools.de/osmlinks/?lat="+lonlat.lat+"&lon="+lonlat.lon+"&zoom="+zoom, "OpenStreetMap Links"));
 	ul.appendChild(makeEntry("http://stable.toolserver.org/geohack/geohack.php?params="+lonlat.lat+"_N_"+lonlat.lon+"_E", "Wikimedia GeoHack"));
-	div.appendChild(ul);
+	fieldset.appendChild(ul);
+
+	div.appendChild(fieldset);
+
+	// OSM tags
+
+	if(osm != undefined)
+	{
+		var tagFieldset = document.createElement("fieldset");
+		tagFieldset.className = "content-visible";
+		var tagLegend = document.createElement("legend");
+		var tagLegendLink = document.createElement("a");
+		tagLegendLink.href = "javascript:";
+		tagLegendLink.onclick = function() { tagFieldset.className = (tagFieldset.className == "content-hidden" ? "content-visible" : "content-hidden"); };
+		tagLegendLink.appendChild(document.createTextNode(OpenLayers.i18n("Tags")));
+		tagLegend.appendChild(tagLegendLink);
+		tagFieldset.appendChild(tagLegend);
+
+		var tagDl = document.createElement("dl");
+		tagDl.className = "fieldset-content";
+		var tags = osm.getElementsByTagName("tag");
+		for(var i=0; i<tags.length; i++)
+		{
+			var tagDt = document.createElement("dt");
+			tagDt.appendChild(document.createTextNode(tags[i].getAttribute("k")));
+			var tagDd = document.createElement("dd");
+			tagDd.appendChild(formatTagValue(tags[i].getAttribute("v"), tags[i].getAttribute("k")));
+			tagDl.appendChild(tagDt);
+			tagDl.appendChild(tagDd);
+		}
+
+		tagFieldset.appendChild(tagDl);
+		div.appendChild(tagFieldset);
+	}
 
 	return div;
 }
@@ -3186,6 +3246,84 @@ function makeClassName(olObject)
 		}
 		return ret;
 	}
+}
+
+/**
+ * Returns a DOM node with a formatted value of the value paramter. The value paramter is the value of a tag of an OSM object, the key
+ * paramter is the appropriate key after whose rules the value will be formatted (for example the value for the url key will be formatted
+ * as a link to this url).
+ * @param String value The value of an OSM tag
+ * @param String key The key of an OSM tag
+ * @return Element A DOM element with the formatted value
+*/
+
+function formatTagValue(value, key)
+{
+	var ret = document.createElement("span");
+
+	while(value.length > 0)
+	{
+		var sepPosition = value.search(formatTagValue.SEPARATOR_PATTERN);
+		var sep = value.match(formatTagValue.SEPARATOR_PATTERN);
+		var thisValue;
+		if(sepPosition = -1)
+		{
+			thisValue = value;
+			value = "";
+		}
+		else
+		{
+			thisValue = value.substring(0, sepPosition);
+			value = value.substring(sepPosition + sep[0].length);
+		}
+
+		var el;
+		if(key.match(/^url:?/i))
+		{
+			el = document.createElement("a");
+			el.href = thisValue;
+			el.appendChild(document.createTextNode(thisValue));
+			break;
+		}
+		else if(key.match(/^wiki:symbol:?/i))
+		{
+			el = document.createElement("a");
+			el.href = "http://wiki.openstreetmap.org/wiki/Image:"+thisValue;
+			el.appendChild(document.createTextNode(thisValue));
+			break;
+		}
+		else if(key.match(/^wiki:?/i))
+		{
+			el = document.createElement("a");
+			el.href = "http://wiki.openstreetmap.org/wiki/"+thisValue;
+			el.appendChild(document.createTextNode(thisValue));
+			break;
+		}
+		else
+			el = document.createTextNode(thisValue);
+
+		ret.appendChild(el);
+		if(sepPosition != -1)
+			ret.appendChild(sep[0]);
+	}
+
+	return ret;
+}
+
+formatTagValue.SEPARATOR_PATTERN = /;/;
+
+/**
+ * Get an array of the keys of an object.
+ * @param Object obj
+ * @return Array<String>
+*/
+
+function getIndexes(obj)
+{
+	var ret = [ ];
+	for(var i in obj)
+		ret.push(i);
+	return ret;
 }
 
 function alert_r(data)
