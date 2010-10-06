@@ -1015,8 +1015,8 @@ OpenLayers.Popup.FramedCloud.cdauth = OpenLayers.Class(OpenLayers.Popup.FramedCl
 
 		this.setContentHTML(contentDom);
 
-		OpenLayers.Event.observe(this.div, "mouseover", OpenLayers.Function.bindAsEventListener(function(){this.unsetOpacity()}, this));
-		OpenLayers.Event.observe(this.div, "mouseout", OpenLayers.Function.bindAsEventListener(function(){this.setOpacity()}, this));
+		OpenLayers.Event.observe(this.div, "mouseover", OpenLayers.Function.bindAsEventListener(function(){ changeOpacity(this.div, 1.0); }, this));
+		OpenLayers.Event.observe(this.div, "mouseout", OpenLayers.Function.bindAsEventListener(function(){ changeOpacity(this.div, this.opacity); }, this));
 	},
 	setContentHTML: function(contentDom) {
 		if(typeof contentDom == "object")
@@ -2474,6 +2474,58 @@ function makeClassName(olObject)
 		}
 		return ret;
 	}
+}
+
+/**
+ * Changes the opacity of the given element to a new value, slowly fading there.
+ * @param Element el The DOM element to change the opacity for
+ * @param Number opacity The new opacity (1.0 for not transparent, 0.0 for invisible).
+ * @param Number ms The time span for the fading in milliseconds (defaults to 750).
+ * @return void
+*/
+
+function changeOpacity(el, opacity, ms)
+{
+	if(changeOpacity.timeouts == undefined)
+		changeOpacity.timeouts = { };
+
+	var timeoutObj = null;
+	for(var i in changeOpacity.timeouts)
+	{
+		if(changeOpacity.timeouts[i] != undefined && changeOpacity.timeouts[i].el === el)
+		{
+			timeoutObj = i;
+			break;
+		}
+	}
+	if(timeoutObj == null)
+	{
+		var i=0;
+		while(changeOpacity.timeouts[i] != undefined)
+			i++;
+		timeoutObj = i;
+		changeOpacity.timeouts[timeoutObj] = { el : el, timeout : null }
+	}
+	else if(changeOpacity.timeouts[timeoutObj].timeout != null)
+		clearTimeout(changeOpacity.timeouts[timeoutObj].timeout);
+
+	if(ms == undefined)
+		ms = 750;
+	var initTime = new Date().getTime();
+	var initOpacity = 1 * (el.style.opacity == "" ? 1 : 1*el.style.opacity);
+	var callback = function() {
+		var period = new Date().getTime()-initTime;
+		if(period > ms)
+			period = ms;
+		var newOpacity = initOpacity+(period/ms)*(opacity-initOpacity);
+		OpenLayers.Util.modifyDOMElement(el, null, null, null, null, null, null, newOpacity);
+
+		if(period < ms)
+			changeOpacity.timeouts[timeoutObj].timeout = setTimeout(callback, 100);
+		else
+			changeOpacity.timeouts[timeoutObj] = undefined;
+	};
+	callback();
 }
 
 function alert_r(data)
