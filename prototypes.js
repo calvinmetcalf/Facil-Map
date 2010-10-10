@@ -322,62 +322,43 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 
 	addAllAvailableOSMLayers : function()
 	{
-		if(OpenLayers.Layer.cdauth.OSM.Mapnik)
-			this.addLayer(new OpenLayers.Layer.cdauth.OSM.Mapnik(OpenLayers.i18n("Mapnik"), { shortName : "Mpnk" }));
-		if(OpenLayers.Layer.cdauth.OSM.MapSurfer)
-		{
-			if(OpenLayers.Layer.cdauth.OSM.MapSurfer.Road)
-				this.addLayer(new OpenLayers.Layer.cdauth.OSM.MapSurfer.Road(OpenLayers.i18n("MapSurfer Road"), { shortName : "MSfR" }));
-			if(OpenLayers.Layer.cdauth.OSM.MapSurfer.Topographic)
-				this.addLayer(new OpenLayers.Layer.cdauth.OSM.MapSurfer.Topographic(OpenLayers.i18n("MapSurfer Topographic"), { shortName : "MSfT" }));
-		}
-		if(OpenLayers.Layer.cdauth.OSM.OpenStreetBrowser)
-			this.addLayer(new OpenLayers.Layer.cdauth.OSM.OpenStreetBrowser(OpenLayers.i18n("OpenStreetBrowser"), { shortName : "OSBr" }));
-		if(OpenLayers.Layer.cdauth.OSM.Osmarender)
-			this.addLayer(new OpenLayers.Layer.cdauth.OSM.Osmarender(OpenLayers.i18n("Osmarender"), { shortName : "Osmr" }));
-		if(OpenLayers.Layer.cdauth.OSM.CycleMap)
-			this.addLayer(new OpenLayers.Layer.cdauth.OSM.CycleMap(OpenLayers.i18n("OpenCycleMap"), { shortName : "OCyc" }));
-		//if(OpenLayers.Layer.cdauth.OSM.Wanderkarte)
-		//	this.addLayer(new OpenLayers.Layer.cdauth.OSM.Wanderkarte(OpenLayers.i18n("Reit- und Wanderkarte"), { shortName : "OSMC" }));
-		if(OpenLayers.Layer.cdauth.OSM.HikeAndBike)
-			this.addLayer(new OpenLayers.Layer.cdauth.OSM.HikeAndBike(OpenLayers.i18n("Hike & Bike Map"), { shortName : "HiBi" }));
-		if(OpenLayers.Layer.cdauth.OSM.OpenPisteMap)
-			this.addLayer(new OpenLayers.Layer.cdauth.OSM.OpenPisteMap(OpenLayers.i18n("OpenPisteMap"), { shortName : "OPis" }));
-		if(OpenLayers.Layer.cdauth.OSM.OPNVKarte)
-			this.addLayer(new OpenLayers.Layer.cdauth.OSM.OPNVKarte(OpenLayers.i18n("ÖPNV-Karte"), { shortName : "OPNV" }));
-		//if(OpenLayers.Layer.cdauth.OSM.Kybl3DMap)
-		//	this.addLayer(new OpenLayers.Layer.cdauth.OSM.Kybl3DMap(OpenLayers.i18n("Izometrická 3D mapa ČR"), { shortName : "kybl" }));
+		this.addLayer(new OpenLayers.Layer.cdauth.OSM.Mapnik(OpenLayers.i18n("Mapnik"), { shortName : "Mpnk" }));
+		this.addLayer(new OpenLayers.Layer.cdauth.OSM.MapSurfer.Road(OpenLayers.i18n("MapSurfer Road"), { shortName : "MSfR" }));
+		this.addLayer(new OpenLayers.Layer.cdauth.OSM.MapSurfer.Topographic(OpenLayers.i18n("MapSurfer Topographic"), { shortName : "MSfT" }));
+		this.addLayer(new OpenLayers.Layer.cdauth.OSM.OpenStreetBrowser(OpenLayers.i18n("OpenStreetBrowser"), { shortName : "OSBr" }));
+		this.addLayer(new OpenLayers.Layer.cdauth.OSM.Osmarender(OpenLayers.i18n("Osmarender"), { shortName : "Osmr" }));
+		this.addLayer(new OpenLayers.Layer.cdauth.OSM.CycleMap(OpenLayers.i18n("OpenCycleMap"), { shortName : "OCyc" }));
+		//this.addLayer(new OpenLayers.Layer.cdauth.OSM.Wanderkarte(OpenLayers.i18n("Reit- und Wanderkarte"), { shortName : "OSMC" }));
+		this.addLayer(new OpenLayers.Layer.cdauth.OSM.HikeAndBike(OpenLayers.i18n("Hike & Bike Map"), { shortName : "HiBi" }));
+		this.addLayer(new OpenLayers.Layer.cdauth.OSM.OpenPisteMap(OpenLayers.i18n("OpenPisteMap"), { shortName : "OPis" }));
+		this.addLayer(new OpenLayers.Layer.cdauth.OSM.OPNVKarte(OpenLayers.i18n("ÖPNV-Karte"), { shortName : "OPNV" }));
+		//this.addLayer(new OpenLayers.Layer.cdauth.OSM.Kybl3DMap(OpenLayers.i18n("Izometrická 3D mapa ČR"), { shortName : "kybl" }));
 
-		if(OpenLayers.Layer.cdauth.OSM.OOMStreets)
-			this.addLayer(new OpenLayers.Layer.cdauth.OSM.OOMStreets(OpenLayers.i18n("Streets overlay"), { shortName : "OOMS", visibility : false }));
-		if(OpenLayers.Layer.cdauth.OSM.OOMLabels)
-			this.addLayer(new OpenLayers.Layer.cdauth.OSM.OOMLabels(OpenLayers.i18n("Labels overlay"), { shortName : "OOML", visibility : false }));
+		this.addLayer(new OpenLayers.Layer.cdauth.OSM.OOMStreets(OpenLayers.i18n("Streets overlay"), { shortName : "OOMS", visibility : false }));
+		this.addLayer(new OpenLayers.Layer.cdauth.OSM.OOMLabels(OpenLayers.i18n("Labels overlay"), { shortName : "OOML", visibility : false }));
 	},
 
 	addAllAvailableGoogleLayers : function()
 	{
-		if(OpenLayers.Layer.cdauth.Google.Maps)
-			this.addLayer(new OpenLayers.Layer.cdauth.Google.Maps(OpenLayers.i18n("Google Streets"), { shortName : "GgSt" }));
-		if(OpenLayers.Layer.cdauth.Google.MapsSatellite)
-			this.addLayer(new OpenLayers.Layer.cdauth.Google.MapsSatellite(OpenLayers.i18n("Google Satellite"), { shortName : "GgSa" }));
-		if(OpenLayers.Layer.cdauth.Google.MapsHybrid)
-			this.addLayer(new OpenLayers.Layer.cdauth.Google.MapsHybrid(OpenLayers.i18n("Google Hybrid"), { shortName : "GgHy" }));
-		if(OpenLayers.Layer.cdauth.Google.MapsTerrain)
-			this.addLayer(new OpenLayers.Layer.cdauth.Google.MapsTerrain(OpenLayers.i18n("Google Terrain"), { shortName : "GgTe" }));
-		if(OpenLayers.Layer.cdauth.Google.MapMaker)
-			this.addLayer(new OpenLayers.Layer.cdauth.Google.MapMaker(OpenLayers.i18n("Google MapMaker"), { shortName : "GgMM" }));
-		if(OpenLayers.Layer.cdauth.Google.MapMakerHybrid)
-			this.addLayer(new OpenLayers.Layer.cdauth.Google.MapMakerHybrid(OpenLayers.i18n("Google MapMaker Hybrid"), { shortName : "GgMH" }));
+		var map = this;
+		OpenLayers.Layer.cdauth.Google.loadAPI(function() {
+			map.addLayer(new OpenLayers.Layer.cdauth.Google.Maps(OpenLayers.i18n("Google Streets"), { shortName : "GgSt" }));
+			map.addLayer(new OpenLayers.Layer.cdauth.Google.MapsSatellite(OpenLayers.i18n("Google Satellite"), { shortName : "GgSa" }));
+			map.addLayer(new OpenLayers.Layer.cdauth.Google.MapsHybrid(OpenLayers.i18n("Google Hybrid"), { shortName : "GgHy" }));
+			map.addLayer(new OpenLayers.Layer.cdauth.Google.MapsTerrain(OpenLayers.i18n("Google Terrain"), { shortName : "GgTe" }));
+			map.addLayer(new OpenLayers.Layer.cdauth.Google.MapMaker(OpenLayers.i18n("Google MapMaker"), { shortName : "GgMM" }));
+			map.addLayer(new OpenLayers.Layer.cdauth.Google.MapMakerHybrid(OpenLayers.i18n("Google MapMaker Hybrid"), { shortName : "GgMH" }));
+		});
 	},
 
 	addAllAvailableYahooLayers : function()
 	{
-		if(OpenLayers.Layer.cdauth.Yahoo.Maps)
-			this.addLayer(new OpenLayers.Layer.cdauth.Yahoo.Maps(OpenLayers.i18n("Yahoo Street"), { shortName : "YaSt" }));
-		if(OpenLayers.Layer.cdauth.Yahoo.Satellite)
-			this.addLayer(new OpenLayers.Layer.cdauth.Yahoo.Satellite(OpenLayers.i18n("Yahoo Satellite"), { shortName : "YaSa" }));
-		if(OpenLayers.Layer.cdauth.Yahoo.Hybrid)
-			this.addLayer(new OpenLayers.Layer.cdauth.Yahoo.Hybrid(OpenLayers.i18n("Yahoo Hybrid"), { shortName : "YaHy" }));
+		var map = this;
+		OpenLayers.Layer.cdauth.Yahoo.loadAPI(function() {
+			map.addLayer(new OpenLayers.Layer.cdauth.Yahoo.Maps(OpenLayers.i18n("Yahoo Street"), { shortName : "YaSt" }));
+			map.addLayer(new OpenLayers.Layer.cdauth.Yahoo.Satellite(OpenLayers.i18n("Yahoo Satellite"), { shortName : "YaSa" }));
+			map.addLayer(new OpenLayers.Layer.cdauth.Yahoo.Hybrid(OpenLayers.i18n("Yahoo Hybrid"), { shortName : "YaHy" }));
+		});
 	},
 
 	/**
@@ -385,11 +366,8 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 	*/
 	addAllAvailableLayers : function()
 	{
-		if(OpenLayers.Layer.cdauth.other.Relief)
-			this.addLayer(new OpenLayers.Layer.cdauth.other.Relief(OpenLayers.i18n("Relief"), { visibility: false, shortName : "Rlie" }));
-
-		if(OpenLayers.Layer.cdauth.other.Hiking)
-			this.addLayer(new OpenLayers.Layer.cdauth.other.Hiking(OpenLayers.i18n("Hiking symbols"), { visibility: false, shortName : "Hike" }));
+		this.addLayer(new OpenLayers.Layer.cdauth.other.Relief(OpenLayers.i18n("Relief"), { visibility: false, shortName : "Rlie" }));
+		this.addLayer(new OpenLayers.Layer.cdauth.other.Hiking(OpenLayers.i18n("Hiking symbols"), { visibility: false, shortName : "Hike" }));
 
 		this.addAllAvailableOSMLayers();
 		this.addAllAvailableGoogleLayers();
@@ -685,315 +663,318 @@ OpenLayers.Layer.cdauth = {
 	other : { }
 };
 
-if(OpenLayers.Layer.OSM)
-{
-	/**
-	 * Mapnik rendering from openstreetmap.org.
-	*/
-	OpenLayers.Layer.cdauth.OSM.Mapnik = OpenLayers.Class(OpenLayers.Layer.OSM, {
-		initialize : function(name, options) {
-			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [
-				name,
-				[ "http://a.tile.openstreetmap.org/${z}/${x}/${y}.png", "http://b.tile.openstreetmap.org/${z}/${x}/${y}.png", "http://c.tile.openstreetmap.org/${z}/${x}/${y}.png" ],
-				OpenLayers.Util.extend({ numZoomLevels: 19 }, options)
-			]);
-        },
-		CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.Mapnik"
-	});
+/**
+ * Mapnik rendering from openstreetmap.org.
+*/
+OpenLayers.Layer.cdauth.OSM.Mapnik = OpenLayers.Class(OpenLayers.Layer.OSM, {
+	initialize : function(name, options) {
+		OpenLayers.Layer.OSM.prototype.initialize.apply(this, [
+			name,
+			[ "http://a.tile.openstreetmap.org/${z}/${x}/${y}.png", "http://b.tile.openstreetmap.org/${z}/${x}/${y}.png", "http://c.tile.openstreetmap.org/${z}/${x}/${y}.png" ],
+			OpenLayers.Util.extend({ numZoomLevels: 19 }, options)
+		]);
+	},
+	CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.Mapnik"
+});
 
-	/**
-	 * Osmarender rendering from openstreetmap.org.
-	*/
-	OpenLayers.Layer.cdauth.OSM.Osmarender = OpenLayers.Class(OpenLayers.Layer.OSM, {
-		initialize : function(name, options) {
-			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [
-				name,
-				[ "http://a.tah.openstreetmap.org/Tiles/tile/${z}/${x}/${y}.png", "http://b.tah.openstreetmap.org/Tiles/tile/${z}/${x}/${y}.png", "http://c.tah.openstreetmap.org/Tiles/tile/${z}/${x}/${y}.png" ],
-				OpenLayers.Util.extend({ numZoomLevels: 18 }, options)
-			]);
-        },
-		CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.Osmarender"
-	});
+/**
+ * Osmarender rendering from openstreetmap.org.
+*/
+OpenLayers.Layer.cdauth.OSM.Osmarender = OpenLayers.Class(OpenLayers.Layer.OSM, {
+	initialize : function(name, options) {
+		OpenLayers.Layer.OSM.prototype.initialize.apply(this, [
+			name,
+			[ "http://a.tah.openstreetmap.org/Tiles/tile/${z}/${x}/${y}.png", "http://b.tah.openstreetmap.org/Tiles/tile/${z}/${x}/${y}.png", "http://c.tah.openstreetmap.org/Tiles/tile/${z}/${x}/${y}.png" ],
+			OpenLayers.Util.extend({ numZoomLevels: 18 }, options)
+		]);
+	},
+	CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.Osmarender"
+});
 
-	/**
-	 * CycleMap rendering from openstreetmap.org.
-	*/
-	OpenLayers.Layer.cdauth.OSM.CycleMap = OpenLayers.Class(OpenLayers.Layer.OSM, {
-		initialize : function(name, options) {
-			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [
-				name,
-				[ "http://a.andy.sandbox.cloudmade.com/tiles/cycle/${z}/${x}/${y}.png", "http://b.andy.sandbox.cloudmade.com/tiles/cycle/${z}/${x}/${y}.png", "http://c.andy.sandbox.cloudmade.com/tiles/cycle/${z}/${x}/${y}.png" ],
-				OpenLayers.Util.extend({
-					numZoomLevels: 19,
-					attribution: OpenLayers.String.format(OpenLayers.i18n("attribution-osm"), { rendering: "<a href=\"http://www.opencyclemap.org/\">OpenCycleMap</a>" })
-				}, options)
-			]);
-        },
-		CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.CycleMap"
-	});
+/**
+ * CycleMap rendering from openstreetmap.org.
+*/
+OpenLayers.Layer.cdauth.OSM.CycleMap = OpenLayers.Class(OpenLayers.Layer.OSM, {
+	initialize : function(name, options) {
+		OpenLayers.Layer.OSM.prototype.initialize.apply(this, [
+			name,
+			[ "http://a.andy.sandbox.cloudmade.com/tiles/cycle/${z}/${x}/${y}.png", "http://b.andy.sandbox.cloudmade.com/tiles/cycle/${z}/${x}/${y}.png", "http://c.andy.sandbox.cloudmade.com/tiles/cycle/${z}/${x}/${y}.png" ],
+			OpenLayers.Util.extend({
+				numZoomLevels: 19,
+				attribution: OpenLayers.String.format(OpenLayers.i18n("attribution-osm"), { rendering: "<a href=\"http://www.opencyclemap.org/\">OpenCycleMap</a>" })
+			}, options)
+		]);
+	},
+	CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.CycleMap"
+});
 
-	/**
-	 * OpenStreetBrowser rendering of OpenStreetMap data. See http://openstreetbrowser.org/.
-	*/
-	OpenLayers.Layer.cdauth.OSM.OpenStreetBrowser = OpenLayers.Class(OpenLayers.Layer.OSM, {
-		initialize: function(name, options) {
-			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://www.openstreetbrowser.org/tiles/base/${z}/${x}/${y}.png", OpenLayers.Util.extend({numZoomLevels: 19, attribution: OpenLayers.String.format(OpenLayers.i18n("attribution-osm"), { rendering: "<a href=\"http://www.openstreetbrowser.org/\">OpenStreetBrowser</a>" })}, options) ]);
-		},
-		CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.OpenStreetBrowser"
-	});
+/**
+ * OpenStreetBrowser rendering of OpenStreetMap data. See http://openstreetbrowser.org/.
+*/
+OpenLayers.Layer.cdauth.OSM.OpenStreetBrowser = OpenLayers.Class(OpenLayers.Layer.OSM, {
+	initialize: function(name, options) {
+		OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://www.openstreetbrowser.org/tiles/base/${z}/${x}/${y}.png", OpenLayers.Util.extend({numZoomLevels: 19, attribution: OpenLayers.String.format(OpenLayers.i18n("attribution-osm"), { rendering: "<a href=\"http://www.openstreetbrowser.org/\">OpenStreetBrowser</a>" })}, options) ]);
+	},
+	CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.OpenStreetBrowser"
+});
 
-	/**
-	 * OpenPisteMap rendering of OpenStreetMap data. See http://openpistemap.org/.
-	*/
-	OpenLayers.Layer.cdauth.OSM.OpenPisteMap = OpenLayers.Class(OpenLayers.Layer.OSM, {
-		initialize: function(name, options) {
-			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://tiles.openpistemap.org/contours/${z}/${x}/${y}.png", OpenLayers.Util.extend({numZoomLevels: 18, attribution: OpenLayers.String.format(OpenLayers.i18n("attribution-osm"), { rendering: "<a href=\"http://www.openpistemap.org/\">OpenPisteMap</a>" })}, options) ]);
-		},
-		CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.OpenPisteMap"
-	});
+/**
+ * OpenPisteMap rendering of OpenStreetMap data. See http://openpistemap.org/.
+*/
+OpenLayers.Layer.cdauth.OSM.OpenPisteMap = OpenLayers.Class(OpenLayers.Layer.OSM, {
+	initialize: function(name, options) {
+		OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://tiles.openpistemap.org/contours/${z}/${x}/${y}.png", OpenLayers.Util.extend({numZoomLevels: 18, attribution: OpenLayers.String.format(OpenLayers.i18n("attribution-osm"), { rendering: "<a href=\"http://www.openpistemap.org/\">OpenPisteMap</a>" })}, options) ]);
+	},
+	CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.OpenPisteMap"
+});
 
-	/**
-	 * OSM Reit- und Wanderkarte rendering of OSM foot- and bridle ways. See http://osmc.broadbox.de/.
-	*/
-	OpenLayers.Layer.cdauth.OSM.Wanderkarte = OpenLayers.Class(OpenLayers.Layer.OSM, {
-		initialize: function(name, options) {
-			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://topo.geofabrik.de/trails/${z}/${x}/${y}.png", OpenLayers.Util.extend({minZoomLevel: 8, maxZoomLevel: 15, attribution: OpenLayers.String.format(OpenLayers.i18n("attribution-osm"), { rendering: "<a href=\"http://osmc.broadbox.de/\">OSMC Reit- und Wanderkarte</a>" })}, options) ]);
-		},
-		CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.Wanderkarte"
-	});
+/**
+ * OSM Reit- und Wanderkarte rendering of OSM foot- and bridle ways. See http://osmc.broadbox.de/.
+*/
+OpenLayers.Layer.cdauth.OSM.Wanderkarte = OpenLayers.Class(OpenLayers.Layer.OSM, {
+	initialize: function(name, options) {
+		OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://topo.geofabrik.de/trails/${z}/${x}/${y}.png", OpenLayers.Util.extend({minZoomLevel: 8, maxZoomLevel: 15, attribution: OpenLayers.String.format(OpenLayers.i18n("attribution-osm"), { rendering: "<a href=\"http://osmc.broadbox.de/\">OSMC Reit- und Wanderkarte</a>" })}, options) ]);
+	},
+	CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.Wanderkarte"
+});
 
-	/**
-	 * Hike & Bike Map (http://hikebikemap.de/)
-	*/
-	OpenLayers.Layer.cdauth.OSM.HikeAndBike = OpenLayers.Class(OpenLayers.Layer.OSM, {
-		initialize: function(name, options) {
-			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://toolserver.org/tiles/hikebike/${z}/${x}/${y}.png", OpenLayers.Util.extend({attribution: OpenLayers.String.format(OpenLayers.i18n("attribution-osm"), { rendering: "<a href=\"http://hikebikemap.de/\">Hike &amp; Bike Map</a>" })}, options) ]);
-		}
-	});
-
-	/**
-	 * OpenStreetMap data rendering by ÖPNV-Karte (PSV map).
-	*/
-	OpenLayers.Layer.cdauth.OSM.OPNVKarte = OpenLayers.Class(OpenLayers.Layer.OSM, {
-		initialize: function(name, options) {
-			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://tile.xn--pnvkarte-m4a.de/tilegen/${z}/${x}/${y}.png", OpenLayers.Util.extend({numZoomLevels: 19, attribution: OpenLayers.String.format(OpenLayers.i18n("attribution-osm"), { rendering: "<a href=\"http://www.xn--pnvkarte-m4a.de/\">ÖPNV-Karte</a>" })}, options) ]);
-		},
-		CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.OPNVKarte"
-	});
-
-	/**
-	 * Parent class for MapSurfer (http://www.mapsurfer.net/) renderings.
-	*/
-	OpenLayers.Layer.cdauth.OSM.MapSurfer = OpenLayers.Class(OpenLayers.Layer.OSM, {
-		attribution : OpenLayers.String.format(OpenLayers.i18n("attribution-osm"), { rendering: "<a href=\"http://www.mapsurfer.net/\">MapSurfer</a>" }),
-		CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.MapSurfer"
-	});
-
-	/**
-	 * MapSurfer road map.
-	*/
-	OpenLayers.Layer.cdauth.OSM.MapSurfer.Road = OpenLayers.Class(OpenLayers.Layer.cdauth.OSM.MapSurfer, {
-		initialize : function(name, options) {
-			OpenLayers.Layer.cdauth.OSM.MapSurfer.prototype.initialize.apply(this, [ name, "http://tiles1.mapsurfer.net/tms_r.ashx?x=${x}&y=${y}&z=${z}", options ]);
-		},
-		CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.MapSurfer.Road"
-	});
-
-	/**
-	 * MapSurfer topographic map.
-	*/
-	OpenLayers.Layer.cdauth.OSM.MapSurfer.Topographic = OpenLayers.Class(OpenLayers.Layer.cdauth.OSM.MapSurfer, {
-		initialize : function(name, options) {
-			OpenLayers.Layer.cdauth.OSM.MapSurfer.prototype.initialize.apply(this, [ name, "http://tiles2.mapsurfer.net/tms_t.ashx?x=${x}&y=${y}&z=${z}", options ]);
-		},
-		CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.MapSurfer.Topographic"
-	});
-
-	/**
-	 * Izometrická 3D mapa ČR (http://osm.kyblsoft.cz/3dmapa/).
-	*/
-	OpenLayers.Layer.cdauth.OSM.Kybl3DMap = OpenLayers.Class(OpenLayers.Layer.OSM, {
-		attribution : OpenLayers.String.format(OpenLayers.i18n("attribution-osm"), { rendering: "<a href=\"http://osm.kyblsoft.cz/3dmapa/\">OpenKyblMap</a>" }),
-		initialize : function(name, options) {
-			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://osm.kyblsoft.cz/3dmapa/tiles/${z}/${x}/${y}.jpg", OpenLayers.Util.extend({ numZoomLevels: 18 }, options) ]);
-		},
-		CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.Kybl3DMap"
-	});
-
-	/**
-	 * OpenOrienteeringMap (http://oobrien.com/oom/) Street-O overlay.
-	*/
-	OpenLayers.Layer.cdauth.OSM.OOMStreets = OpenLayers.Class(OpenLayers.Layer.OSM, {
-		attribution : OpenLayers.i18n("attribution-oom-streets"),
-		initialize : function(name, options) {
-			// New world-wide tiles. Aren’t transparent anymore so not as good for using them as an overlay as the old ones. See http://www.openstreetmap.org/user/Ollie/diary/9223.
-			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://tiler1.censusprofiler.org/streeto/${z}/${x}/${y}.png", OpenLayers.Util.extend({ numZoomLevels: 19, isBaseLayer: false, opacity:0.25 }, options) ]);
-		},
-		CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.OOMStreets"
-	});
-
-	/**
-	 * OpenOrienteeringMap (http://oobrien.com/oom/) names overlay.
-	*/
-	OpenLayers.Layer.cdauth.OSM.OOMLabels = OpenLayers.Class(OpenLayers.Layer.OSM, {
-		attribution : OpenLayers.i18n("attribution-oom-labels"),
-		initialize : function(name, options) {
-			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://tiler1.censusprofiler.org/labelsonly/${z}/${x}/${y}.png", OpenLayers.Util.extend({ numZoomLevels: 19, isBaseLayer: false }, options) ]);
-		},
-		CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.OOMLabels"
-	});
-
-	/**
-	 * Relief rendering from Hike & Bike map (http://hikebikemap.de/)
-	*/
-	OpenLayers.Layer.cdauth.other.Relief = OpenLayers.Class(OpenLayers.Layer.OSM, {
-		initialize: function(name, options) {
-			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://toolserver.org/~cmarqu/hill/${z}/${x}/${y}.png", OpenLayers.Util.extend({isBaseLayer: false, attribution: OpenLayers.i18n("attribution-relief") }, options) ]);
-		},
-		CLASS_NAME : "OpenLayers.Layer.cdauth.other.Relief"
-	});
-
-	/**
-	 * Hiking symbol overlay by Lonvia (http://osm.lonvia.de/)
-	*/
-	OpenLayers.Layer.cdauth.other.Hiking = OpenLayers.Class(OpenLayers.Layer.OSM, {
-		initialize: function(name, options) {
-			OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://osm.lonvia.de/hiking/${z}/${x}/${y}.png", OpenLayers.Util.extend({ isBaseLayer: false, attribution: OpenLayers.i18n("attribution-hiking") }, options) ]);
-		}
-	});
-}
-
-if(OpenLayers.Layer.Google && typeof GMap2 != "undefined")
-{
-	/**
-	 * Google Streets (http://maps.google.com/)
-	 * Get a Google map key from http://code.google.com/apis/maps/signup.html and include
-	 * http://maps.google.com/maps?file=api&v=2&key=[Your key] for this to work.
-	*/
-	OpenLayers.Layer.cdauth.Google.Maps = OpenLayers.Class(OpenLayers.Layer.Google, {
-		initialize: function(name, options) {
-			OpenLayers.Layer.Google.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({sphericalMercator: true}, options) ]);
-		},
-		CLASS_NAME : "OpenLayers.Layer.cdauth.Google.Maps"
-	});
-
-	/**
-	 * Google Satellite (http://maps.google.com/)
-	 * Get a Google map key from http://code.google.com/apis/maps/signup.html and include
-	 * http://maps.google.com/maps?file=api&v=2&key=[Your key] for this to work.
-	*/
-	if(typeof G_SATELLITE_MAP != "undefined")
-	{
-		OpenLayers.Layer.cdauth.Google.MapsSatellite = OpenLayers.Class(OpenLayers.Layer.cdauth.Google.Maps, {
-			initialize: function(name, options) {
-				OpenLayers.Layer.cdauth.Google.Maps.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({type: G_SATELLITE_MAP, numZoomLevels: 22}, options) ]);
-			},
-			CLASS_NAME : "OpenLayers.Layer.cdauth.Google.MapsSatellite"
-		});
+/**
+ * Hike & Bike Map (http://hikebikemap.de/)
+*/
+OpenLayers.Layer.cdauth.OSM.HikeAndBike = OpenLayers.Class(OpenLayers.Layer.OSM, {
+	initialize: function(name, options) {
+		OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://toolserver.org/tiles/hikebike/${z}/${x}/${y}.png", OpenLayers.Util.extend({attribution: OpenLayers.String.format(OpenLayers.i18n("attribution-osm"), { rendering: "<a href=\"http://hikebikemap.de/\">Hike &amp; Bike Map</a>" })}, options) ]);
 	}
+});
 
-	/**
-	 * Google Hybrid (Streets and Satellite) (http://maps.google.com/)
-	 * Get a Google map key from http://code.google.com/apis/maps/signup.html and include
-	 * http://maps.google.com/maps?file=api&v=2&key=[Your key] for this to work.
-	*/
-	if(typeof G_HYBRID_MAP != "undefined")
-	{
-		OpenLayers.Layer.cdauth.Google.MapsHybrid = OpenLayers.Class(OpenLayers.Layer.cdauth.Google.Maps, {
-			initialize: function(name, options) {
-				OpenLayers.Layer.cdauth.Google.Maps.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({type: G_HYBRID_MAP}, options) ]);
-			},
-			CLASS_NAME : "OpenLayers.Layer.cdauth.Google.MapsHybrid"
-		});
+/**
+ * OpenStreetMap data rendering by ÖPNV-Karte (PSV map).
+*/
+OpenLayers.Layer.cdauth.OSM.OPNVKarte = OpenLayers.Class(OpenLayers.Layer.OSM, {
+	initialize: function(name, options) {
+		OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://tile.xn--pnvkarte-m4a.de/tilegen/${z}/${x}/${y}.png", OpenLayers.Util.extend({numZoomLevels: 19, attribution: OpenLayers.String.format(OpenLayers.i18n("attribution-osm"), { rendering: "<a href=\"http://www.xn--pnvkarte-m4a.de/\">ÖPNV-Karte</a>" })}, options) ]);
+	},
+	CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.OPNVKarte"
+});
+
+/**
+ * Parent class for MapSurfer (http://www.mapsurfer.net/) renderings.
+*/
+OpenLayers.Layer.cdauth.OSM.MapSurfer = OpenLayers.Class(OpenLayers.Layer.OSM, {
+	attribution : OpenLayers.String.format(OpenLayers.i18n("attribution-osm"), { rendering: "<a href=\"http://www.mapsurfer.net/\">MapSurfer</a>" }),
+	CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.MapSurfer"
+});
+
+/**
+ * MapSurfer road map.
+*/
+OpenLayers.Layer.cdauth.OSM.MapSurfer.Road = OpenLayers.Class(OpenLayers.Layer.cdauth.OSM.MapSurfer, {
+	initialize : function(name, options) {
+		OpenLayers.Layer.cdauth.OSM.MapSurfer.prototype.initialize.apply(this, [ name, "http://tiles1.mapsurfer.net/tms_r.ashx?x=${x}&y=${y}&z=${z}", options ]);
+	},
+	CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.MapSurfer.Road"
+});
+
+/**
+ * MapSurfer topographic map.
+*/
+OpenLayers.Layer.cdauth.OSM.MapSurfer.Topographic = OpenLayers.Class(OpenLayers.Layer.cdauth.OSM.MapSurfer, {
+	initialize : function(name, options) {
+		OpenLayers.Layer.cdauth.OSM.MapSurfer.prototype.initialize.apply(this, [ name, "http://tiles2.mapsurfer.net/tms_t.ashx?x=${x}&y=${y}&z=${z}", options ]);
+	},
+	CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.MapSurfer.Topographic"
+});
+
+/**
+ * Izometrická 3D mapa ČR (http://osm.kyblsoft.cz/3dmapa/).
+*/
+OpenLayers.Layer.cdauth.OSM.Kybl3DMap = OpenLayers.Class(OpenLayers.Layer.OSM, {
+	attribution : OpenLayers.String.format(OpenLayers.i18n("attribution-osm"), { rendering: "<a href=\"http://osm.kyblsoft.cz/3dmapa/\">OpenKyblMap</a>" }),
+	initialize : function(name, options) {
+		OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://osm.kyblsoft.cz/3dmapa/tiles/${z}/${x}/${y}.jpg", OpenLayers.Util.extend({ numZoomLevels: 18 }, options) ]);
+	},
+	CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.Kybl3DMap"
+});
+
+/**
+ * OpenOrienteeringMap (http://oobrien.com/oom/) Street-O overlay.
+*/
+OpenLayers.Layer.cdauth.OSM.OOMStreets = OpenLayers.Class(OpenLayers.Layer.OSM, {
+	attribution : OpenLayers.i18n("attribution-oom-streets"),
+	initialize : function(name, options) {
+		// New world-wide tiles. Aren’t transparent anymore so not as good for using them as an overlay as the old ones. See http://www.openstreetmap.org/user/Ollie/diary/9223.
+		OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://tiler1.censusprofiler.org/streeto/${z}/${x}/${y}.png", OpenLayers.Util.extend({ numZoomLevels: 19, isBaseLayer: false, opacity:0.25 }, options) ]);
+	},
+	CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.OOMStreets"
+});
+
+/**
+ * OpenOrienteeringMap (http://oobrien.com/oom/) names overlay.
+*/
+OpenLayers.Layer.cdauth.OSM.OOMLabels = OpenLayers.Class(OpenLayers.Layer.OSM, {
+	attribution : OpenLayers.i18n("attribution-oom-labels"),
+	initialize : function(name, options) {
+		OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://tiler1.censusprofiler.org/labelsonly/${z}/${x}/${y}.png", OpenLayers.Util.extend({ numZoomLevels: 19, isBaseLayer: false }, options) ]);
+	},
+	CLASS_NAME : "OpenLayers.Layer.cdauth.OSM.OOMLabels"
+});
+
+/**
+ * Relief rendering from Hike & Bike map (http://hikebikemap.de/)
+*/
+OpenLayers.Layer.cdauth.other.Relief = OpenLayers.Class(OpenLayers.Layer.OSM, {
+	initialize: function(name, options) {
+		OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://toolserver.org/~cmarqu/hill/${z}/${x}/${y}.png", OpenLayers.Util.extend({isBaseLayer: false, attribution: OpenLayers.i18n("attribution-relief") }, options) ]);
+	},
+	CLASS_NAME : "OpenLayers.Layer.cdauth.other.Relief"
+});
+
+/**
+ * Hiking symbol overlay by Lonvia (http://osm.lonvia.de/)
+*/
+OpenLayers.Layer.cdauth.other.Hiking = OpenLayers.Class(OpenLayers.Layer.OSM, {
+	initialize: function(name, options) {
+		OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://osm.lonvia.de/hiking/${z}/${x}/${y}.png", OpenLayers.Util.extend({ isBaseLayer: false, attribution: OpenLayers.i18n("attribution-hiking") }, options) ]);
 	}
+});
 
-	/**
-	 * Google Terrain (http://maps.google.com/)
-	 * Get a Google map key from http://code.google.com/apis/maps/signup.html and include
-	 * http://maps.google.com/maps?file=api&v=2&key=[Your key] for this to work.
-	*/
-	if(typeof G_PHYSICAL_MAP != "undefined")
-	{
-		OpenLayers.Layer.cdauth.Google.MapsTerrain = OpenLayers.Class(OpenLayers.Layer.cdauth.Google.Maps, {
-			initialize: function(name, options) {
-				OpenLayers.Layer.cdauth.Google.Maps.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({type: G_PHYSICAL_MAP}, options) ]);
-			},
-			CLASS_NAME : "OpenLayers.Layer.cdauth.Google.MapsTerrain"
-		});
-	}
+/**
+ * Set this to your Google Maps API key (http://code.google.com/apis/maps/signup.html) prior to adding the Google layers
+ * to your map. In theory, this will asynchronously include the API JavaScript file as soon as the Google layers
+ * are added to the map using {@link OpenLayers.Map.cdauth.addAllAvailableGoogleLayers()}. In practice, it is
+ * currently impossible to do that because the Google Maps API relies on document.write(), so you have to leave this value null.
+ * You still have to include the JavaScript file http://maps.google.com/maps?file=api&v=2&key=[Your key] manually,
+ * but you can do that after adding the Google Layers, they will then be added as soon as the API is loaded.
+ * @var String
+*/
+OpenLayers.Layer.cdauth.Google.API_KEY = null;
 
-	/**
-	 * Google MapMaker streets (http://www.google.com/mapmaker)
-	 * Get a Google map key from http://code.google.com/apis/maps/signup.html and include
-	 * http://maps.google.com/maps?file=api&v=2&key=[Your key] for this to work.
-	*/
-	if(typeof G_MAPMAKER_NORMAL_MAP != "undefined")
-	{
-		OpenLayers.Layer.cdauth.Google.MapMaker = OpenLayers.Class(OpenLayers.Layer.cdauth.Google.Maps, {
-			initialize: function(name, options) {
-				OpenLayers.Layer.cdauth.Google.Maps.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({type: G_MAPMAKER_NORMAL_MAP}, options) ]);
-			},
-			CLASS_NAME : "OpenLayers.Layer.cdauth.Google.MapMaker"
-		});
-	}
+/**
+ * Loads the Google Maps API with the API key set in {@link OpenLayers.Layer.cdauth.Google.API_KEY} and calls the given callback
+ * function as soon as it’s loaded.
+ * @param Function callback
+ * @return void
+*/
+OpenLayers.Layer.cdauth.Google.loadAPI = function(callback) {
+	var url = null;
+	if(OpenLayers.Layer.cdauth.Google.API_KEY != null)
+		url = "http://maps.google.com/maps?file=api&v=2&key="+encodeURIComponent(OpenLayers.Layer.cdauth.Google.API_KEY);
+	loadJavaScript(url, function() { return window.GMap2 != undefined; }, callback);
+};
 
-	/**
-	 * Google MapMaker hybrid (streets and satellite) (http://www.google.com/mapmaker)
-	 * Get a Google map key from http://code.google.com/apis/maps/signup.html and include
-	 * http://maps.google.com/maps?file=api&v=2&key=[Your key] for this to work.
-	*/
-	if(typeof G_MAPMAKER_HYBRID_MAP != "undefined")
-	{
-		OpenLayers.Layer.cdauth.Google.MapMakerHybrid = OpenLayers.Class(OpenLayers.Layer.cdauth.Google.Maps, {
-			initialize: function(name, options) {
-				OpenLayers.Layer.cdauth.Google.Maps.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({type: G_MAPMAKER_HYBRID_MAP}, options) ]);
-			},
-			CLASS_NAME : "OpenLayers.Layer.cdauth.Google.MapMakerHybrid"
-		});
-	}
-}
+/**
+ * Google Streets (http://maps.google.com/)
+*/
+OpenLayers.Layer.cdauth.Google.Maps = OpenLayers.Class(OpenLayers.Layer.Google, {
+	initialize: function(name, options) {
+		OpenLayers.Layer.Google.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({sphericalMercator: true}, options) ]);
+	},
+	CLASS_NAME : "OpenLayers.Layer.cdauth.Google.Maps"
+});
 
-if(OpenLayers.Layer.Yahoo && typeof YMap != "undefined")
-{
-	/**
-	 * Yahoo Streets (http://maps.yahoo.com/)
-	 * Include http://api.maps.yahoo.com/ajaxymap?v=3.0&appid=cdauths-map for this to work.
-	*/
-	OpenLayers.Layer.cdauth.Yahoo.Maps = OpenLayers.Class(OpenLayers.Layer.Yahoo, {
-		initialize: function(name, options) {
-			OpenLayers.Layer.Yahoo.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({sphericalMercator: true}, options) ]);
-		},
-		CLASS_NAME : "OpenLayers.Layer.cdauth.Yahoo.Maps"
-	});
+/**
+ * Google Satellite (http://maps.google.com/)
+*/
+OpenLayers.Layer.cdauth.Google.MapsSatellite = OpenLayers.Class(OpenLayers.Layer.cdauth.Google.Maps, {
+	initialize: function(name, options) {
+		OpenLayers.Layer.cdauth.Google.Maps.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({type: G_SATELLITE_MAP, numZoomLevels: 22}, options) ]);
+	},
+	CLASS_NAME : "OpenLayers.Layer.cdauth.Google.MapsSatellite"
+});
 
-	/**
-	 * Yahoo Satellite (http://maps.yahoo.com/)
-	 * Include http://api.maps.yahoo.com/ajaxymap?v=3.0&appid=cdauths-map for this to work.
-	*/
-	if(typeof YAHOO_MAP_SAT != "undefined")
-	{
-		OpenLayers.Layer.cdauth.Yahoo.Satellite = OpenLayers.Class(OpenLayers.Layer.cdauth.Yahoo.Maps, {
-			initialize: function(name, options) {
-				OpenLayers.Layer.cdauth.Yahoo.Maps.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({type: YAHOO_MAP_SAT}, options) ]);
-			},
-			CLASS_NAME : "OpenLayers.Layer.cdauth.Yahoo.Satellite"
-		});
-	}
+/**
+ * Google Hybrid (Streets and Satellite) (http://maps.google.com/)
+*/
+OpenLayers.Layer.cdauth.Google.MapsHybrid = OpenLayers.Class(OpenLayers.Layer.cdauth.Google.Maps, {
+	initialize: function(name, options) {
+		OpenLayers.Layer.cdauth.Google.Maps.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({type: G_HYBRID_MAP}, options) ]);
+	},
+	CLASS_NAME : "OpenLayers.Layer.cdauth.Google.MapsHybrid"
+});
 
-	/**
-	 * Yahoo Hybrid (Streets and Satellite)
-	 * Include http://api.maps.yahoo.com/ajaxymap?v=3.0&appid=cdauths-map for this to work.
-	*/
-	if(typeof YAHOO_MAP_HYB != "undefined")
-	{
-		OpenLayers.Layer.cdauth.Yahoo.Hybrid = OpenLayers.Class(OpenLayers.Layer.cdauth.Yahoo.Maps, {
-			initialize: function(name, options) {
-				OpenLayers.Layer.cdauth.Yahoo.Maps.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({type: YAHOO_MAP_HYB}, options) ]);
-			},
-			CLASS_NAME : "OpenLayers.Layer.cdauth.Yahoo.Hybrid"
-		});
-	}
-}
+/**
+ * Google Terrain (http://maps.google.com/)
+*/
+OpenLayers.Layer.cdauth.Google.MapsTerrain = OpenLayers.Class(OpenLayers.Layer.cdauth.Google.Maps, {
+	initialize: function(name, options) {
+		OpenLayers.Layer.cdauth.Google.Maps.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({type: G_PHYSICAL_MAP}, options) ]);
+	},
+	CLASS_NAME : "OpenLayers.Layer.cdauth.Google.MapsTerrain"
+});
+
+/**
+ * Google MapMaker streets (http://www.google.com/mapmaker)
+*/
+OpenLayers.Layer.cdauth.Google.MapMaker = OpenLayers.Class(OpenLayers.Layer.cdauth.Google.Maps, {
+	initialize: function(name, options) {
+		OpenLayers.Layer.cdauth.Google.Maps.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({type: G_MAPMAKER_NORMAL_MAP}, options) ]);
+	},
+	CLASS_NAME : "OpenLayers.Layer.cdauth.Google.MapMaker"
+});
+
+/**
+ * Google MapMaker hybrid (streets and satellite) (http://www.google.com/mapmaker)
+*/
+OpenLayers.Layer.cdauth.Google.MapMakerHybrid = OpenLayers.Class(OpenLayers.Layer.cdauth.Google.Maps, {
+	initialize: function(name, options) {
+		OpenLayers.Layer.cdauth.Google.Maps.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({type: G_MAPMAKER_HYBRID_MAP}, options) ]);
+	},
+	CLASS_NAME : "OpenLayers.Layer.cdauth.Google.MapMakerHybrid"
+});
+
+/**
+ * Set this to your Yahoo Maps App ID (which is any string you want) prior to adding the Yahoo layers
+ * to your map. In theory, this will asynchronously include the API JavaScript file as soon as the Yahoo layers
+ * are added to the map using {@link OpenLayers.Map.cdauth.addAllAvailableYahooLayers()}. In practice, it is
+ * currently impossible to do that because the Yahoo Maps API relies on document.write(), so you have to leave this value null.
+ * You still have to include the JavaScript file http://api.maps.yahoo.com/ajaxymap?v=3.0&appid=[Your App ID] manually,
+ * but you can do that after adding the Yahoo Layers, they will then be added as soon as the API is loaded.
+ * @var String
+*/
+OpenLayers.Layer.cdauth.Yahoo.APPID = null;
+
+/**
+ * Loads the Yahoo Maps API with the App ID set in {@link OpenLayers.Layer.cdauth.Yahoo.APPID} and calls the given callback
+ * function as soon as it’s loaded.
+ * @param Function callback
+ * @return void
+*/
+OpenLayers.Layer.cdauth.Yahoo.loadAPI = function(callback) {
+	var url = null;
+	if(OpenLayers.Layer.cdauth.Yahoo.APPID != null)
+		url = "http://api.maps.yahoo.com/ajaxymap?v=3.0&appid="+encodeURIComponent(OpenLayers.Layer.cdauth.Yahoo.APPID);
+	loadJavaScript(url, function() { return window.YMap != undefined; }, callback);
+};
+
+/**
+ * Yahoo Streets (http://maps.yahoo.com/)
+*/
+OpenLayers.Layer.cdauth.Yahoo.Maps = OpenLayers.Class(OpenLayers.Layer.Yahoo, {
+	initialize: function(name, options) {
+		OpenLayers.Layer.Yahoo.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({sphericalMercator: true}, options) ]);
+	},
+	CLASS_NAME : "OpenLayers.Layer.cdauth.Yahoo.Maps"
+});
+
+/**
+ * Yahoo Satellite (http://maps.yahoo.com/)
+*/
+OpenLayers.Layer.cdauth.Yahoo.Satellite = OpenLayers.Class(OpenLayers.Layer.cdauth.Yahoo.Maps, {
+	initialize: function(name, options) {
+		OpenLayers.Layer.cdauth.Yahoo.Maps.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({type: YAHOO_MAP_SAT}, options) ]);
+	},
+	CLASS_NAME : "OpenLayers.Layer.cdauth.Yahoo.Satellite"
+});
+
+/**
+ * Yahoo Hybrid (Streets and Satellite)
+*/
+OpenLayers.Layer.cdauth.Yahoo.Hybrid = OpenLayers.Class(OpenLayers.Layer.cdauth.Yahoo.Maps, {
+	initialize: function(name, options) {
+		OpenLayers.Layer.cdauth.Yahoo.Maps.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({type: YAHOO_MAP_HYB}, options) ]);
+	},
+	CLASS_NAME : "OpenLayers.Layer.cdauth.Yahoo.Hybrid"
+});
 
 /**
  * Extends a FramedCloud with various useful features. An event is triggered during closing instead of passing the callback function
@@ -2525,6 +2506,72 @@ function changeOpacity(el, opacity, ms)
 			changeOpacity.timeouts[timeoutObj] = undefined;
 	};
 	callback();
+}
+
+/**
+ * Loads a JavaScript file and then calls a callback function. Another callback function has to be provided that
+ * checks if the JavaScript file has been loaded (for example by checking whether a variable set there exists)
+ * and returns true in that case. In case a JavaScript file with the same URL has already been loaded, the
+ * success callback function will be called immediately without loading the JavaScript file for a second time.
+ * If the loadCheck function is ommitted, the success function will not be called.
+ * @var String url The URL of the JavaScript file. If null, no URL will be loaded but the success function will still be called.
+ * @var Function loadCheck A function that returns true if the JavaScript file has been loaded or null.
+ * @var Function success A function that will be called once the loadCheck function returns true for the first time.
+*/
+function loadJavaScript(url, loadCheck, success)
+{
+	var load = true;
+	if(url == null || (loadCheck != null && loadCheck()))
+		load = false;
+	else
+	{
+		var scripts = document.getElementsByTagName("script");
+		for(var i=0; i<scripts.length; i++)
+		{
+			if(makeAbsoluteURL(scripts[i].src) == makeAbsoluteURL(url))
+			{
+				load = false;
+				break;
+			}
+		}
+	}
+
+	if(load)
+	{
+		var scriptTag = document.createElement("script");
+		scriptTag.type = "text/javascript";
+		scriptTag.src = url;
+		document.getElementsByTagName("head")[0].appendChild(scriptTag);
+	}
+
+	if(loadCheck != null && success != null)
+	{
+		var callback = function(nextWait) {
+			if(loadCheck())
+				success();
+			else
+			{
+				var newWait = nextWait*2;
+				if(newWait > 10000)
+					newWait = 10000;
+				setTimeout(function(){ callback(newWait); }, nextWait);
+			}
+		};
+		callback(10);
+	}
+}
+
+/**
+ * Convert a relative URL to an absolute URL.
+ * @param String url
+ * @return String
+*/
+function makeAbsoluteURL(url)
+{
+	// See http://stackoverflow.com/questions/470832/getting-an-absolute-url-from-a-relative-one-ie6-issue/472729#472729
+	var el = document.createElement("div");
+	el.innerHTML = "<a href=\"" + url.replace("&", "&amp;").replace("\"", "&quot;").replace("<", "&lt;").replace(">", "&gt;") + "\">x</a>";
+	return el.firstChild.href;
 }
 
 function alert_r(data)
