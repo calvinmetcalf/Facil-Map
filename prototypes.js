@@ -153,8 +153,7 @@ OpenLayers.Class.isPrototype = OpenLayers.cdauthBackup.Class.isPrototype;
 
 // Make use of ajax-proxy (http://gitorious.org/ajax-proxy/ajax-proxy)
 // Include http://osm.cdauth.eu/ajax-proxy/ajax-proxy.js to "disable" the Same Origin Policy.
-if(window.AjaxProxyXMLHttpRequest != undefined)
-	OpenLayers.Request.XMLHttpRequest = AjaxProxyXMLHttpRequest;
+loadJavaScript("http://osm.cdauth.eu/ajax-proxy/ajax-proxy.js", function() { return window.AjaxProxyXMLHttpRequest != undefined; }, function() { OpenLayers.Request.XMLHttpRequest = AjaxProxyXMLHttpRequest; });
 
 // Fix displayClass in OpenLayers Controls to also use parent class names
 OpenLayers.cdauthBackup.Control = {
