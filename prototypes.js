@@ -51,6 +51,7 @@ OpenLayers.Lang.en = OpenLayers.Util.extend(OpenLayers.Lang.en, {
 	"attribution-oom-labels" : "Labels overlay CC-by-SA by <a href=\"http://oobrien.com/oom/\">OpenOrienteeringMap</a>/<a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a> data",
 	"attribution-routing-yours" : "Routing CC-by-SA by <a href=\"http://www.yournavigation.org/\"><acronym title=\"Yet Another OpenStreetMap Routing Service\">YOURS</acronym></a>/<a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a> data",
 	"attribution-routing-cloudmade" : "Routing CC-by-SA by <a href=\"http://cloudmade.com/\">CloudMade</a>/<a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a> data",
+	"attribution-routing-mapquest" : "Routing CC-by-SA by <a href=\"http://open.mapquest.co.uk/\">MapQuest Open</a>/<a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a> data",
 	"Create a marker" : "Create a marker",
 	"Coordinates" : "Coordinates",
 	"unknown" : "unknown",
@@ -100,6 +101,7 @@ OpenLayers.Lang.de = OpenLayers.Util.extend(OpenLayers.Lang.de, {
 	"attribution-oom-labels" : "Beschriftungen von <a href=\"http://oobrien.com/oom/\">OpenOrienteeringMap</a> (<a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>-Daten, CC-by-SA)",
 	"attribution-routing-yours" : "Route von <a href=\"http://www.yournavigation.org/\"><acronym title=\"Yet Another OpenStreetMap Routing Service\">YOURS</acronym></a> (<a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>-Daten, CC-by-SA)",
 	"attribution-routing-cloudmade" : "Route von <a href=\"http://cloudmade.com/\">CloudMade</a> (<a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>-Daten, CC-by-SA)",
+	"attribution-routing-mapquest" : "Route von <a href=\"http://open.mapquest.co.uk/\">MapQuest Open</a> (<a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>-Daten, CC-by-SA)",
 	"Create a marker" : "Marker anlegen",
 	"Coordinates" : "Koordinaten",
 	"unknown" : "unbekannt",
@@ -1695,6 +1697,7 @@ OpenLayers.Layer.cdauth.XML = OpenLayers.Class(OpenLayers.Layer.GML, {
 					break;
 				case "osm": this.format = OpenLayers.Format.OSM; break;
 				case "kml": this.format = OpenLayers.Format.KML; break;
+				case "response": this.format = OpenLayers.cdauth.Routing.MapQuest.Format;
 			}
 		}
 		this.formatOptions = { extractAttributes: false };
@@ -1959,6 +1962,72 @@ OpenLayers.cdauth.Routing.Cloudmade.Format = OpenLayers.Class(OpenLayers.Format.
 	}
 });
 
+OpenLayers.cdauth.Routing.MapQuest = OpenLayers.Class(OpenLayers.cdauth.Routing, {
+	routingURL : "http://open.mapquestapi.com/directions/v0/route",
+	attribution : OpenLayers.i18n("attribution-routing-mapquest"),
+
+	getGPXURL : function() {
+		if(this.from == null || this.to == null || this.medium == null || this.routingType == null)
+			return null;
+
+		var json = "{options:{unit:k,generalize:0},locations:[{latLng:{lat:" + this.from.lat + ",lng:" + this.from.lon +"}}";
+		for(var i=0; i<this.via.length; i++)
+			json += ",{latLng:{lat:" + this.via[i].lat + ",lng:" + this.via[i].lon + "}}";
+		json += ",{latLng:{lat:" + this.to.lat + ",lng:" + this.to.lon + "}}]";
+
+		// NOTE: No bicycle routing support
+		if(this.medium == OpenLayers.cdauth.Routing.Medium.FOOT || this.medium == OpenLayers.cdauth.Routing.Medium.BICYCLE)
+			json += ",routeType:pedestrian";
+		else
+			json += ",routeType:" + this.routingType;
+
+		json += "}";
+
+		return this.routingURL + "?inFormat=json&outFormat=xml&json=" + encodeURIComponent(json);
+	},
+
+	getRouteLength : function(dom) {
+		var els = dom.getElementsByTagName("route")[0].childNodes;
+		for(var i=0; i<els.length; i++)
+		{
+			if(els[i].tagName == "distance")
+				return els[i].firstChild.data;
+		}
+	},
+
+	getRouteDuration : function(dom) {
+		var els = dom.getElementsByTagName("route")[0].childNodes;
+		for(var i=0; i<els.length; i++)
+		{
+			if(els[i].tagName == "time")
+				return els[i].firstChild.data/3600;
+		}
+	}
+});
+
+OpenLayers.cdauth.Routing.MapQuest.Format = OpenLayers.Class(OpenLayers.Format.GPX, {
+	read : function(doc) {
+		if (typeof doc == "string") {
+			doc = OpenLayers.Format.XML.prototype.read.apply(this, [doc]);
+		}
+
+		var points = doc.getElementsByTagName("shapePoints")[0].getElementsByTagName("latLng");
+		var point_features = [];
+		for (var i = 0, len = points.length; i < len; i++) {
+			point_features.push(new OpenLayers.Geometry.Point(points[i].getElementsByTagName("lng")[0].firstChild.data, points[i].getElementsByTagName("lat")[0].firstChild.data));
+		}
+		features = [ new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LineString(point_features), null) ];
+
+		if (this.internalProjection && this.externalProjection) {
+			for (var g = 0, featLength = features.length; g < featLength; g++) {
+				features[g].geometry.transform(this.externalProjection, this.internalProjection);
+			}
+		}
+
+		return features;
+	}
+});
+
 /**
  * Shows a calculated route on the map. Add this layer to a map and set the different paramters using the set* functions. As soon as all
  * parameters are set, the route will be displayed. The parameters can be updated then and the route will be recalculated.
@@ -1974,7 +2043,7 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 
 	colour : "blue",
 
-	provider : OpenLayers.cdauth.Routing.Cloudmade, // is instantiated in the initialize() function
+	provider : OpenLayers.cdauth.Routing.MapQuest, // is instantiated in the initialize() function
 
 	fromMarker : null,
 	toMarker : null,
@@ -2147,6 +2216,7 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 		var smallestDistancePoint = null;
 		var index = 0; // Index is used to find out the position of the point in the ordered list of points
 		var maxDistance = this.HOVER_MAX_DISTANCE * this.map.getResolution();
+
 		for(var j=0; j<this.features.length; j++)
 		{
 			if(!this.features[j] || !this.features[j].geometry || !this.features[j].geometry.components)
@@ -2159,8 +2229,9 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 				p1 = points[i];
 				p2 = points[i+1];
 				d = { x : p2.x-p1.x, y : p2.y-p1.y };
+				if(d.x == 0 && d.y == 0)
+					continue;
 				u = ((lonlat.lon-p1.x)*d.x + (lonlat.lat-p1.y)*d.y) / (d.x*d.x + d.y*d.y); // See http://local.wasp.uwa.edu.au/~pbourke/geometry/pointline/
-
 				if(u < 0 || u > 1)
 					continue;
 
@@ -3332,4 +3403,23 @@ function alert_r(data)
 	for(var i in data)
 		str += i+": "+data[i]+"\n";
 	alert(str);
+}
+
+function debugOutput(string)
+{
+	if(debugOutput.textarea == null)
+	{
+		debugOutput.textarea = document.createElement("textarea");
+		debugOutput.textarea.style.width = "75%";
+		debugOutput.textarea.style.height = "50%";
+		debugOutput.textarea.style.bottom = "0";
+		debugOutput.textarea.style.left = "0";
+		debugOutput.textarea.style.position = "fixed";
+		debugOutput.textarea.id = "cdauth-debug";
+		document.getElementsByTagName("body")[0].appendChild(debugOutput.textarea);
+		debugOutput.textarea.onmouseover = function(){ changeOpacity(this, 1); };
+		debugOutput.textarea.onmouseout = function(){ changeOpacity(this, 0.5); };
+		debugOutput.textarea.onmouseout();
+	}
+	debugOutput.textarea.value = new Date()+": "+string+"\n\n"+debugOutput.textarea.value;
 }
