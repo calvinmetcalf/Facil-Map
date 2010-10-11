@@ -1357,6 +1357,220 @@ OpenLayers.cdauth.NameFinder = OpenLayers.Class({
 		}
 		else
 			callbackFunction([ ]);
+	},
+
+	/**
+	 * Initilise an auto-suggest feature on a text input field that will use this NameFinder.
+	 *
+	 * Creates the following properties on the input node:
+	 * - cdauthAutocompleteTimeout
+	 * - cdauthAutocompleteValue
+	 * - cdauthAutocompleteList
+	 * - cdauthAutocompleteResults: The list of results returned by the namefinder
+	 * - cdauthAutocompleteSelected
+	 * @param Element input The DOM node of a text input field.
+	 * @return void
+	*/
+	initAutoSuggest : function(input) {
+		input.setAttribute("autocomplete", "off");
+
+		// Opera fix
+		input.style.position = "relative";
+
+		var namefinder = this;
+
+		OpenLayers.Event.observe(input, "keypress", OpenLayers.Function.bindAsEventListener(this._autoSuggestKeyPress, this));
+
+		var clickOpener = OpenLayers.Function.bindAsEventListener(function() { this._openAutoSuggest(input); }, this);
+
+		OpenLayers.Event.observe(input, "focus", OpenLayers.Function.bindAsEventListener(function(e){
+			setTimeout(function(){ OpenLayers.Event.observe(input, "click", clickOpener); }, 150);
+		}, this));
+		OpenLayers.Event.observe(input, "blur", OpenLayers.Function.bindAsEventListener(function(e){
+			OpenLayers.Event.stopObserving(input, "click", clickOpener);
+		}, this));
+
+		// Wait some time before closing the suggestion list on blur so that clicking the results still works
+		OpenLayers.Event.observe(input, "blur", OpenLayers.Function.bindAsEventListener(function(){ setTimeout(function(){ namefinder._closeAutoSuggest(input); }, 150) }, this));
+	},
+
+	_autoSuggestKeyPress : function(e) {
+		var input = e.target;
+		var namefinder = this;
+
+		var kc_down = 40;
+		var kc_up = 38;
+		var kc_return = 13;
+		var kc_enter = 14;
+		var kc_escape = 27;
+
+		if(!e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey)
+		{
+			if(e.keyCode == kc_down || e.keyCode == kc_up)
+			{
+				this._openAutoSuggest(input);
+				if(input.cdauthAutocompleteResults == null)
+					return true;
+
+				var currentIndex = -1;
+				if(input.cdauthAutocompleteSelected != null)
+				{
+					this._unselectAutoSuggestItem(input, input.cdauthAutocompleteSelected);
+					currentIndex = input.cdauthAutocompleteSelected.i;
+					input.cdauthAutocompleteSelected = null;
+				}
+
+				if(currentIndex == -1)
+					currentIndex = (e.keyCode == kc_up ? input.cdauthAutocompleteResults.length-1 : 0);
+				else
+				{
+					currentIndex += (e.keyCode == kc_up ? -1 : 1);
+					if(currentIndex < 0)
+						currentIndex += input.cdauthAutocompleteResults.length;
+					else if(currentIndex >= input.cdauthAutocompleteResults.length)
+						currentIndex -= input.cdauthAutocompleteResults.length;
+				}
+
+				input.cdauthAutocompleteSelected = input.cdauthAutocompleteResults[currentIndex];
+				this._selectAutoSuggestItem(input, input.cdauthAutocompleteSelected);
+
+				OpenLayers.Event.stop(e);
+				return false;
+			}
+			else if(e.keyCode == kc_return || e.keyCode == kc_enter)
+			{
+				if(input.cdauthAutocompleteSelected)
+				{
+					input.value = input.cdauthAutocompleteSelected.name;
+					this._closeAutoSuggest(input);
+					OpenLayers.Event.stop(e);
+					return false;
+				}
+				return true;
+			}
+			else if(e.keyCode == kc_escape)
+			{
+				if(input.cdauthAutocompleteList && input.cdauthAutocompleteList.style.display != "none")
+				{
+					this._closeAutoSuggest(input);
+					OpenLayers.Event.stop(e);
+					return false;
+				}
+			}
+		}
+
+		if(input.cdauthAutocompleteTimeout != null)
+			clearTimeout(input.cdauthAutocompleteTimeout);
+		input.cdauthAutocompleteTimeout = setTimeout(function(){ namefinder._openAutoSuggest(input); }, 150);
+		return true;
+	},
+
+	_openAutoSuggest : function(input) {
+		if(input.cdauthAutocompleteValue != null && input.cdauthAutocompleteValue == input.value)
+		{ // List is already present, only make it visible again
+			if(input.cdauthAutocompleteList != null)
+				input.cdauthAutocompleteList.style.display = "block";
+			return;
+		}
+
+		if(input.value == "" || input.value.length < 4)
+		{
+			this._closeAutoSuggest(input);
+			return;
+		}
+
+		input.cdauthAutocompleteValue = input.value;
+		var namefinder = this;
+		this.find(input.value, function(results){ namefinder._openAutoSuggestResult(input, results); });
+	},
+
+	_openAutoSuggestResult : function(input, results) {
+		var namefinder = this;
+
+		input.cdauthAutocompleteResults = results;
+
+		if(input.cdauthAutocompleteList == null)
+		{
+			input.cdauthAutocompleteList = document.createElement("ol");
+			input.cdauthAutocompleteList.className = "olCdauthAutocomplete";
+			input.cdauthAutocompleteList.style.position = "absolute";
+			input.cdauthAutocompleteList.style.top = (input.offsetTop + input.offsetHeight) + "px";
+			input.cdauthAutocompleteList.style.left = input.offsetLeft + "px";
+			input.cdauthAutocompleteList.style.minWidth = input.offsetWidth + "px";
+			input.parentNode.appendChild(input.cdauthAutocompleteList);
+		}
+
+		while(input.cdauthAutocompleteList.firstChild)
+			input.cdauthAutocompleteList.removeChild(input.cdauthAutocompleteList.firstChild);
+
+		var foundSelection = false;
+		for(var i=0; i<results.length; i++) (function(i)
+		{
+			var li = document.createElement("li");
+			var name = document.createElement("strong");
+			name.appendChild(document.createTextNode(results[i].name));
+			li.appendChild(name);
+			li.appendChild(document.createTextNode(" (" + results[i].info + ")"));
+			input.cdauthAutocompleteList.appendChild(li);
+			results[i].li = li;
+			results[i].i = i;
+			if(!foundSelection && input.cdauthAutocompleteSelected != null && input.cdauthAutocompleteSelected.lonlat == results[i].lonlat && input.cdauthAutocompleteSelected.name == results[i].name && input.cdauthAutocompleteSelected.info == results[i].info)
+			{
+				namefinder._selectAutoSuggestItem(input, results[i]);
+				input.cdauthAutocompleteSelected = results[i];
+				foundSelection = true;
+			}
+			li.onmousemove = function() {
+				if(input.cdauthAutocompleteSelected != null)
+					namefinder._unselectAutoSuggestItem(input, input.cdauthAutocompleteSelected);
+				input.cdauthAutocompleteSelected = results[i];
+				namefinder._selectAutoSuggestItem(input, results[i]);
+			};
+			li.onclick = function() {
+				input.value = results[i].name;
+				namefinder._closeAutoSuggest(input);
+			};
+		})(i);
+
+		if(!foundSelection)
+			input.cdauthAutocompleteSelected = null;
+
+		input.cdauthAutocompleteList.style.display = "block";
+	},
+
+	_closeAutoSuggest : function(input) {
+		if(input.cdauthAutocompleteTimeout != null)
+			clearTimeout(input.cdauthAutocompleteTimeout);
+		if(input.cdauthAutocompleteList != null)
+			input.cdauthAutocompleteList.style.display = "none";
+		if(input.cdauthAutocompleteSelected != null)
+		{
+			this._unselectAutoSuggestItem(input, input.cdauthAutocompleteSelected);
+			input.cdauthAutocompleteSelected = null;
+		}
+	},
+
+	_selectAutoSuggestItem : function(input, item)
+	{
+		item.li.className = "selected";
+
+		// Scroll to item
+		var list = input.cdauthAutocompleteList;
+		if(list == null || list.scrollTop == undefined)
+			return;
+
+		var itemTop = item.li.offsetTop;
+		var itemBottom = itemTop + item.li.offsetHeight;
+
+		if(itemTop < list.scrollTop) // Need to scroll up
+			list.scrollTop = itemTop;
+		else if(itemBottom > list.scrollTop + list.offsetHeight) // Need to scroll down
+			list.scrollTop = itemBottom - list.offsetHeight;
+	},
+
+	_unselectAutoSuggestItem : function(input, item)
+	{
+		item.li.className = "";
 	}
 });
 

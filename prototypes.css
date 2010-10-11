@@ -8,3 +8,26 @@
 .olLayercdauthMarkers img {
 	cursor:pointer;
 }
+
+.olCdauthAutocomplete {
+	margin:0 -1px !important;
+	padding:0 !important;
+	overflow:auto !important;
+	border:1px solid ButtonShadow !important;
+	background-color:Window !important;
+	color:WindowText !important;
+	list-style-type:none !important;
+	z-index:100000 !important;
+	max-height:12em !important;
+	display:block;
+}
+
+.olCdauthAutocomplete li {
+	cursor:pointer !important;
+	padding:3px 6px !important;
+	display:block !important;
+}
+.olCdauthAutocomplete li.selected {
+	background-color:Highlight !important;
+	color:HighlightText !important;
+}
