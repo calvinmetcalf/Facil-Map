@@ -1970,18 +1970,19 @@ OpenLayers.cdauth.Routing.MapQuest = OpenLayers.Class(OpenLayers.cdauth.Routing,
 		if(this.from == null || this.to == null || this.medium == null || this.routingType == null)
 			return null;
 
-		var json = "{options:{unit:k,generalize:0},locations:[{latLng:{lat:" + this.from.lat + ",lng:" + this.from.lon +"}}";
+		var json = "{locations:[{latLng:{lat:" + this.from.lat + ",lng:" + this.from.lon +"}}";
 		for(var i=0; i<this.via.length; i++)
 			json += ",{latLng:{lat:" + this.via[i].lat + ",lng:" + this.via[i].lon + "}}";
 		json += ",{latLng:{lat:" + this.to.lat + ",lng:" + this.to.lon + "}}]";
 
-		// NOTE: No bicycle routing support
+		json += ",options:{unit:k,generalize:0";
+
 		if(this.medium == OpenLayers.cdauth.Routing.Medium.FOOT || this.medium == OpenLayers.cdauth.Routing.Medium.BICYCLE)
 			json += ",routeType:pedestrian";
 		else
 			json += ",routeType:" + this.routingType;
 
-		json += "}";
+		json += "}}";
 
 		return this.routingURL + "?inFormat=json&outFormat=xml&json=" + encodeURIComponent(json);
 	},
@@ -1997,10 +1998,23 @@ OpenLayers.cdauth.Routing.MapQuest = OpenLayers.Class(OpenLayers.cdauth.Routing,
 
 	getRouteDuration : function(dom) {
 		var els = dom.getElementsByTagName("route")[0].childNodes;
+		var time = null;
 		for(var i=0; i<els.length; i++)
 		{
 			if(els[i].tagName == "time")
-				return els[i].firstChild.data/3600;
+			{
+				time = els[i].firstChild.data/3600;
+				break;
+			}
+		}
+
+		if(time != null)
+		{
+			// NOTE: Workaround for missing bicycle routing support: Divide the time to walk by 3.
+			if(this.medium == OpenLayers.cdauth.Routing.Medium.BICYCLE)
+				return time/3;
+			else
+				return time;
 		}
 	}
 });
