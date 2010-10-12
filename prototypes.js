@@ -50,6 +50,7 @@ OpenLayers.Lang.en = OpenLayers.Util.extend(OpenLayers.Lang.en, {
 	"attribution-oom-streets" : "Streets overlay CC-by-SA by <a href=\"http://oobrien.com/oom/\">OpenOrienteeringMap</a>/<a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a> data",
 	"attribution-oom-labels" : "Labels overlay CC-by-SA by <a href=\"http://oobrien.com/oom/\">OpenOrienteeringMap</a>/<a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a> data",
 	"attribution-hiking" : "Hiking symbols overlay CC-by-SA by <a href=\"http://osm.lonvia.de/world_hiking.html\">Lonvia's Hiking Map</a>/<a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a> data",
+	"attribution-os-streetview" : "Contains Ordnance Survey data © Crown copyright and database right 2010",
 	"Create a marker" : "Create a marker",
 	"Coordinates" : "Coordinates",
 	"unknown" : "unknown",
@@ -99,6 +100,7 @@ OpenLayers.Lang.de = OpenLayers.Util.extend(OpenLayers.Lang.de, {
 	"attribution-oom-streets" : "Straßenhybrid von <a href=\"http://oobrien.com/oom/\">OpenOrienteeringMap</a> (<a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>-Daten, CC-by-SA)",
 	"attribution-oom-labels" : "Beschriftungen von <a href=\"http://oobrien.com/oom/\">OpenOrienteeringMap</a> (<a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>-Daten, CC-by-SA)",
 	"attribution-hiking" : "Wanderbeschilderung von <a href=\"http://osm.lonvia.de/world_hiking.html\">Lonvia's Hiking Map</a>/<a href=\"http://www.openstreetmap.org/\">OpenStreetMap</a>-Daten, CC-by-SA",
+	"attribution-os-streetview" : "Enthält Ordnance-Survey-Daten, © Crown copyright and database right 2010",
 	"Create a marker" : "Marker anlegen",
 	"Coordinates" : "Koordinaten",
 	"unknown" : "unbekannt",
@@ -369,6 +371,8 @@ OpenLayers.Map.cdauth = OpenLayers.Class(OpenLayers.Map, {
 		this.addLayer(new OpenLayers.Layer.cdauth.other.Hiking(OpenLayers.i18n("Hiking symbols"), { visibility: false, shortName : "Hike" }));
 
 		this.addAllAvailableOSMLayers();
+		this.addLayer(new OpenLayers.Layer.cdauth.other.OSStreetView(OpenLayers.i18n("Ordnance Survey (UK)"), { shortName : "OSSV" }));
+
 		this.addAllAvailableGoogleLayers();
 		this.addAllAvailableYahooLayers();
 	},
@@ -834,6 +838,17 @@ OpenLayers.Layer.cdauth.other.Relief = OpenLayers.Class(OpenLayers.Layer.OSM, {
 OpenLayers.Layer.cdauth.other.Hiking = OpenLayers.Class(OpenLayers.Layer.OSM, {
 	initialize: function(name, options) {
 		OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://osm.lonvia.de/hiking/${z}/${x}/${y}.png", OpenLayers.Util.extend({ isBaseLayer: false, attribution: OpenLayers.i18n("attribution-hiking") }, options) ]);
+	}
+});
+
+/**
+ * Ordnance Survey Street View tiles from http://os.openstreetmap.org/.
+*/
+OpenLayers.Layer.cdauth.other.OSStreetView = OpenLayers.Class(OpenLayers.Layer.XYZ, {
+	attribution : OpenLayers.i18n("attribution-os-streetview"),
+
+	initialize : function(name, options) {
+		OpenLayers.Layer.XYZ.prototype.initialize.apply(this, [ name, [ "http://a.os.openstreetmap.org/sv/${z}/${x}/${y}.png", "http://b.os.openstreetmap.org/sv/${z}/${x}/${y}.png", "http://c.os.openstreetmap.org/sv/${z}/${x}/${y}.png" ], options ]);
 	}
 });
 
