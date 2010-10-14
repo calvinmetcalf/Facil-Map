@@ -1427,7 +1427,7 @@ OpenLayers.cdauth.NameFinder = OpenLayers.Class({
 	},
 
 	_autoSuggestKeyPress : function(e) {
-		var input = e.target;
+		var input = e.target || e.srcElement;
 		var namefinder = this;
 
 		var kc_down = 40;
@@ -1491,7 +1491,7 @@ OpenLayers.cdauth.NameFinder = OpenLayers.Class({
 			}
 		}
 
-		if(input.cdauthAutocompleteTimeout)
+		if(input.cdauthAutocompleteTimeout != null)
 			clearTimeout(input.cdauthAutocompleteTimeout);
 		input.cdauthAutocompleteTimeout = setTimeout(function(){ namefinder._openAutoSuggest(input); }, 500);
 		return true;
