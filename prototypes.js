@@ -2506,7 +2506,7 @@ function changeOpacity(el, opacity, ms)
 	if(ms == undefined)
 		ms = 750;
 	var initTime = new Date().getTime();
-	var initOpacity = 1 * (el.style.opacity == "" ? 1 : 1*el.style.opacity);
+	var initOpacity = 1 * (el.style.opacity == undefined || el.style.opacity == "" ? 1 : 1*el.style.opacity);
 	var callback = function() {
 		var period = new Date().getTime()-initTime;
 		if(period > ms)
