@@ -1491,7 +1491,7 @@ OpenLayers.cdauth.NameFinder = OpenLayers.Class({
 			}
 		}
 
-		if(input.cdauthAutocompleteTimeout != null)
+		if(input.cdauthAutocompleteTimeout)
 			clearTimeout(input.cdauthAutocompleteTimeout);
 		input.cdauthAutocompleteTimeout = setTimeout(function(){ namefinder._openAutoSuggest(input); }, 500);
 		return true;
