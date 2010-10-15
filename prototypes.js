@@ -2144,6 +2144,7 @@ OpenLayers.Layer.cdauth.XML = OpenLayers.Class(OpenLayers.Layer.GML, {
 	cdauthURL : null,
 	relations : null,
 	colour : null,
+	toLoad : 0,
 	initialize : function(name, url, options) {
 		this.cdauthURL = url;
 		this.relations = { };
@@ -2186,7 +2187,7 @@ OpenLayers.Layer.cdauth.XML = OpenLayers.Class(OpenLayers.Layer.GML, {
 
 		if(!(url instanceof Array))
 			url = [ url ];
-		var toLoad = url.length;
+		this.toLoad += url.length;
 		this.events.triggerEvent("loadstart");
 		for(var i=0; i<url.length; i++)
 		{
@@ -2196,12 +2197,12 @@ OpenLayers.Layer.cdauth.XML = OpenLayers.Class(OpenLayers.Layer.GML, {
 				url: url[i],
 				success: function() {
 					this.requestSuccess.apply(this, arguments);
-					if(--toLoad == 0)
+					if(--this.toLoad == 0)
 						this.events.triggerEvent("allloadend");
 				},
 				failure: function() {
 					this.requestFailure.apply(this, arguments);
-					if(--toLoad == 0)
+					if(--this.toLoad == 0)
 						this.events.triggerEvent("allloadend");
 				},
 				scope: this
