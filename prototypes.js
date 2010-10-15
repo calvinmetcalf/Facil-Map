@@ -1478,6 +1478,13 @@ OpenLayers.cdauth.NameFinder = OpenLayers.Class({
 					OpenLayers.Event.stop(e);
 					return false;
 				}
+				else
+				{
+					if(input.cdauthAutocompleteTimeout != null)
+						clearTimeout(input.cdauthAutocompleteTimeout);
+					if(input.cdauthAutocompleteList && input.cdauthAutocompleteList.style.display != "none")
+						this._closeAutoSuggest(input);
+				}
 				return true;
 			}
 			else if(e.keyCode == kc_escape)
