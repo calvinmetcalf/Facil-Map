@@ -2187,12 +2187,12 @@ OpenLayers.Layer.cdauth.XML = OpenLayers.Class(OpenLayers.Layer.GML, {
 
 		if(!(url instanceof Array))
 			url = [ url ];
-		this.toLoad += url.length;
 		this.events.triggerEvent("loadstart");
 		for(var i=0; i<url.length; i++)
 		{
 			if(!url[i])
 				continue;
+			this.toLoad++;
 			OpenLayers.Request.GET({
 				url: url[i],
 				success: function() {
