@@ -2655,11 +2655,13 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 						routingLayer.temporaryViaMarker = new OpenLayers.Marker(new OpenLayers.LonLat(0, 0), routingLayer.viaIcon.clone());
 						routingLayer.temporaryViaMarker.layer = routingLayer;
 						routingLayer.addMarker(routingLayer.temporaryViaMarker);
+						routingLayer.map.cursorRoutingBkp = (routingLayer.map.viewPortDiv.style.cursor || null);
 					}
 					routingLayer.temporaryViaMarker.lonlat = point.lonlat;
 					routingLayer.drawMarker(routingLayer.temporaryViaMarker);
 					this.lastPoint = point;
 					this.lastXY = evt.xy;
+					routingLayer.map.viewPortDiv.style.cursor = "pointer";
 				}
 				else if(routingLayer.temporaryViaMarker != null)
 				{
@@ -2667,11 +2669,14 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 					routingLayer.temporaryViaMarker.destroy();
 					routingLayer.temporaryViaMarker = null;
 					this.lastPoint = null;
+					routingLayer.map.viewPortDiv.style.cursor = routingLayer.map.cursorRoutingBkp;
 				}
 			},
 			mousedown : function(evt) {
 				if(this.lastPoint != null)
 				{
+					routingLayer.map.viewPortDiv.style.cursor = routingLayer.map.cursorRoutingBkp;
+
 					var newIndex = routingLayer.provider.via.length;
 					while(newIndex > 0)
 					{
