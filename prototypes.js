@@ -1531,6 +1531,10 @@ OpenLayers.cdauth.NameFinder = OpenLayers.Class({
 	},
 
 	_openAutoSuggestResult : function(input, results, value) {
+		// Do not show list if loading has been aborted by _closeAutoSuggest() in the meantime
+		if(input.cdauthAutocompleteLoadingValue == null)
+			return;
+
 		var namefinder = this;
 
 		input.cdauthAutocompleteResults = results;
@@ -1590,6 +1594,10 @@ OpenLayers.cdauth.NameFinder = OpenLayers.Class({
 	_closeAutoSuggest : function(input) {
 		if(input.cdauthAutocompleteTimeout != null)
 			clearTimeout(input.cdauthAutocompleteTimeout);
+
+		// Prevent showing the list if find() is currently waiting for a response
+		input.cdauthAutocompleteLoadingValue = null;
+
 		if(input.cdauthAutocompleteList != null)
 			input.cdauthAutocompleteList.style.display = "none";
 		if(input.cdauthAutocompleteSelected != null)
