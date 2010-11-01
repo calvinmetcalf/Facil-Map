@@ -2657,7 +2657,7 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 						routingLayer.temporaryViaMarker = new OpenLayers.Marker(new OpenLayers.LonLat(0, 0), routingLayer.viaIcon.clone());
 						routingLayer.temporaryViaMarker.layer = routingLayer;
 						routingLayer.addMarker(routingLayer.temporaryViaMarker);
-						routingLayer.map.cursorRoutingBkp = (routingLayer.map.viewPortDiv.style.cursor || null);
+						routingLayer.map.cursorRoutingBkp = (routingLayer.map.viewPortDiv.style.cursor || "auto");
 					}
 					routingLayer.temporaryViaMarker.lonlat = point.lonlat;
 					routingLayer.drawMarker(routingLayer.temporaryViaMarker);
