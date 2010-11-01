@@ -2740,7 +2740,7 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 		var markers = [ this.fromMarker, this.toMarker ].concat(this.viaMarkers);
 		for(var i=0; i<markers.length; i++)
 		{
-			if(markers[i] != null && markers[i].icon && markers[i].icon.imageDiv && evt.target == markers[i].icon.imageDiv.firstChild)
+			if(markers[i] != null && markers[i].icon && markers[i].icon.imageDiv && (evt.target || evt.srcElement) == markers[i].icon.imageDiv.firstChild)
 				return markers[i];
 		}
 		return null;
