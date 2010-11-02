@@ -2353,6 +2353,16 @@ OpenLayers.cdauth.Routing = OpenLayers.Class({
 	*/
 	getRouteDuration : function(dom) {
 		return null;
+	},
+
+	/**
+	 * Reorders the via points so that the total driving time/distance is minimised but still all the targets are
+	 * reached. Only does something when there are 2 or more via points (otherwise calls the callback function immediately).
+	 * @param Function callback A callback function that is called in any case after the ordering has been done
+	 *                          or an error has occurred. May receive an error message as first parameter.
+	 * @return void
+	*/
+	reorderViaPoints : function(callback) {
 	}
 });
 
@@ -2499,6 +2509,7 @@ OpenLayers.cdauth.Routing.Cloudmade.Format = OpenLayers.Class(OpenLayers.Format.
 
 OpenLayers.cdauth.Routing.MapQuest = OpenLayers.Class(OpenLayers.cdauth.Routing, {
 	routingURL : "http://open.mapquestapi.com/directions/v0/route",
+	orderedURL : "http://open.mapquestapi.com/directions/v0/optimizedRoute",
 	attribution : OpenLayers.i18n("attribution-routing-mapquest"),
 
 	getGPXURL : function() {
@@ -2510,7 +2521,7 @@ OpenLayers.cdauth.Routing.MapQuest = OpenLayers.Class(OpenLayers.cdauth.Routing,
 			json += ",{latLng:{lat:" + this.via[i].lat + ",lng:" + this.via[i].lon + "}}";
 		json += ",{latLng:{lat:" + this.to.lat + ",lng:" + this.to.lon + "}}]";
 
-		json += ",options:{unit:k,generalize:0";
+		json += ",options:{unit:k,generalize:0,narrativeType:none";
 
 		if(this.medium == OpenLayers.cdauth.Routing.Medium.FOOT || this.medium == OpenLayers.cdauth.Routing.Medium.BICYCLE)
 			json += ",routeType:pedestrian";
@@ -2551,6 +2562,74 @@ OpenLayers.cdauth.Routing.MapQuest = OpenLayers.Class(OpenLayers.cdauth.Routing,
 			else
 				return time;
 		}
+	},
+
+	reorderViaPoints : function(callback) {
+		if(callback == null)
+			callback = function() { };
+
+		if(this.from == null || this.to == null || this.medium == null || this.routingType == null)
+		{
+			callback("Insufficient parameters.");
+			return;
+		}
+		if(this.via.length < 2)
+		{
+			callback("Less than 2 via points.");
+			return;
+		}
+		var json = "{locations:[{latLng:{lat:" + this.from.lat + ",lng:" + this.from.lon +"}}";
+		for(var i=0; i<this.via.length; i++)
+			json += ",{latLng:{lat:" + this.via[i].lat + ",lng:" + this.via[i].lon + "}}";
+		json += ",{latLng:{lat:" + this.to.lat + ",lng:" + this.to.lon + "}}]";
+
+		json += ",options:{generalize:-1,narrativeType:none";
+
+		if(this.medium == OpenLayers.cdauth.Routing.Medium.FOOT || this.medium == OpenLayers.cdauth.Routing.Medium.BICYCLE)
+			json += ",routeType:pedestrian";
+		else
+			json += ",routeType:" + this.routingType;
+
+		json += "}}";
+
+		var url = this.orderedURL + "?inFormat=json&outFormat=xml&json=" + encodeURIComponent(json);
+
+		OpenLayers.Request.GET({
+			url: url,
+			success: function(resp) {
+				if(!resp.responseXML)
+				{
+					callback("Error: no response");
+					return;
+				}
+
+				var locSequence = resp.responseXML.getElementsByTagName("locationSequence");
+				if(locSequence.length == 0)
+				{
+					callback(true);
+					return;
+				}
+
+				locSequence = locSequence[0].firstChild.data.split(",");
+
+				var newVia = [ ];
+				for(var i=1; i<locSequence.length-1; i++) // The first and last location are the start and end points
+				{
+					if(this.via[locSequence[i]-1] == undefined)
+					{
+						callback("Error: non-existent location");
+						return;
+					}
+					newVia.push(this.via[locSequence[i]-1]);
+				}
+				this.via = newVia;
+				callback();
+			},
+			failure: function() {
+				callback("Request error");
+			},
+			scope: this
+		});
 	}
 });
 
@@ -2810,6 +2889,24 @@ OpenLayers.Layer.cdauth.XML.Routing = OpenLayers.Class(OpenLayers.Layer.cdauth.X
 			return { index : smallestDistancePoint[0], lonlat : new OpenLayers.LonLat(smallestDistancePoint[1].x, smallestDistancePoint[1].y) };
 		else
 			return null;
+	},
+
+	/**
+	 * Reorders the via points so that the total driving time/distance is minimised but still all the targets are
+	 * reached. Only does something when there are 2 or more via points. In case of an error, nothing is done.
+	 * @param Function callback A callback function to be called as soon as the points are ordered or an error has
+	 *                          occurred. On success, the first parameter is null, else it may be an error message.
+	 * @return void
+	*/
+	reorderViaPoints : function(callback) {
+		var layer = this;
+		this.provider.reorderViaPoints(function(error) {
+			layer.events.triggerEvent("queryObjectChanged");
+			layer.updateRouting(false);
+
+			if(callback != null)
+				callback(error);
+		});
 	},
 
 	/**
