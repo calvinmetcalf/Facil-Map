@@ -1532,7 +1532,7 @@ OpenLayers.cdauth.NameFinder = OpenLayers.Class({
 
 	_openAutoSuggestResult : function(input, results, value) {
 		// Do not show list if loading has been aborted by _closeAutoSuggest() in the meantime
-		if(input.cdauthAutocompleteLoadingValue == null)
+		if(input.cdauthAutocompleteLoadingValue == null || results == null)
 			return;
 
 		var namefinder = this;
