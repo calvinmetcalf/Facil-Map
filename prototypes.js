@@ -1635,7 +1635,7 @@ OpenLayers.cdauth.NameFinder = OpenLayers.Class({
  * An implementation of the NameFinder that contacts Nominatim (http://wiki.openstreetmap.org/wiki/Nominatim).
 */
 OpenLayers.cdauth.NameFinder.Nominatim = OpenLayers.Class(OpenLayers.cdauth.NameFinder, {
-	nameFinderURL : "http://nominatim.openstreetmap.org/search",
+	nameFinderURL : "http://open.mapquestapi.com/nominatim/v1/search",
 
 	/**
 	 * List of special phrases from http://wiki.openstreetmap.org/wiki/Nominatim/Special_Phrases
