@@ -1,9 +1,10 @@
 #!/bin/bash
 list_files() {
 	echo "src/base.js"
+	echo "src/classes/Util.js"
 	find "src/olfix" -type f -name "*.js" | sort
 	find "src/i18n" -type f -name "*.js" | sort
-	find "src/classes" -type f -name "*.js" | sort
+	find "src/classes" -type f -name "*.js" | grep -vx src/classes/Util.js | sort
 }
 
 files="$(list_files)"
