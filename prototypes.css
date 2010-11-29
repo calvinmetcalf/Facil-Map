@@ -1,15 +1,15 @@
-.olControlcdauthGeoLocation {
+.fmControlGeoLocation {
 	position:absolute;
 	right:3px;
 	font-size:smaller;
 	bottom:6em;
 }
 
-.olLayercdauthMarkers img {
+.fmLayerMarkers img {
 	cursor:pointer;
 }
 
-.olCdauthAutocomplete {
+.fmAutocomplete {
 	margin:0 -1px !important;
 	padding:0 !important;
 	overflow:auto !important;
@@ -22,12 +22,12 @@
 	display:block;
 }
 
-.olCdauthAutocomplete li {
+.fmAutocomplete li {
 	cursor:pointer !important;
 	padding:3px 6px !important;
 	display:block !important;
 }
-.olCdauthAutocomplete li.selected {
+.fmAutocomplete li.selected {
 	background-color:Highlight !important;
 	color:HighlightText !important;
 }
