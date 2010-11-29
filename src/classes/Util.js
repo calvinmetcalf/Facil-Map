@@ -365,6 +365,8 @@ FacilMap.Util = {
 	 * @return void
 	*/
 	changeOpacity: function(el, opacity, ms) {
+		var changeOpacity = FacilMap.Util.changeOpacity;
+
 		if(changeOpacity.timeouts == undefined)
 			changeOpacity.timeouts = { };
 
