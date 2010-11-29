@@ -2,9 +2,13 @@
 list_files() {
 	echo "src/base.js"
 	echo "src/classes/Util.js"
-	find "src/olfix" -type f -name "*.js" | sort
-	find "src/i18n" -type f -name "*.js" | sort
-	find "src/classes" -type f -name "*.js" | grep -vx src/classes/Util.js | sort
+	find "src/olfix" -type f -name "*.js" | sort_js_files
+	find "src/i18n" -type f -name "*.js" | sort_js_files
+	find "src/classes" -type f -name "*.js" | grep -vx src/classes/Util.js | sort_js_files
+}
+
+sort_js_files() {
+	sed -e 's/\.js$//' | sort | sed -e 's/$/.js/'
 }
 
 files="$(list_files)"
