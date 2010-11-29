@@ -18,6 +18,13 @@
 */
 
 // Workaround for http://trac.openlayers.org/ticket/2607
+
+if(FacilMap.olBackup.Control == undefined)
+	FacilMap.olBackup.Control = { };
+
+FacilMap.olBackup.Control.activate = OpenLayers.Control.prototype.activate;
+FacilMap.olBackup.Control.deactivate = OpenLayers.Control.prototype.deactivate;
+
 OpenLayers.Control.prototype.activate = function() {
 	var ret = FacilMap.olBackup.Control.activate.apply(this, arguments);
 	if(this.map)
