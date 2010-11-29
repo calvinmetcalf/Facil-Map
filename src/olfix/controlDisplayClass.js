@@ -18,13 +18,13 @@
 */
 
 // Fix displayClass in OpenLayers Controls to also use parent class names
-OpenLayers.cdauthBackup.Control = {
+FacilMap.olBackup.Control = {
 	initialize : OpenLayers.Control.prototype.initialize,
 	activate : OpenLayers.Control.prototype.activate,
 	deactivate : OpenLayers.Control.prototype.deactivate
 };
 
 OpenLayers.Control.prototype.initialize = function() {
-	OpenLayers.cdauthBackup.Control.initialize.apply(this, arguments);
+	FacilMap.olBackup.Control.initialize.apply(this, arguments);
 	this.displayClass = FacilMap.Util.makeClassName(this);
 };

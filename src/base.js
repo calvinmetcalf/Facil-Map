@@ -18,5 +18,5 @@
 */
 
 var FacilMap = {
-	require : function() { }
+	olBackup : { }
 };

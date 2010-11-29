@@ -19,7 +19,7 @@
 
 // Workaround for http://trac.openlayers.org/ticket/2607
 OpenLayers.Control.prototype.activate = function() {
-	var ret = OpenLayers.cdauthBackup.Control.activate.apply(this, arguments);
+	var ret = FacilMap.olBackup.Control.activate.apply(this, arguments);
 	if(this.map)
 	{
 		var classNames = this.displayClass.split(/\s+/);
@@ -35,7 +35,7 @@ OpenLayers.Control.prototype.activate = function() {
 };
 
 OpenLayers.Control.prototype.deactivate = function() {
-	var ret = OpenLayers.cdauthBackup.Control.deactivate.apply(this, arguments);
+	var ret = FacilMap.olBackup.Control.deactivate.apply(this, arguments);
 	if(this.map)
 	{
 		var classNames = this.displayClass.split(/\s+/);

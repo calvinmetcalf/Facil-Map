@@ -24,7 +24,7 @@
 */
 
 FacilMap.Layer.Markers = OpenLayers.Class(OpenLayers.Layer.Markers, {
-	defaultIcon : new OpenLayers.Icon('http://osm.cdauth.eu/map/marker.png', new OpenLayers.Size(21,25), new OpenLayers.Pixel(-9, -25)),
+	defaultIcon : new OpenLayers.Icon('http://api.facilmap.org/marker.png', new OpenLayers.Size(21,25), new OpenLayers.Pixel(-9, -25)),
 	openPopupsOnShow : null,
 	initialize : function(name, options) {
 		this.openPopupsOnShow = [ ];

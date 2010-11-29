@@ -21,7 +21,7 @@
  * Displays an XML file on the map (such as GPX, KML or OSM) auto-determining of the format. The colour is
  * randomly assigned.
  * If you set FacilMap.Layer.XML.relationURL, OSM sub-relations will be loaded in additional requests.
- * Include the JavaScript http://osm.cdauth.eu/ajax-proxy/ajax-proxy.js to "disable" the Same Origin Policy.
+ * Include the JavaScript http://api.facilmap.org/ajax-proxy/ajax-proxy.js to "disable" the Same Origin Policy.
  * Otherwise, you might have to set OpenLayers.ProxyHost to a URL on your server. The actual URL will be appended
  * to that in encoded form.
  * @event allloadend If an array of URL is passed, this is only called when the last URL is actually loaded.

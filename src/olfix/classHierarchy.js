@@ -18,10 +18,10 @@
 */
 
 // Save parent classes in class objects, needed for FacilMap.Util.makeClassName()
-OpenLayers.cdauthBackup.Class = OpenLayers.Class;
+FacilMap.olBackup.Class = OpenLayers.Class;
 OpenLayers.Class = function() {
-	var ret = OpenLayers.cdauthBackup.Class.apply(this, arguments);
-	ret.prototype.cdauthParentClasses = arguments;
+	var ret = FacilMap.olBackup.Class.apply(this, arguments);
+	ret.prototype.fmParentClasses = arguments;
 	return ret;
 };
-OpenLayers.Class.isPrototype = OpenLayers.cdauthBackup.Class.isPrototype;
+OpenLayers.Class.isPrototype = FacilMap.olBackup.Class.isPrototype;

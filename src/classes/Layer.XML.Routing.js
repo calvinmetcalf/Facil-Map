@@ -26,9 +26,9 @@
 FacilMap.Layer.XML.Routing = OpenLayers.Class(FacilMap.Layer.XML, {
 	HOVER_MAX_DISTANCE : 10,
 
-	fromIcon : new OpenLayers.Icon('http://osm.cdauth.eu/map/route-start.png', new OpenLayers.Size(20,34), new OpenLayers.Pixel(-10, -34)),
-	toIcon : new OpenLayers.Icon('http://osm.cdauth.eu/map/route-stop.png', new OpenLayers.Size(20,34), new OpenLayers.Pixel(-10, -34)),
-	viaIcon : new OpenLayers.Icon('http://osm.cdauth.eu/map/yellow.png', new OpenLayers.Size(20,34), new OpenLayers.Pixel(-10, -34)),
+	fromIcon : new OpenLayers.Icon('http://api.facilmap.org/route-start.png', new OpenLayers.Size(20,34), new OpenLayers.Pixel(-10, -34)),
+	toIcon : new OpenLayers.Icon('http://api.facilmap.org/route-stop.png', new OpenLayers.Size(20,34), new OpenLayers.Pixel(-10, -34)),
+	viaIcon : new OpenLayers.Icon('http://api.facilmap.org/yellow.png', new OpenLayers.Size(20,34), new OpenLayers.Pixel(-10, -34)),
 
 	colour : "blue",
 

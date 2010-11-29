@@ -37,7 +37,7 @@ FacilMap.Layer.Markers.GeoSearch = OpenLayers.Class(FacilMap.Layer.Markers, {
 	 * The marker icon to use for the first search result.
 	 * @var OpenLayers.Icon
 	*/
-	highlightIcon : new OpenLayers.Icon("http://osm.cdauth.eu/map/marker-green.png", new OpenLayers.Size(21,25), new OpenLayers.Pixel(-9, -25)),
+	highlightIcon : new OpenLayers.Icon("http://api.facilmap.org/marker-green.png", new OpenLayers.Size(21,25), new OpenLayers.Pixel(-9, -25)),
 
 	/**
 	 * The icon type for Nominatim search result icons. Either "p" or "n", see http://www.sjjb.co.uk/mapicons/SJJBMapIconsv0.03/recoloured/, p has a transparent background, n a coloured.

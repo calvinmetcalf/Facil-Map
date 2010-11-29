@@ -28,7 +28,7 @@ FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
 	/**
 	 * This CSS file will be additionally loaded.
 	*/
-	fmTheme : "http://osm.cdauth.eu/map/prototypes.css",
+	fmTheme : "http://api.facilmap.org/prototypes.css",
 
 	/**
 	 * The projection to use in coordinates in the Permalink.
