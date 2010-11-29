@@ -40,5 +40,5 @@ FacilMap.Layer.Google.loadAPI = function(callback) {
 	var url = null;
 	if(FacilMap.Layer.Google.API_KEY != null)
 		url = "http://maps.google.com/maps?file=api&v=2&key="+encodeURIComponent(FacilMap.Layer.Google.API_KEY);
-	loadJavaScript(url, function() { return window.GMap2 != undefined; }, callback);
+	FacilMap.Util.loadJavaScript(url, function() { return window.GMap2 != undefined; }, callback);
 };

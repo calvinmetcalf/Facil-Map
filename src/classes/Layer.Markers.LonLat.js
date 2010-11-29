@@ -69,7 +69,7 @@ FacilMap.Layer.Markers.LonLat = OpenLayers.Class(FacilMap.Layer.Markers, {
 				heading.appendChild(document.createTextNode(this.markers[i].fmTitle));
 				content.appendChild(heading);
 			}
-			content.appendChild(makePermalinks(this.markers[i].lonlat.clone().transform(this.map.getProjectionObject(), this.readableProjection), this.map.getZoom()));
+			content.appendChild(FacilMap.Util.makePermalinks(this.markers[i].lonlat.clone().transform(this.map.getProjectionObject(), this.readableProjection), this.map.getZoom()));
 			this.markers[i].fmFeature.popup.setContentHTML(content);
 		}
 	},
@@ -93,7 +93,7 @@ FacilMap.Layer.Markers.LonLat = OpenLayers.Class(FacilMap.Layer.Markers, {
 		{
 			if(obj[i].lon == undefined || obj[i].lat == undefined)
 				continue;
-			this.addLonLatMarker(new OpenLayers.LonLat(1*obj[i].lon, 1*obj[i].lat), (obj[i].title != undefined) ? htmlspecialchars(obj[i].title) : null);
+			this.addLonLatMarker(new OpenLayers.LonLat(1*obj[i].lon, 1*obj[i].lat), (obj[i].title != undefined) ? FacilMap.Util.htmlspecialchars(obj[i].title) : null);
 		}
 	},
 

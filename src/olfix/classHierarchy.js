@@ -17,7 +17,7 @@
 	Obtain the source code from http://gitorious.org/facilmap.
 */
 
-// Save parent classes in class objects, needed for makeClassName()
+// Save parent classes in class objects, needed for FacilMap.Util.makeClassName()
 OpenLayers.cdauthBackup.Class = OpenLayers.Class;
 OpenLayers.Class = function() {
 	var ret = OpenLayers.cdauthBackup.Class.apply(this, arguments);

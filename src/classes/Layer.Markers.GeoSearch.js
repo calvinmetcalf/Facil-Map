@@ -134,7 +134,7 @@ FacilMap.Layer.Markers.GeoSearch = OpenLayers.Class(FacilMap.Layer.Markers, {
 			content_heading.appendChild(content_zoom);
 			content.appendChild(content_heading);
 
-			content.appendChild(makePermalinks(results[i].lonlat, results[i].getZoom(layer.map), results[i].osm));
+			content.appendChild(FacilMap.Util.makePermalinks(results[i].lonlat, results[i].getZoom(layer.map), results[i].osm));
 
 			var icon = null;
 			if(results[i].icon)

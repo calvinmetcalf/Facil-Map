@@ -37,8 +37,8 @@ FacilMap.Popup.FramedCloud = OpenLayers.Class(OpenLayers.Popup.FramedCloud, {
 
 		this.setContentHTML(contentDom);
 
-		OpenLayers.Event.observe(this.div, "mouseover", OpenLayers.Function.bindAsEventListener(function(){ changeOpacity(this.div, 1.0); }, this));
-		OpenLayers.Event.observe(this.div, "mouseout", OpenLayers.Function.bindAsEventListener(function(){ changeOpacity(this.div, this.opacity); }, this));
+		OpenLayers.Event.observe(this.div, "mouseover", OpenLayers.Function.bindAsEventListener(function(){ FacilMap.Util.changeOpacity(this.div, 1.0); }, this));
+		OpenLayers.Event.observe(this.div, "mouseout", OpenLayers.Function.bindAsEventListener(function(){ FacilMap.Util.changeOpacity(this.div, this.opacity); }, this));
 	},
 	setContentHTML: function(contentDom) {
 		if(typeof contentDom == "object")

@@ -38,5 +38,5 @@ FacilMap.Layer.Yahoo.loadAPI = function(callback) {
 	var url = null;
 	if(FacilMap.Layer.Yahoo.APPID != null)
 		url = "http://api.maps.yahoo.com/ajaxymap?v=3.0&appid="+encodeURIComponent(FacilMap.Layer.Yahoo.APPID);
-	loadJavaScript(url, function() { return window.YMap != undefined; }, callback);
+	FacilMap.Util.loadJavaScript(url, function() { return window.YMap != undefined; }, callback);
 };

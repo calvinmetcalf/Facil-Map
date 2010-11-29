@@ -26,5 +26,5 @@ OpenLayers.cdauthBackup.Control = {
 
 OpenLayers.Control.prototype.initialize = function() {
 	OpenLayers.cdauthBackup.Control.initialize.apply(this, arguments);
-	this.displayClass = makeClassName(this);
+	this.displayClass = FacilMap.Util.makeClassName(this);
 };

@@ -100,7 +100,7 @@ FacilMap.Control.URLHashHandler = OpenLayers.Class(OpenLayers.Control, {
 		var queryObject = this.map.getQueryObject();
 		if(!queryObject)
 			return false;
-		this.hashHandler.setLocationHash(encodeQueryString(queryObject));
+		this.hashHandler.setLocationHash(FacilMap.Util.encodeQueryString(queryObject));
 		this.events.triggerEvent("hashChanged");
 		return true;
 	},
@@ -109,7 +109,7 @@ FacilMap.Control.URLHashHandler = OpenLayers.Class(OpenLayers.Control, {
 	 * Updates the map view to show the content of location.hash.
 	*/
 	updateMapView : function() {
-		var query_object = decodeQueryString(this.hashHandler.getLocationHash());
+		var query_object = FacilMap.Util.decodeQueryString(this.hashHandler.getLocationHash());
 		this.map.zoomToQuery(query_object);
 		this.updateLocationHash();
 	},

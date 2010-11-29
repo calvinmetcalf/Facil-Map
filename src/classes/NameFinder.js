@@ -41,7 +41,7 @@ FacilMap.NameFinder = OpenLayers.Class({
 		var query_urlPart;
 		if(query_match = query.match(/^http:\/\/(www\.)?osm\.org\/go\/([-A-Za-z0-9_@]+)/))
 		{ // Coordinates, shortlink
-			var shortlink = decodeShortLink(query_match[2]);
+			var shortlink = FacilMap.Util.decodeShortLink(query_match[2]);
 			results = [ {
 				lonlat : shortlink.lonlat,
 				info : OpenLayers.i18n("Coordinates"),
@@ -64,7 +64,7 @@ FacilMap.NameFinder = OpenLayers.Class({
 			results[0].name = results[0].lonlat.lat+","+results[0].lonlat.lon;
 			callbackFunction(results);
 		}
-		else if((query_match = query.match(/^http:\/\/.*\?(.*)$/)) && typeof (query_urlPart = decodeQueryString(query_match[1])).lon != "undefined" && typeof query_urlPart.lat != "undefined")
+		else if((query_match = query.match(/^http:\/\/.*\?(.*)$/)) && typeof (query_urlPart = FacilMap.Util.decodeQueryString(query_match[1])).lon != "undefined" && typeof query_urlPart.lat != "undefined")
 		{ // OpenStreetMap Permalink
 			results = [ {
 				lonlat : new OpenLayers.LonLat(query_urlPart.lon, query_urlPart.lat),

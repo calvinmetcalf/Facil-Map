@@ -19,4 +19,4 @@
 
 // Make use of ajax-proxy (http://gitorious.org/ajax-proxy/ajax-proxy)
 // Include http://osm.cdauth.eu/ajax-proxy/ajax-proxy.js to "disable" the Same Origin Policy.
-loadJavaScript("http://osm.cdauth.eu/ajax-proxy/ajax-proxy.js", function() { return window.AjaxProxyXMLHttpRequest != undefined; }, function() { OpenLayers.Request.XMLHttpRequest = AjaxProxyXMLHttpRequest; });
+FacilMap.Util.loadJavaScript("http://osm.cdauth.eu/ajax-proxy/ajax-proxy.js", function() { return window.AjaxProxyXMLHttpRequest != undefined; }, function() { OpenLayers.Request.XMLHttpRequest = AjaxProxyXMLHttpRequest; });

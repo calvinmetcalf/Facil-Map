@@ -106,7 +106,7 @@ FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
 				this.setQueryObject(obj);
 		};
 
-		layer.div.className = makeClassName(layer) + " " + layer.div.className;
+		layer.div.className = FacilMap.Util.makeClassName(layer) + " " + layer.div.className;
 
 		if(layer.saveInPermalink && layer.removableInLayerSwitcher)
 			this.events.triggerEvent("newHash");
@@ -180,7 +180,7 @@ FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
 	/**
 	 * Zoom to the specified query object. Remember to add your layers and to eventually set OpenLayers.ProxyHost before running
 	 * this method.
-	 * @param Object query Usually decodeQueryString(location.hash.replace(/^#/, ""))
+	 * @param Object query Usually FacilMap.Util.decodeQueryString(location.hash.replace(/^#/, ""))
 	*/
 
 	zoomToQuery: function(query)
@@ -305,7 +305,7 @@ FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
 
 	/**
 	 * Returns a Query object that you can pass to the zoomToQuery() function to restore the current view. Usually you save this to the location
-	 * hash part by calling location.hash = "#"+encodeQueryString(map.getQueryObject());
+	 * hash part by calling location.hash = "#"+FacilMap.Util.encodeQueryString(map.getQueryObject());
 	 * Only non-default settings will be added to this query object. Remember to set the visibility of your overlay layers _before_ adding
 	 * them to the map, as the default visibility value will be determined during adding it.
 	 * @return Object

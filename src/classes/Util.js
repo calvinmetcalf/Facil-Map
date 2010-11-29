@@ -56,7 +56,7 @@ FacilMap.Util = {
 				var cur_el = obj;
 				for(var j=0; j<arr_indexes.length; j++)
 				{
-					var cur_key = decodeURIComponentTolerantly(arr_indexes[j]);
+					var cur_key = FacilMap.Util.decodeURIComponentTolerantly(arr_indexes[j]);
 					if(cur_key.length == 0)
 					{
 						cur_key = 0;
@@ -64,7 +64,7 @@ FacilMap.Util = {
 							cur_key++;
 					}
 					if(j == arr_indexes.length-1)
-						cur_el[cur_key] = decodeURIComponentTolerantly(str_split[i].substr(equal_sign+1));
+						cur_el[cur_key] = FacilMap.Util.decodeURIComponentTolerantly(str_split[i].substr(equal_sign+1));
 					else
 					{
 						if(!cur_el[cur_key] || typeof cur_el[cur_key] != "object")
@@ -74,7 +74,7 @@ FacilMap.Util = {
 				}
 			}
 			else
-				obj[decodeURIComponentTolerantly(key)] = decodeURIComponentTolerantly(str_split[i].substr(equal_sign+1));
+				obj[FacilMap.Util.decodeURIComponentTolerantly(key)] = FacilMap.Util.decodeURIComponentTolerantly(str_split[i].substr(equal_sign+1));
 		}
 		return obj;
 	},
@@ -97,7 +97,7 @@ FacilMap.Util = {
 			switch(typeof obj[i])
 			{
 				case "object":
-					encodeQueryString(obj[i], key, arr);
+					FacilMap.Util.encodeQueryString(obj[i], key, arr);
 					break;
 				case "boolean":
 					arr.push(key+"="+(obj[i] ? "1" : "0"));
@@ -172,7 +172,7 @@ FacilMap.Util = {
 		var ul = document.createElement("ul");
 		ul.className = "fieldset-content";
 		ul.appendChild(makeEntry("http://www.openstreetmap.org/?mlat="+lonlat.lat+"&mlon="+lonlat.lon+"&zoom="+zoom, "OpenStreetMap Permalink"));
-		ul.appendChild(makeEntry("http://osm.org/go/"+encodeShortLink(lonlat, zoom)+"?m", "OpenStreetMap Shortlink"));
+		ul.appendChild(makeEntry("http://osm.org/go/"+FacilMap.Util.encodeShortLink(lonlat, zoom)+"?m", "OpenStreetMap Shortlink"));
 		ul.appendChild(makeEntry("http://maps.google.com/?q="+lonlat.lat+","+lonlat.lon, "Google Maps Permalink"));
 		ul.appendChild(makeEntry("http://maps.yahoo.com/broadband/#lat="+lonlat.lat+"&lon="+lonlat.lon+"&zoom="+zoom, "Yahoo Maps Permalink"));
 		ul.appendChild(makeEntry("http://osmtools.de/osmlinks/?lat="+lonlat.lat+"&lon="+lonlat.lon+"&zoom="+zoom, "OpenStreetMap Links"));
@@ -203,7 +203,7 @@ FacilMap.Util = {
 				var tagDt = document.createElement("dt");
 				tagDt.appendChild(document.createTextNode(tags[i].getAttribute("k")));
 				var tagDd = document.createElement("dd");
-				tagDd.appendChild(formatTagValue(tags[i].getAttribute("v"), tags[i].getAttribute("k")));
+				tagDd.appendChild(FacilMap.Util.formatTagValue(tags[i].getAttribute("v"), tags[i].getAttribute("k")));
 				tagDl.appendChild(tagDt);
 				tagDl.appendChild(tagDd);
 			}
@@ -270,7 +270,7 @@ FacilMap.Util = {
 	},
 
 	/**
-	 * Decodes a string from encodeShortLink().
+	 * Decodes a string from FacilMap.Util.encodeShortLink().
 	 * @param String encoded
 	 * @return Object (lonlat: OpenLayers.LonLat, zoom: Number)
 	*/
@@ -340,7 +340,7 @@ FacilMap.Util = {
 			if(olClass.fmParentClasses != undefined)
 			{
 				for(var i=0; i<olClass.fmParentClasses.length; i++)
-					makeClassName(olClass.fmParentClasses[i], array);
+					FacilMap.Util.makeClassName(olClass.fmParentClasses[i], array);
 			}
 		}
 
@@ -426,7 +426,7 @@ FacilMap.Util = {
 			var scripts = document.getElementsByTagName("script");
 			for(var i=0; i<scripts.length; i++)
 			{
-				if(makeAbsoluteURL(scripts[i].src) == makeAbsoluteURL(url))
+				if(FacilMap.Util.makeAbsoluteURL(scripts[i].src) == FacilMap.Util.makeAbsoluteURL(url))
 				{
 					load = false;
 					break;
@@ -564,8 +564,8 @@ FacilMap.Util = {
 			debugOutput.textarea.style.position = "fixed";
 			debugOutput.textarea.id = "fm-debug";
 			document.getElementsByTagName("body")[0].appendChild(debugOutput.textarea);
-			debugOutput.textarea.onmouseover = function(){ changeOpacity(this, 1); };
-			debugOutput.textarea.onmouseout = function(){ changeOpacity(this, 0.5); };
+			debugOutput.textarea.onmouseover = function(){ FacilMap.Util.changeOpacity(this, 1); };
+			debugOutput.textarea.onmouseout = function(){ FacilMap.Util.changeOpacity(this, 0.5); };
 			debugOutput.textarea.onmouseout();
 		}
 		debugOutput.textarea.value = new Date()+": "+string+"\n\n"+debugOutput.textarea.value;
