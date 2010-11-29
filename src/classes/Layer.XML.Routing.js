@@ -32,7 +32,11 @@ FacilMap.Layer.XML.Routing = OpenLayers.Class(FacilMap.Layer.XML, {
 
 	colour : "blue",
 
-	provider : FacilMap.Routing.MapQuest, // is instantiated in the initialize() function
+	/**
+	 * The routing provider to use.
+	 * @var FacilMap.Routing
+	*/
+	provider : null, // is instantiated in the initialize() function
 
 	fromMarker : null,
 	toMarker : null,
@@ -51,7 +55,7 @@ FacilMap.Layer.XML.Routing = OpenLayers.Class(FacilMap.Layer.XML, {
 	initialize : function(name, options) {
 		FacilMap.Layer.XML.prototype.initialize.apply(this, [ name, undefined, options ]);
 
-		this.provider = new this.provider();
+		this.provider = this.provider == null ? new FacilMap.Routing.MapQuest : new this.provider();
 		this.attribution = this.provider.attribution;
 
 		this.viaMarkers = [ ];
