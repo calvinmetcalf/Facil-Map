@@ -20,9 +20,6 @@
 /**
  * Yahoo Streets (http://maps.yahoo.com/)
 */
-FacilMap.Layer.Yahoo.Maps = OpenLayers.Class(OpenLayers.Layer.Yahoo, {
-	initialize: function(name, options) {
-		OpenLayers.Layer.Yahoo.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({sphericalMercator: true}, options) ]);
-	},
+FacilMap.Layer.Yahoo.Maps = OpenLayers.Class(FacilMap.Layer.Yahoo, {
 	CLASS_NAME : "FacilMap.Layer.Yahoo.Maps"
 });

@@ -20,9 +20,9 @@
 /**
  * Google MapMaker streets (http://www.google.com/mapmaker)
 */
-FacilMap.Layer.Google.MapMaker = OpenLayers.Class(FacilMap.Layer.Google.Maps, {
+FacilMap.Layer.Google.MapMaker = OpenLayers.Class(FacilMap.Layer.Google, {
 	initialize: function(name, options) {
-		FacilMap.Layer.Google.Maps.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({type: G_MAPMAKER_NORMAL_MAP}, options) ]);
+		FacilMap.Layer.Google.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({type: G_MAPMAKER_NORMAL_MAP}, options) ]);
 	},
 	CLASS_NAME : "FacilMap.Layer.Google.MapMaker"
 });

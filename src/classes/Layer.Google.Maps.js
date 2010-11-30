@@ -20,9 +20,6 @@
 /**
  * Google Streets (http://maps.google.com/)
 */
-FacilMap.Layer.Google.Maps = OpenLayers.Class(OpenLayers.Layer.Google, {
-	initialize: function(name, options) {
-		OpenLayers.Layer.Google.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({sphericalMercator: true}, options) ]);
-	},
+FacilMap.Layer.Google.Maps = OpenLayers.Class(FacilMap.Layer.Google, {
 	CLASS_NAME : "FacilMap.Layer.Google.Maps"
 });

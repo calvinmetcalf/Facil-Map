@@ -17,7 +17,12 @@
 	Obtain the source code from http://gitorious.org/facilmap.
 */
 
-FacilMap.Layer.Google = { };
+FacilMap.Layer.Google = OpenLayers.Class(OpenLayers.Layer.Google, {
+	initialize: function(name, options) {
+		OpenLayers.Layer.Google.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({sphericalMercator: true}, options) ]);
+	},
+	CLASS_NAME : "FacilMap.Layer.Google"
+});
 
 /**
  * Set this to your Google Maps API key (http://code.google.com/apis/maps/signup.html) prior to adding the Google layers

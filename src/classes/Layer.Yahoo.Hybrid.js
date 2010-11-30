@@ -20,9 +20,9 @@
 /**
  * Yahoo Hybrid (Streets and Satellite)
 */
-FacilMap.Layer.Yahoo.Hybrid = OpenLayers.Class(FacilMap.Layer.Yahoo.Maps, {
+FacilMap.Layer.Yahoo.Hybrid = OpenLayers.Class(FacilMap.Layer.Yahoo, {
 	initialize: function(name, options) {
-		FacilMap.Layer.Yahoo.Maps.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({type: YAHOO_MAP_HYB}, options) ]);
+		FacilMap.Layer.Yahoo.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({type: YAHOO_MAP_HYB}, options) ]);
 	},
 	CLASS_NAME : "FacilMap.Layer.Yahoo.Hybrid"
 });
