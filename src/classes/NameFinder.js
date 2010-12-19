@@ -106,6 +106,7 @@ FacilMap.NameFinder = OpenLayers.Class({
 	 * - fmAutocompleteList
 	 * - fmAutocompleteResults: The list of results returned by the namefinder
 	 * - fmAutocompleteSelected
+	 * - fmAutocompletePrevious
 	 * @param Element input The DOM node of a text input field.
 	 * @return void
 	*/
@@ -204,6 +205,10 @@ FacilMap.NameFinder = OpenLayers.Class({
 			}
 		}
 
+		if(input.fmAutocompletePrevious == input.value)
+			return true;
+		input.fmAutocompletePrevious = input.value;
+
 		if(input.fmAutocompleteTimeout != null)
 			clearTimeout(input.fmAutocompleteTimeout);
 		input.fmAutocompleteTimeout = setTimeout(function(){ namefinder._openAutoSuggest(input); }, 500);
@@ -211,6 +216,8 @@ FacilMap.NameFinder = OpenLayers.Class({
 	},
 
 	_openAutoSuggest : function(input) {
+		input.fmAutocompletePrevious = input.value;
+
 		var offset = this.getLocationPart(input.value);
 		var val = (offset == null ? input.value : input.value.substr(offset[0], offset[1]));
 		var valOrig = input.value;
