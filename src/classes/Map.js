@@ -337,6 +337,19 @@ FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
 				};
 		}
 
+		var firstBaseLayer = null;
+		for(var i=0; i<this.layers.length; i++)
+		{
+			if(this.layers[i].isBaseLayer)
+			{
+				firstBaseLayer = this.layers[i].shortName;
+				break;
+			}
+		}
+		
+		if(FacilMap.Util.encodeQueryString(hashObject) == "lon=0;lat=0;zoom=2;layer="+firstBaseLayer)
+			return { };
+
 		return hashObject;
 	},
 
