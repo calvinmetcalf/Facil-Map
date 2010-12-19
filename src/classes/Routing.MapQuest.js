@@ -33,8 +33,10 @@ FacilMap.Routing.MapQuest = OpenLayers.Class(FacilMap.Routing, {
 
 		json += ",options:{unit:k,generalize:0,narrativeType:none";
 
-		if(this.medium == FacilMap.Routing.Medium.FOOT || this.medium == FacilMap.Routing.Medium.BICYCLE)
+		if(this.medium == FacilMap.Routing.Medium.FOOT)
 			json += ",routeType:pedestrian";
+		else if(this.medium == FacilMap.Routing.Medium.BICYCLE)
+			json += ",routeType:" + this.medium;
 		else
 			json += ",routeType:" + this.routingType;
 
@@ -66,11 +68,7 @@ FacilMap.Routing.MapQuest = OpenLayers.Class(FacilMap.Routing, {
 
 		if(time != null)
 		{
-			// NOTE: Workaround for missing bicycle routing support: Divide the time to walk by 3.
-			if(this.medium == FacilMap.Routing.Medium.BICYCLE)
-				return time/3;
-			else
-				return time;
+			return time;
 		}
 	},
 
@@ -97,6 +95,8 @@ FacilMap.Routing.MapQuest = OpenLayers.Class(FacilMap.Routing, {
 
 		if(this.medium == FacilMap.Routing.Medium.FOOT || this.medium == FacilMap.Routing.Medium.BICYCLE)
 			json += ",routeType:pedestrian";
+		else if(this.medium == FacilMap.Routing.Medium.BICYCLE)
+			json += ",routeType:" + this.medium;
 		else
 			json += ",routeType:" + this.routingType;
 
