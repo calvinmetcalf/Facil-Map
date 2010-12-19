@@ -235,7 +235,7 @@ FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
 				var alreadyExists = false;
 				for(var j=0; j<existingLayers.length; j++)
 				{
-					if(existingLayers[j].CLASS_NAME == "OpenLayers.Layer."+query.r[i]["class"])
+					if(existingLayers[j].CLASS_NAME == query.r[i]["class"])
 					{
 						if(existingLayers[j].name != query.r[i].name)
 						{
@@ -252,7 +252,7 @@ FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
 					continue;
 
 				var classNameParts = query.r[i]["class"].split(/\./);
-				var layerClass = OpenLayers.Layer;
+				var layerClass = window;
 				for(var j=0; j<classNameParts.length; j++)
 				{
 					layerClass = layerClass[classNameParts[j]];
@@ -332,7 +332,7 @@ FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
 			hashObject.l[l.shortName] = l.getQueryObjectFixed();
 			if(l.removableInLayerSwitcher && l.saveInPermalink)
 				hashObject.r[l.shortName] = {
-					"class" : l.CLASS_NAME.replace(/^OpenLayers\.Layer\./, ""),
+					"class" : l.CLASS_NAME,
 					name : l.name
 				};
 		}
