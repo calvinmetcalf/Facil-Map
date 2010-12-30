@@ -38,7 +38,7 @@ FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
 
 	initialize : function(div, options)
 	{
-		var keyboardControl = new FacilMap.Control.KeyboardDefaults();
+		var keyboardControl = new FacilMap.Control.KeyboardDefaults({autoActivate: false});
 		OpenLayers.Map.prototype.initialize.apply(this, [ div, OpenLayers.Util.extend({
 			controls: [
 				new OpenLayers.Control.Navigation(),
