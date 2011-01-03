@@ -104,7 +104,7 @@ FacilMap.Layer.Markers = OpenLayers.Class(OpenLayers.Layer.Markers, {
 				this.marker.events.triggerEvent(this.popup.visible() ? "open" : "close");
 				layer.events.triggerEvent("markersChanged");
 			});
-			marker.events.register("mouseover", feature.popup, function(){this.unsetOpacity()}); // FIXME: Fade opacity
+			marker.events.register("mouseover", feature.popup, function(){this.unsetOpacity()});
 			marker.events.register("mouseout", feature.popup, function(){this.setOpacity()});
 		}
 		marker.fmFeature = feature;
