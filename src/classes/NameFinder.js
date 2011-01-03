@@ -70,7 +70,7 @@ FacilMap.NameFinder = OpenLayers.Class({
 				lonlat : new OpenLayers.LonLat(query_urlPart.lon, query_urlPart.lat),
 				info : OpenLayers.i18n("Coordinates"),
 				name : query_urlPart.lat + ", " + query_urlPart.lon,
-				zoomCallback : function(map) {
+				getZoom : function(map) {
 					if(query_urlPart.zoom == undefined)
 						return 15;
 					else
