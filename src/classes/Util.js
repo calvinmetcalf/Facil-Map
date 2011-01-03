@@ -469,7 +469,7 @@ FacilMap.Util = {
 	makeAbsoluteURL: function(url) {
 		// See http://stackoverflow.com/questions/470832/getting-an-absolute-url-from-a-relative-one-ie6-issue/472729#472729
 		var el = document.createElement("div");
-		el.innerHTML = "<a href=\"" + url.replace("&", "&amp;").replace("\"", "&quot;").replace("<", "&lt;").replace(">", "&gt;") + "\">x</a>";
+		el.innerHTML = "<a href=\"" + FacilMap.Util.htmlspecialchars(url) + "\">x</a>";
 		return el.firstChild.href;
 	},
 
