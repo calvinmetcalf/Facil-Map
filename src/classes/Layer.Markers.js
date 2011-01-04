@@ -61,20 +61,22 @@ FacilMap.Layer.Markers = OpenLayers.Class(OpenLayers.Layer.Markers, {
 	 *                                                content. It is expected to call the callback function that it receives as
 	 *                                                parameter, giving the popup content to it as parameter.
 	 * @param boolean popupVisible Should the popup be visible initially?
-	 * @param OpenLayers.Icon Use this icon instead of the default icon.
+	 * @param OpenLayers.Icon icon Use this icon instead of the default icon.
 	 * @param boolean noPan Don’t move the map view to the marker.
+	 * @param OpenLayers.Icon iconHighlight Show this icon when the popup is visible (if null, the icon isn’t changed when the popup is opened)
 	 * @return The newly created OpenLayers.Marker object. It contains the additional property fmFeature, which is the OpenLayers.Feature
 	 * that connects the marker with the popup. The marker triggers the events “open” or “close” when changing the visibility of the popup.
 	*/
-	createMarker : function(lonlat, popupContent, popupVisible, icon, noPan) {
+	createMarker : function(lonlat, popupContent, popupVisible, icon, noPan, iconHighlight) {
 		var popupContentCallback = (typeof popupContent == "function" ? popupContent : function(callback) { callback(popupContent); });
 
+		if(icon == null)
+			icon = this.defaultIcon;
+
 		var feature = new OpenLayers.Feature(this, lonlat.clone().transform(this.projection, this.map.getProjectionObject()));
-		feature.data.icon = icon ? icon : this.defaultIcon.clone();
+		feature.data.icon = icon.clone();
 		if(popupContent)
-		{
 			feature.popupClass = FacilMap.Popup.FramedCloud;
-		}
 		var marker = feature.createMarker();
 		marker.events.addEventType("close");
 		marker.events.addEventType("open");
@@ -91,6 +93,7 @@ FacilMap.Layer.Markers = OpenLayers.Class(OpenLayers.Layer.Markers, {
 				{
 					popupContentCallback(function(content) {
 						feature.popup.setContentHTML(content);
+						feature.popup.updateSize();
 						showSave.apply(feature.popup, arguments);
 					});
 				}
@@ -108,10 +111,7 @@ FacilMap.Layer.Markers = OpenLayers.Class(OpenLayers.Layer.Markers, {
 			});
 
 			if(popupVisible)
-			{
 				feature.popup.show();
-				feature.popup.updateSize();
-			}
 
 			var layer = this;
 			marker.events.register("click", feature, function(e) {
@@ -124,6 +124,16 @@ FacilMap.Layer.Markers = OpenLayers.Class(OpenLayers.Layer.Markers, {
 			});
 			marker.events.register("mouseover", feature.popup, function(){this.unsetOpacity()});
 			marker.events.register("mouseout", feature.popup, function(){this.setOpacity()});
+
+			if(iconHighlight)
+			{
+				feature.popup.events.register("visibilitychange", feature.popup, function() {
+					var currentIcon = feature.popup.visible() ? iconHighlight : icon;
+					marker.icon.offset = currentIcon.offset;
+					marker.icon.setSize(currentIcon.size);
+					marker.icon.setUrl(currentIcon.url);
+				});
+			}
 		}
 		marker.fmFeature = feature;
 		this.addMarker(marker);

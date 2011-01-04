@@ -21,7 +21,8 @@
  * Extends a FramedCloud with various useful features. An event is triggered during closing instead of passing the callback function
  * to the initialize function. You may pass a DOM element for the popup content instead of HTML code.
  * This FramedCloud supports the OpenLayers.Popup.OPACITY setting. On mouse over, the opacity is set to 1.
- * @event close
+ * @event close The close button was pressed.
+ * @event visibilitychange The visibility ({@link #visibile()}) of the popup has changed.
 */
 
 FacilMap.Popup.FramedCloud = OpenLayers.Class(OpenLayers.Popup.FramedCloud, {
@@ -34,6 +35,7 @@ FacilMap.Popup.FramedCloud = OpenLayers.Class(OpenLayers.Popup.FramedCloud, {
 		OpenLayers.Popup.FramedCloud.prototype.initialize.apply(this, [ id, lonlat, contentSize, null, anchor, closeBox, closeCallback ] );
 
 		this.events.addEventType("close");
+		this.events.addEventType("visibilitychange");
 
 		this.setContentHTML(contentDom);
 
@@ -86,6 +88,16 @@ FacilMap.Popup.FramedCloud = OpenLayers.Class(OpenLayers.Popup.FramedCloud, {
 			FacilMap.Util.changeOpacity(this.div, 1.0);
 			this.div.style.zIndex = 2000;
 		}
+	},
+	show : function() {
+		var ret = OpenLayers.Popup.FramedCloud.prototype.show.apply(this, arguments);
+		this.events.triggerEvent("visibilitychange");
+		return ret;
+	},
+	hide : function() {
+		var ret = OpenLayers.Popup.FramedCloud.prototype.hide.apply(this, arguments);
+		this.events.triggerEvent("visibilitychange");
+		return ret;
 	},
 	destroy: function() {
 		this.contentDom = null;
