@@ -26,10 +26,11 @@
 FacilMap.Layer.Markers = OpenLayers.Class(OpenLayers.Layer.Markers, {
 	defaultIcon : new OpenLayers.Icon('http://api.facilmap.org/marker.png', new OpenLayers.Size(21,25), new OpenLayers.Pixel(-9, -25)),
 	openPopupsOnShow : null,
+	zoomableInLayerSwitcher : true,
 	initialize : function(name, options) {
 		this.openPopupsOnShow = [ ];
 
-		OpenLayers.Layer.Markers.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({zoomableInLayerSwitcher: true, projection: new OpenLayers.Projection("EPSG:4326")}, options) ]);
+		OpenLayers.Layer.Markers.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({projection: new OpenLayers.Projection("EPSG:4326")}, options) ]);
 		this.events.addEventType("markersChanged");
 
 		this.events.register("visibilitychanged", this, function() {

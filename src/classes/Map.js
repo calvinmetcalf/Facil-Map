@@ -169,6 +169,7 @@ FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
 	{
 		this.addLayer(new FacilMap.Layer.other.Relief(OpenLayers.i18n("Relief"), { visibility: false, shortName : "Rlie" }));
 		this.addLayer(new FacilMap.Layer.other.Hiking(OpenLayers.i18n("Hiking symbols"), { visibility: false, shortName : "Hike" }));
+		this.addLayer(new FacilMap.Layer.Markers.OpenLinkMap(OpenLayers.i18n("POI"), { shortName: "OLiM" }));
 
 		this.addAllAvailableOSMLayers();
 		this.addLayer(new FacilMap.Layer.other.OSStreetView(OpenLayers.i18n("Ordnance Survey (UK)"), { shortName : "OSSV" }));
