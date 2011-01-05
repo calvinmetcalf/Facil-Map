@@ -45,8 +45,8 @@ FacilMap.Routing.MapQuest = OpenLayers.Class(FacilMap.Routing, {
 		return this.routingURL + "?inFormat=json&outFormat=xml&json=" + encodeURIComponent(json);
 	},
 
-	getRouteLength : function(dom) {
-		var els = dom.getElementsByTagName("route")[0].childNodes;
+	getRouteLength : function() {
+		var els = this.dom.getElementsByTagName("route")[0].childNodes;
 		for(var i=0; i<els.length; i++)
 		{
 			if(els[i].tagName == "distance")
@@ -54,8 +54,8 @@ FacilMap.Routing.MapQuest = OpenLayers.Class(FacilMap.Routing, {
 		}
 	},
 
-	getRouteDuration : function(dom) {
-		var els = dom.getElementsByTagName("route")[0].childNodes;
+	getRouteDuration : function() {
+		var els = this.dom.getElementsByTagName("route")[0].childNodes;
 		var time = null;
 		for(var i=0; i<els.length; i++)
 		{

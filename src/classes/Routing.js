@@ -44,8 +44,14 @@ FacilMap.Routing = OpenLayers.Class({
 	*/
 	via : null,
 
+	dom : null,
+
 	initialize : function() {
 		this.via = [ ];
+	},
+
+	setDOM : function(dom) {
+		this.dom = dom;
 	},
 
 	/**
@@ -67,19 +73,17 @@ FacilMap.Routing = OpenLayers.Class({
 
 	/**
 	 * Extracts the length of the route in kilometers from the GPX DOM tree.
-	 * @param Document dom
 	 * @return Number
 	*/
-	getRouteLength : function(dom) {
+	getRouteLength : function() {
 		return null;
 	},
 
 	/**
 	 * Extracts the duration of the route in hours from the GPX DOM tree.
-	 * @param Document dom
 	 * @return Number
 	*/
-	getRouteDuration : function(dom) {
+	getRouteDuration : function() {
 		return null;
 	},
 
