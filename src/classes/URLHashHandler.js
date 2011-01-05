@@ -115,7 +115,7 @@ FacilMap.URLHashHandler = OpenLayers.Class({
 		}
 
 		// Konqueror will reload the page when setting an empty location hash
-		if(!hash && navigator.vendor.indexOf("KDE") != -1)
+		if(!hash && (""+navigator.vendor).indexOf("KDE") != -1)
 			location.hash = "#.";
 		else
 			location.hash = hash ? "#"+hash : "";
