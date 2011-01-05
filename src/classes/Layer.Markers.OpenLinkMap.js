@@ -50,6 +50,9 @@ FacilMap.Layer.Markers.OpenLinkMap = OpenLayers.Class(FacilMap.Layer.Markers, {
 			this.lastZoom = this.map.getZoom();
 		}
 
+		if(this.map.getZoom() < this.minZoomLevel)
+			return;
+
 		var extent = this.map.getExtent();
 		if(extent == null)
 			return;
