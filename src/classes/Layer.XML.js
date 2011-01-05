@@ -60,6 +60,11 @@ FacilMap.Layer.XML = OpenLayers.Class(OpenLayers.Layer.GML, {
 
 		this.events.addEventType("allloadend");
 	},
+	afterAdd : function() {
+		var ret = OpenLayers.Layer.GML.prototype.afterAdd.apply(this, arguments);
+		this.map.setLayerZIndex(this, 0);
+		return ret;
+	},
 	loadGML : function(url) {
 		if(!url)
 		{
