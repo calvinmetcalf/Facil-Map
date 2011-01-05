@@ -405,6 +405,10 @@ FacilMap.Layer.XML.Routing = OpenLayers.Class(FacilMap.Layer.XML, {
 		return this.provider.getRouteDuration();
 	},
 
+	getElevationProfileURL : function(size) {
+		return this.provider.getElevationProfileURL(size);
+	},
+
 	requestSuccess : function(request) {
 		if(request.responseXML)
 		{ // Do this before calling the parent function as that invokes the loadend event

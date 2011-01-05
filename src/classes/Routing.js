@@ -95,6 +95,15 @@ FacilMap.Routing = OpenLayers.Class({
 	 * @return void
 	*/
 	reorderViaPoints : function(callback) {
+	},
+
+	/**
+	 * Returns a URL to an image containing the elevation profile of this route.
+	 * @param OpenLayers.Size size The desired size of the image
+	 * @return String
+	*/
+	getElevationProfileURL : function(size) {
+		return null;
 	}
 });
 

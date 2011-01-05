@@ -20,6 +20,7 @@
 FacilMap.Routing.MapQuest = OpenLayers.Class(FacilMap.Routing, {
 	routingURL : "http://open.mapquestapi.com/directions/v0/route",
 	orderedURL : "http://open.mapquestapi.com/directions/v0/optimizedRoute",
+	elevationChartURL : "http://open.mapquestapi.com/elevation/v1/getElevationChart",
 	attribution : OpenLayers.i18n("attribution-routing-mapquest"),
 
 	getGPXURL : function() {
@@ -140,5 +141,45 @@ FacilMap.Routing.MapQuest = OpenLayers.Class(FacilMap.Routing, {
 			},
 			scope: this
 		});
+	},
+
+	getElevationProfileURL : function(size) {
+		var minDist = 2 * this.getRouteLength() / size.w;
+
+		var calcDist = function(lonlat1, lonlat2) {
+			// Source: http://www.movable-type.co.uk/scripts/latlong.html
+			var R = 6371; // km
+			var dLat = (lonlat2.lat-lonlat1.lat) * Math.PI/180;
+			var dLon = (lonlat2.lon-lonlat1.lon) * Math.PI/180;
+			var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+					Math.cos(lonlat1.lat * Math.PI/180) * Math.cos(lonlat2.lat * Math.PI/180) *
+					Math.sin(dLon/2) * Math.sin(dLon/2);
+			var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+			return R * c;
+		};
+
+		var points = this.dom.getElementsByTagName("shapePoints")[0].getElementsByTagName("latLng");
+		var last = null;
+		var latlons = [ ];
+		var dist = 0;
+		for(var i=0; i < points.length; i++)
+		{
+			var it = new OpenLayers.LonLat(points[i].getElementsByTagName("lng")[0].firstChild.data, points[i].getElementsByTagName("lat")[0].firstChild.data);
+
+			if(last != null)
+				dist += calcDist(last, it);
+			last = it;
+
+			if(i == 0 || i == points.length-1 || dist >= minDist)
+			{
+				latlons.push(it.lat);
+				latlons.push(it.lon);
+				dist = 0;
+			}
+		}
+
+		var json = "{shapeFormat:'raw',unit:'k',width:'"+size.w+"',height:'"+size.h+"',latLngCollection:["+latlons.join(",")+"]}";
+
+		return this.elevationChartURL + "?inFormat=json&json="+encodeURIComponent(json);
 	}
 });
