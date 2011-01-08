@@ -17,6 +17,14 @@
 	Obtain the source code from http://gitorious.org/facilmap.
 */
 
+/**
+ * OpenLinkMap from http://olm.openstreetmap.de/.
+ *
+ * Displays clickable circles over POIs on the map that open popups with information about opening hours,
+ * addresses, telephone numbers and websites.
+ *
+ * POIs are identified by an ID and a type string in OpenLinkMap.
+ */
 FacilMap.Layer.Markers.OpenLinkMap = OpenLayers.Class(FacilMap.Layer.Markers, {
 	api : "http://olm.openstreetmap.de/api",
 	apiProjection : new OpenLayers.Projection("EPSG:4326"),
@@ -39,6 +47,9 @@ FacilMap.Layer.Markers.OpenLinkMap = OpenLayers.Class(FacilMap.Layer.Markers, {
 		return ret;
 	},
 
+	/**
+	 * Receives the markers for the current map view and adds them to the map.
+	 */
 	loadMarkers : function() {
 		if(!this.getVisibility() || this.map == null)
 			return;
@@ -91,6 +102,12 @@ FacilMap.Layer.Markers.OpenLinkMap = OpenLayers.Class(FacilMap.Layer.Markers, {
 		});
 	},
 
+	/**
+	 * Is called by the {#loadMarkers} function and adds a single marker to the map.
+	 * @param OpenLayers.LonLat lonlat The position in EPSG 4326
+	 * @param String id The ID of the POI
+	 * @param String type The type of the POI
+	 */
 	addOLMMarker: function(lonlat, id, type)
 	{
 		if(this.olmMarkers[type] == undefined)
@@ -103,6 +120,13 @@ FacilMap.Layer.Markers.OpenLinkMap = OpenLayers.Class(FacilMap.Layer.Markers, {
 		this.olmMarkers[type][id] = this.createMarker(lonlat, function(callback){ layer.getPopupContent(id, type, callback); }, false, this.markerIcon.clone(), true, this.markerIconHighlight.clone());
 	},
 
+	/**
+	 * Downloads the information for a specific POI to be displayed in the popup and passes it on to
+	 * a callback function.
+	 * @param String id The ID of the POI to load the information for
+	 * @param String type The type of the POI to load the information for
+	 * @param Function callback A function that receives the HTML code with the information as first parameter
+	 */
 	getPopupContent : function(id, type, callback) {
 		var layer = this;
 		OpenLayers.Request.GET({
@@ -118,6 +142,13 @@ FacilMap.Layer.Markers.OpenLinkMap = OpenLayers.Class(FacilMap.Layer.Markers, {
 		});
 	},
 
+	/**
+	 * When the OLM API sends POI information, internationalised strings are encoded as #key#. This function
+	 * replaces such placeholders by their actual translation.
+	 * This function is used by the {@link #getPopupContent} function.
+	 * @param String str The string to replace I18n string in
+	 * @return String The translated string
+	 */
 	replaceI18n : function(str) {
 		var togo = str;
 		var ret = "";
