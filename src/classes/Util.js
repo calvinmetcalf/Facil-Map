@@ -570,13 +570,6 @@ FacilMap.Util = {
 		f.idx++;
 	},
 
-	alert_r: function(data) {
-		var str = "";
-		for(var i in data)
-			str += i+": "+data[i]+"\n";
-		alert(str);
-	},
-
 	debugOutput: function(string) {
 		var debugOutput = FacilMap.Util.debugOutput;
 		if(debugOutput.textarea == null)
@@ -593,6 +586,29 @@ FacilMap.Util = {
 			debugOutput.textarea.onmouseout = function(){ FacilMap.Util.changeOpacity(this, 0.5); };
 			debugOutput.textarea.onmouseout();
 		}
-		debugOutput.textarea.value = new Date()+": "+string+"\n\n"+debugOutput.textarea.value;
+		var obj2str = function(obj, depth) {
+			var tabs = "";
+			for(var i=0; i<depth; i++)
+				tabs += "\t";
+			var str = "";
+			if(obj instanceof Array)
+			{
+				str += tabs+"[\n";
+				for(var i=0; i<obj.length; i++)
+					str += tabs+"\t"+obj[i]+"\n";
+				str += tabs+"]\n";
+			}
+			else if(obj instanceof Object)
+			{
+				str += tabs+"{\n";
+				for(var i in obj)
+					str += tabs+"\t"+i+": "+obj2str(obj[i], depth+1)+"\n";
+				str += tabs+"}\n";
+			}
+			else
+				str = ""+obj;
+			return str;
+		}
+		debugOutput.textarea.value = new Date()+": "+obj2str(string)+"\n\n"+debugOutput.textarea.value;
 	}
 }
