@@ -53,6 +53,27 @@ FacilMap.Control.KeyboardDefaults = OpenLayers.Class(OpenLayers.Control.Keyboard
 		if(evt.altKey || evt.ctrlKey)
 			return true;
 		OpenLayers.Control.KeyboardDefaults.prototype.defaultKeyPress.apply(this, [ evt ]);
+
+		switch(evt.keyCode)
+		{ // List copied from OpenLayers.Control.KeyboardDefaults
+			case OpenLayers.Event.KEY_LEFT:
+			case OpenLayers.Event.KEY_RIGHT:
+			case OpenLayers.Event.KEY_UP:
+			case OpenLayers.Event.KEY_DOWN:
+			case 33: // Page Up. Same in all browsers.
+			case 34: // Page Down. Same in all browsers.
+			case 35: // End. Same in all browsers.
+			case 36: // Home. Same in all browsers.
+			case 43:  // +/= (ASCII), keypad + (ASCII, Opera)
+			case 61:  // +/= (Mozilla, Opera, some ASCII)
+			case 187: // +/= (IE)
+			case 107: // keypad + (IE, Mozilla)
+			case 45:  // -/_ (ASCII, Opera), keypad - (ASCII, Opera)
+			case 109: // -/_ (Mozilla), keypad - (Mozilla, IE)
+			case 189: // -/_ (IE)
+			case 95:  // -/_ (some ASCII)
+				OpenLayers.Event.stop(evt);
+		}
 	},
 	CLASS_NAME : "FacilMap.Control.KeyboardDefaults"
 });
