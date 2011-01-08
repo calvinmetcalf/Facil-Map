@@ -38,14 +38,13 @@ FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
 
 	initialize : function(div, options)
 	{
-		var keyboardControl = new FacilMap.Control.KeyboardDefaults({autoActivate: false});
 		OpenLayers.Map.prototype.initialize.apply(this, [ div, OpenLayers.Util.extend({
 			controls: [
 				new OpenLayers.Control.Navigation(),
 				new OpenLayers.Control.PanZoomBar(),
 				new FacilMap.Control.LayerSwitcher(),
 				new OpenLayers.Control.Attribution(),
-				keyboardControl,
+				new FacilMap.Control.KeyboardDefaults(),
 				new OpenLayers.Control.MousePosition(),
 				new OpenLayers.Control.ScaleLine() ],
 			//maxExtent: new OpenLayers.Bounds(-180, -85, 180, 85), // FIXME: 4326 as projection does not seem to work
@@ -65,9 +64,6 @@ FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
 		this.events.register("move", this, function(){ this.events.triggerEvent("newHash"); });
 		this.events.register("changebaselayer", this, function(){ this.events.triggerEvent("newHash"); });
 		this.events.register("changelayer", this, function(){ this.events.triggerEvent("newHash"); });
-
-		OpenLayers.Event.observe(this.viewPortDiv, "mouseover", OpenLayers.Function.bindAsEventListener(function(){ keyboardControl.activate(); }, this));
-		OpenLayers.Event.observe(this.viewPortDiv, "mouseout", OpenLayers.Function.bindAsEventListener(function(){ keyboardControl.deactivate(); }, this));
 	},
 
 	updateSize : function()
