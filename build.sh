@@ -17,8 +17,9 @@ files="$(list_files)"
 
 if which git > /dev/null; then
 	#rev="$(git rev-list --max-count=1 HEAD)"
-	rev="$(date -u -d "1970-01-01 UTC $(git rev-list --max-count=1 --timestamp HEAD | cut -d' ' -f1) seconds" "+%FT%TZ")"
-	out_dir="versions/$rev"
+	#rev="$(date -u -d "1970-01-01 UTC $(git rev-list --max-count=1 --timestamp HEAD | cut -d' ' -f1) seconds" "+%FT%TZ")"
+	rev="$(date -u "+%FT%TZ")"
+	out_dir="builds/$rev"
 	mkdir -p "$out_dir"
 else
 	out_dir=.
