@@ -126,7 +126,7 @@ FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
 
 		this.addLayer(new FacilMap.Layer.OSM.OOMStreets(OpenLayers.i18n("Streets overlay"), { shortName : "OOMS", visibility : false }));
 		this.addLayer(new FacilMap.Layer.OSM.OOMLabels(OpenLayers.i18n("Labels overlay"), { shortName : "OOML", visibility : false }));
-		this.addLayer(new FacilMap.Layer.other.Hiking(OpenLayers.i18n("Hiking symbols"), { visibility: false, shortName : "Hike" }));
+		this.addLayer(new FacilMap.Layer.OSM.Hiking(OpenLayers.i18n("Hiking symbols"), { visibility: false, shortName : "Hike" }));
 		this.addLayer(new FacilMap.Layer.Markers.OpenLinkMap(OpenLayers.i18n("POI"), { shortName: "OLiM" }));
 	},
 
