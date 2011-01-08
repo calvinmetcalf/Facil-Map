@@ -32,9 +32,18 @@ FacilMap.Layer.XML = OpenLayers.Class(OpenLayers.Layer.GML, {
 	relations : null,
 	colour : null,
 	toLoad : 0,
+	style : {
+		strokeColor: this.colour,
+		strokeWidth: 3,
+		strokeOpacity: 0.5
+	},
+	projection : new OpenLayers.Projection("EPSG:4326"),
+	zoomableInLayerSwitcher : true,
+
 	initialize : function(name, url, options) {
 		this.fmURL = url;
 		this.relations = { };
+		this.shortName = "xml"+FacilMap.Layer.XML.shortNameI++;
 
 		if(this.colour == null)
 		{
@@ -47,16 +56,7 @@ FacilMap.Layer.XML = OpenLayers.Class(OpenLayers.Layer.GML, {
 			}
 		}
 
-		OpenLayers.Layer.GML.prototype.initialize.apply(this, [ name ? name : url, url, OpenLayers.Util.extend({
-			style: {
-				strokeColor: this.colour,
-				strokeWidth: 3,
-				strokeOpacity: 0.5
-			},
-			projection: new OpenLayers.Projection("EPSG:4326"),
-			zoomableInLayerSwitcher: true,
-			shortName : "xml"+FacilMap.Layer.XML.shortNameI++
-		}, options) ]);
+		OpenLayers.Layer.GML.prototype.initialize.apply(this, [ name ? name : url, url, options ]);
 
 		this.events.addEventType("allloadend");
 	},
@@ -101,7 +101,7 @@ FacilMap.Layer.XML = OpenLayers.Class(OpenLayers.Layer.GML, {
 			});
 		}
 	},
-	requestSuccess: function(request) {
+	requestSuccess : function(request) {
 		if(request.responseXML && request.responseXML.documentElement)
 		{
 			switch(request.responseXML.documentElement.tagName)

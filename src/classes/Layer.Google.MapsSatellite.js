@@ -21,8 +21,10 @@
  * Google Satellite (http://maps.google.com/)
 */
 FacilMap.Layer.Google.MapsSatellite = OpenLayers.Class(FacilMap.Layer.Google, {
-	initialize: function(name, options) {
-		FacilMap.Layer.Google.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({type: G_SATELLITE_MAP, numZoomLevels: 22}, options) ]);
+	numZoomLevels : 22,
+	initialize : function() {
+		this.type = G_SATELLITE_MAP;
+		FacilMap.Layer.Google.prototype.initialize.apply(this, arguments);
 	},
 	CLASS_NAME : "FacilMap.Layer.Google.MapsSatellite"
 });

@@ -21,7 +21,9 @@
  * Hike & Bike Map (http://hikebikemap.de/)
 */
 FacilMap.Layer.OSM.HikeAndBike = OpenLayers.Class(OpenLayers.Layer.OSM, {
-	initialize: function(name, options) {
-		OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://toolserver.org/tiles/hikebike/${z}/${x}/${y}.png", OpenLayers.Util.extend({attribution: OpenLayers.String.format(OpenLayers.i18n("attribution-osm"), { rendering: "<a href=\"http://hikebikemap.de/\">Hike &amp; Bike Map</a>" })}, options) ]);
-	}
+	attribution : OpenLayers.String.format(OpenLayers.i18n("attribution-osm"), { rendering: "<a href=\"http://hikebikemap.de/\">Hike &amp; Bike Map</a>" }),
+	initialize : function(name, options) {
+		OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://toolserver.org/tiles/hikebike/${z}/${x}/${y}.png", options ]);
+	},
+	CLASS_NAME : "FacilMap.Layer.OSM.HikeAndBike"
 });

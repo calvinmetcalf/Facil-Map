@@ -21,9 +21,11 @@
  * OpenOrienteeringMap (http://oobrien.com/oom/) names overlay.
 */
 FacilMap.Layer.OSM.OOMLabels = OpenLayers.Class(OpenLayers.Layer.OSM, {
+	numZoomLevels: 19,
+	isBaseLayer: false,
 	attribution : OpenLayers.i18n("attribution-oom-labels"),
 	initialize : function(name, options) {
-		OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://tiler1.censusprofiler.org/labelsonly/${z}/${x}/${y}.png", OpenLayers.Util.extend({ numZoomLevels: 19, isBaseLayer: false }, options) ]);
+		OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://tiler1.censusprofiler.org/labelsonly/${z}/${x}/${y}.png", options ]);
 	},
 	CLASS_NAME : "FacilMap.Layer.OSM.OOMLabels"
 });

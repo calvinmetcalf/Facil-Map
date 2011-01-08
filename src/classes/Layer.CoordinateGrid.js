@@ -57,6 +57,8 @@ FacilMap.Layer.CoordinateGrid = OpenLayers.Class(OpenLayers.Layer.Vector, {
 	*/
 	labelStyleMapHighlight : { fontColor: "#666", fontSize: "10px", fontWeight: "bold" },
 
+	projection : new OpenLayers.Projection("EPSG:4326"),
+
 	horizontalLines : null,
 	verticalLines : null,
 	degreeLabels : null,
@@ -68,7 +70,6 @@ FacilMap.Layer.CoordinateGrid = OpenLayers.Class(OpenLayers.Layer.Vector, {
 
 		if(typeof name == "undefined" || name == null)
 			name = OpenLayers.i18n("Coordinate grid");
-		options = OpenLayers.Util.extend(options, { projection : new OpenLayers.Projection("EPSG:4326") });
 		OpenLayers.Layer.Vector.prototype.initialize.apply(this, [ name, options ]);
 	},
 	setMap : function() {
@@ -192,5 +193,7 @@ FacilMap.Layer.CoordinateGrid = OpenLayers.Class(OpenLayers.Layer.Vector, {
 		this.destroyFeatures(destroyFeatures);
 		this.addFeatures(addFeatures);
 		this.addFeatures(this.degreeLabels);
-	}
+	},
+
+	CLASS_NAME: "FacilMap.Layer.CoordinateGrid"
 });

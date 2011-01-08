@@ -18,9 +18,7 @@
 */
 
 FacilMap.Layer.Yahoo = OpenLayers.Class(OpenLayers.Layer.Yahoo, {
-	initialize: function(name, options) {
-		OpenLayers.Layer.Yahoo.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({sphericalMercator: true}, options) ]);
-	},
+	sphericalMercator : true,
 	CLASS_NAME : "FacilMap.Layer.Yahoo"
 });
 

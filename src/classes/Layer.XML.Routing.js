@@ -537,5 +537,7 @@ FacilMap.Layer.XML.Routing = OpenLayers.Class(FacilMap.Layer.XML, {
 				this.drawMarker(this.markers[i]);
             this.markersDrawn = true;
 		}
-	}
+	},
+
+	CLASS_NAME : "FacilMap.Layer.XML.Routing"
 });

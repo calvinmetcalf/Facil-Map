@@ -21,8 +21,10 @@
  * Relief rendering from Hike & Bike map (http://hikebikemap.de/)
 */
 FacilMap.Layer.other.Relief = OpenLayers.Class(OpenLayers.Layer.OSM, {
+	isBaseLayer : false,
+	attribution : OpenLayers.i18n("attribution-relief"),
 	initialize: function(name, options) {
-		OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://toolserver.org/~cmarqu/hill/${z}/${x}/${y}.png", OpenLayers.Util.extend({isBaseLayer: false, attribution: OpenLayers.i18n("attribution-relief") }, options) ]);
+		OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://toolserver.org/~cmarqu/hill/${z}/${x}/${y}.png", options ]);
 	},
 	CLASS_NAME : "FacilMap.Layer.other.Relief"
 });

@@ -21,10 +21,13 @@
  * OpenOrienteeringMap (http://oobrien.com/oom/) Street-O overlay.
 */
 FacilMap.Layer.OSM.OOMStreets = OpenLayers.Class(OpenLayers.Layer.OSM, {
+	numZoomLevels : 19,
+	isBaseLayer : false,
+	opacity : 0.25,
 	attribution : OpenLayers.i18n("attribution-oom-streets"),
 	initialize : function(name, options) {
 		// New world-wide tiles. Aren’t transparent anymore so not as good for using them as an overlay as the old ones. See http://www.openstreetmap.org/user/Ollie/diary/9223.
-		OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://tiler1.censusprofiler.org/streeto/${z}/${x}/${y}.png", OpenLayers.Util.extend({ numZoomLevels: 19, isBaseLayer: false, opacity:0.25 }, options) ]);
+		OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://tiler1.censusprofiler.org/streeto/${z}/${x}/${y}.png", options ]);
 	},
 	CLASS_NAME : "FacilMap.Layer.OSM.OOMStreets"
 });

@@ -146,5 +146,7 @@ FacilMap.Layer.Markers.OpenLinkMap = OpenLayers.Class(FacilMap.Layer.Markers, {
 		}
 
 		return ret;
-	}
+	},
+
+	CLASS_NAME : "FacilMap.Layer.Markers.OpenLinkMap"
 });

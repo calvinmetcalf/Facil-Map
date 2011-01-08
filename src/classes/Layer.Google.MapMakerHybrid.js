@@ -21,8 +21,9 @@
  * Google MapMaker hybrid (streets and satellite) (http://www.google.com/mapmaker)
 */
 FacilMap.Layer.Google.MapMakerHybrid = OpenLayers.Class(FacilMap.Layer.Google, {
-	initialize: function(name, options) {
-		FacilMap.Layer.Google.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({type: G_MAPMAKER_HYBRID_MAP}, options) ]);
+	initialize : function() {
+		this.type = G_MAPMAKER_HYBRID_MAP;
+		FacilMap.Layer.Google.prototype.initialize.apply(this, arguments);
 	},
 	CLASS_NAME : "FacilMap.Layer.Google.MapMakerHybrid"
 });
