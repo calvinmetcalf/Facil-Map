@@ -547,6 +547,29 @@ FacilMap.Util = {
 		return ret;
 	},
 
+	/**
+	 * Add the specified CSS rule to the document. The rules are added from the top so they can be overridden
+	 * in the HTML code.
+	 * @param String selector The selector, for example ".class"
+	 * @param String rules The rules, for example "font-weight:bold;"
+	 */
+	addCSSRule: function(selector, rules) {
+		// See http://www.hunlock.com/blogs/Totally_Pwn_CSS_with_Javascript
+
+		var f = FacilMap.Util.addCSSRule;
+		if(f.idx == null)
+			f.idx = 0;
+
+		var s = document.styleSheets[0];
+		var rule;
+		if(s.addRule) // M$IE
+			rule = s.addRule(selector, rules, f.idx);
+		else
+			rule = s.insertRule(selector + " { " + rules + " }", f.idx);
+		OpenLayers.Util.extend(s.style, rules);
+		f.idx++;
+	},
+
 	alert_r: function(data) {
 		var str = "";
 		for(var i in data)

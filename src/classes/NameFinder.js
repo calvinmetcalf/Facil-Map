@@ -21,6 +21,12 @@
  * An abstract class whose implementations connect to a NameFinder.
 */
 FacilMap.NameFinder = OpenLayers.Class({
+	initialize : function() {
+		FacilMap.Util.addCSSRule('.fmAutocomplete', 'margin:0 -1px !important; padding:0 !important; overflow:auto !important; border:1px solid ButtonShadow !important; background-color:Window !important; color:WindowText !important; list-style-type:none !important; z-index:100000 !important; max-height:12em !important; display:block;');
+		FacilMap.Util.addCSSRule('.fmAutocomplete li', 'cursor:pointer !important; padding:3px 6px !important; display:block !important;');
+		FacilMap.Util.addCSSRule('.fmAutocomplete li.selected', 'background-color:Highlight !important; color:HighlightText !important;');
+	},
+
 	/**
 	 * Perform a search through a NameFinder. This function itself does not connect to an actual NameFinder, it only finds one result if
 	 * the query String consists of coordinates encoded in a Lat,Lon string or an OpenStreetMap Permalink.

@@ -30,6 +30,8 @@ FacilMap.Layer.Markers = OpenLayers.Class(OpenLayers.Layer.Markers, {
 	initialize : function(name, options) {
 		this.openPopupsOnShow = [ ];
 
+		FacilMap.Util.addCSSRule('.fmLayerMarkers img', 'cursor:pointer;');
+
 		OpenLayers.Layer.Markers.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({projection: new OpenLayers.Projection("EPSG:4326")}, options) ]);
 		this.events.addEventType("markersChanged");
 

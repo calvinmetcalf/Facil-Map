@@ -31,6 +31,12 @@ FacilMap.Control.GeoLocation = OpenLayers.Class(OpenLayers.Control, {
 
 	element : null,
 
+	initialize : function() {
+		FacilMap.Util.addCSSRule('.fmControlGeoLocation', 'position:absolute; right:3px; font-size:smaller; bottom:6em;');
+
+		return OpenLayers.Control.prototype.initialize.apply(this, arguments);
+	},
+
 	draw : function() {
 		var ret = OpenLayers.Control.prototype.draw.apply(this, arguments);
 

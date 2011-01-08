@@ -26,11 +26,6 @@
 
 FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
 	/**
-	 * This CSS file will be additionally loaded.
-	*/
-	fmTheme : "http://api.facilmap.org/facilmap.css",
-
-	/**
 	 * The projection to use in coordinates in the Permalink.
 	 * @var OpenLayers.Projection
 	*/
@@ -55,8 +50,6 @@ FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
 			projection: new OpenLayers.Projection("EPSG:900913"),
 			displayProjection: new OpenLayers.Projection("EPSG:4326")
 		}, options) ]);
-
-		this.loadCSSFile(this.fmTheme);
 
 		this.events.addEventType("mapResize");
 		this.events.addEventType("newHash");
@@ -348,30 +341,6 @@ FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
 			return { };
 
 		return hashObject;
-	},
-
-	loadCSSFile : function(url) {
-		if(url == null)
-			return;
-
-		var addNode = true;
-		var nodes = document.getElementsByTagName('link');
-		for(var i=0; i<nodes.length; i++)
-		{
-			if(OpenLayers.Util.isEquivalentUrl(nodes[i].href, url))
-			{
-				addNode = false;
-				break;
-			}
-		}
-		if(addNode)
-		{
-			var cssNode = document.createElement('link');
-			cssNode.setAttribute('rel', 'stylesheet');
-			cssNode.setAttribute('type', 'text/css');
-			cssNode.setAttribute('href', url);
-			document.getElementsByTagName('head')[0].appendChild(cssNode);
-		}
 	},
 
 	CLASS_NAME : "FacilMap.Map"

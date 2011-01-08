@@ -254,6 +254,7 @@ FacilMap.NameFinder.Nominatim = OpenLayers.Class(FacilMap.NameFinder, {
 	 * @param String nameFinderURL http://nominatim.openstreetmap.org/search. To work around the same origin policy, pass a wrapper that lives on your webspace.
 	*/
 	initialize : function(nameFinderURL) {
+		FacilMap.NameFinder.prototype.initialize.apply(this, [ ]);
 		if(nameFinderURL)
 			this.nameFinderURL = nameFinderURL;
 	},
