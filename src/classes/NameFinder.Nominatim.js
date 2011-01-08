@@ -348,5 +348,7 @@ FacilMap.NameFinder.Nominatim = OpenLayers.Class(FacilMap.NameFinder, {
 		}
 
 		return null;
-	}
+	},
+
+	CLASS_NAME : "FacilMap.NameFinder.Nominatim"
 });

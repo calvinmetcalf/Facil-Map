@@ -60,5 +60,7 @@ FacilMap.Routing.Cloudmade = OpenLayers.Class(FacilMap.Routing, {
 				return duration[0].firstChild.data/3600;
 		}
 		return null;
-	}
+	},
+
+	CLASS_NAME : "FacilMap.Routing.Cloudmade"
 });

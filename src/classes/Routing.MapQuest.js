@@ -181,5 +181,7 @@ FacilMap.Routing.MapQuest = OpenLayers.Class(FacilMap.Routing, {
 		var json = "{shapeFormat:'raw',unit:'k',width:'"+size.w+"',height:'"+size.h+"',latLngCollection:["+latlons.join(",")+"]}";
 
 		return this.elevationChartURL + "?inFormat=json&json="+encodeURIComponent(json);
-	}
+	},
+
+	CLASS_NAME : "FacilMap.Routing.MapQuest"
 });

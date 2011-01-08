@@ -345,5 +345,7 @@ FacilMap.NameFinder = OpenLayers.Class({
 	_unselectAutoSuggestItem : function(input, item)
 	{
 		item.li.className = "";
-	}
+	},
+
+	CLASS_NAME : "FacilMap.NameFinder"
 });

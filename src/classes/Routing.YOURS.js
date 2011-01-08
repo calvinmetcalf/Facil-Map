@@ -69,5 +69,7 @@ FacilMap.Routing.YOURS = OpenLayers.Class(FacilMap.Routing, {
 			return 1*distanceEls[0].firstChild.data;
 		else
 			return null;
-	}
+	},
+
+	CLASS_NAME : "FacilMap.Routing.YOURS"
 });

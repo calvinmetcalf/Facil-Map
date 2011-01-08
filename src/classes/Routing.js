@@ -104,7 +104,9 @@ FacilMap.Routing = OpenLayers.Class({
 	*/
 	getElevationProfileURL : function(size) {
 		return null;
-	}
+	},
+
+	CLASS_NAME : "FacilMap.Routing"
 });
 
 /**
