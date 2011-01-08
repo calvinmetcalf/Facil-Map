@@ -21,7 +21,9 @@
 FacilMap.olBackup.Class = OpenLayers.Class;
 OpenLayers.Class = function() {
 	var ret = FacilMap.olBackup.Class.apply(this, arguments);
-	ret.prototype.fmParentClasses = arguments;
+	ret.prototype.fmParentClasses = [ ];
+	for(var i=0; i<arguments.length; i++)
+		ret.prototype.fmParentClasses.push(arguments[i]);
 	return ret;
 };
 OpenLayers.Class.isPrototype = FacilMap.olBackup.Class.isPrototype;
