@@ -112,6 +112,8 @@ FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
 
 	addAllAvailableOSMLayers : function()
 	{
+		var map = this;
+
 		this.addLayer(new FacilMap.Layer.OSM.Mapnik(OpenLayers.i18n("Mapnik"), { shortName : "Mpnk" }));
 		this.addLayer(new FacilMap.Layer.OSM.MapSurfer.Road(OpenLayers.i18n("MapSurfer Road"), { shortName : "MSfR" }));
 		this.addLayer(new FacilMap.Layer.OSM.MapSurfer.Topographic(OpenLayers.i18n("MapSurfer Topographic"), { shortName : "MSfT" }));
@@ -128,6 +130,10 @@ FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
 		this.addLayer(new FacilMap.Layer.OSM.OOMLabels(OpenLayers.i18n("Labels overlay"), { shortName : "OOML", visibility : false }));
 		this.addLayer(new FacilMap.Layer.OSM.Hiking(OpenLayers.i18n("Hiking symbols"), { visibility: false, shortName : "Hike" }));
 		this.addLayer(new FacilMap.Layer.Markers.OpenLinkMap(OpenLayers.i18n("POI"), { shortName: "OLiM" }));
+
+		FacilMap.Layer.Markers.OpenStreetBugs.loadAPI(function() {
+			map.addLayer(new FacilMap.Layer.Markers.OpenStreetBugs(_("OpenStreetBugs"), { visibility: false, shortName: "OSBu" }));
+		});
 	},
 
 	addAllAvailableGoogleLayers : function()
