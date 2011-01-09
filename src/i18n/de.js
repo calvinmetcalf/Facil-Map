@@ -12,7 +12,7 @@
 	GNU Affero General Public License for more details.
 
 	You should have received a copy of the GNU Affero General Public License
-	along with FacilMap.  If not, see <http://www.gnu.org/licenses/>.
+	along with FacilchangeOpacityMap.  If not, see <http://www.gnu.org/licenses/>.
 
 	Obtain the source code from http://gitorious.org/facilmap.
 */
@@ -71,6 +71,7 @@ OpenLayers.Lang.de = OpenLayers.Util.extend(OpenLayers.Lang.de, {
 	"Links to other maps" : "Auf andere Karten",
 	"Tags" : "Attribute",
 	"POI" : "POI",
+	"OpenStreetBugs" : "OpenStreetBugs",
 	"olm.address" : "Adresse",
 	"olm.contact" : "Kontakt",
 	"olm.fuel" : "Tankstelle",

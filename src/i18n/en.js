@@ -71,6 +71,7 @@ OpenLayers.Lang.en = OpenLayers.Util.extend(OpenLayers.Lang.en, {
 	"Links to other maps" : "Links to other maps",
 	"Tags" : "Tags",
 	"POI" : "POI",
+	"OpenStreetBugs" : "OpenStreetBugs",
 	"olm.object" : "Objects",
 	"olm.address" : "Address",
 	"olm.contact" : "Contact",
