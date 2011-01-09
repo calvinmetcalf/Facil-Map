@@ -79,15 +79,55 @@ FacilMap.Layer.Markers = OpenLayers.Class(OpenLayers.Layer.Markers, {
 
 		var feature = new OpenLayers.Feature(this, lonlat.clone().transform(this.projection, this.map.getProjectionObject()));
 		feature.data.icon = icon.clone();
-		if(popupContent)
-			feature.popupClass = FacilMap.Popup.FramedCloud;
+		feature.popupClass = FacilMap.Popup.FramedCloud;
 		var marker = feature.createMarker();
 		marker.events.addEventType("close");
 		marker.events.addEventType("open");
+
+		var layer = this;
+
+		var createPopupSave = feature.createPopup;
+		feature.createPopup = function() {
+			var popup = createPopupSave.apply(feature, arguments);
+
+			popup.panMapIfOutOfView = !noPan;
+
+			layer.map.addPopup(popup);
+			popup.events.register("close", feature, function(e)
+			{
+				this.popup.hide();
+				OpenLayers.Event.stop(e);
+				layer.events.triggerEvent("markersChanged");
+				this.marker.events.triggerEvent("close");
+			});
+
+			marker.events.register("click", feature, function(e) {
+				this.popup.toggle();
+				if(this.popup.visible())
+					this.popup.updateSize();
+				OpenLayers.Event.stop(e);
+				this.marker.events.triggerEvent(this.popup.visible() ? "open" : "close");
+				layer.events.triggerEvent("markersChanged");
+			});
+			marker.events.register("mouseover", popup, function(){this.unsetOpacity()});
+			marker.events.register("mouseout", popup, function(){this.setOpacity()});
+
+			if(iconHighlight)
+			{
+				popup.events.register("visibilitychange", popup, function() {
+					var currentIcon = this.visible() ? iconHighlight : icon;
+					marker.icon.offset = currentIcon.offset;
+					marker.icon.setSize(currentIcon.size);
+					marker.icon.setUrl(currentIcon.url);
+				});
+			}
+
+			return popup;
+		};
+
 		if(popupContent)
 		{
 			feature.createPopup(true);
-			feature.popup.panMapIfOutOfView = !noPan;
 			feature.popup.hide();
 
 			var showSave = feature.popup.show;
@@ -105,39 +145,8 @@ FacilMap.Layer.Markers = OpenLayers.Class(OpenLayers.Layer.Markers, {
 					showSave.apply(feature.popup, arguments);
 			};
 
-			this.map.addPopup(feature.popup);
-			feature.popup.events.register("close", feature, function(e)
-			{
-				this.popup.hide();
-				OpenLayers.Event.stop(e);
-				layer.events.triggerEvent("markersChanged");
-				this.marker.events.triggerEvent("close");
-			});
-
 			if(popupVisible)
 				feature.popup.show();
-
-			var layer = this;
-			marker.events.register("click", feature, function(e) {
-				this.popup.toggle();
-				if(this.popup.visible())
-					this.popup.updateSize();
-				OpenLayers.Event.stop(e);
-				this.marker.events.triggerEvent(this.popup.visible() ? "open" : "close");
-				layer.events.triggerEvent("markersChanged");
-			});
-			marker.events.register("mouseover", feature.popup, function(){this.unsetOpacity()});
-			marker.events.register("mouseout", feature.popup, function(){this.setOpacity()});
-
-			if(iconHighlight)
-			{
-				feature.popup.events.register("visibilitychange", feature.popup, function() {
-					var currentIcon = feature.popup.visible() ? iconHighlight : icon;
-					marker.icon.offset = currentIcon.offset;
-					marker.icon.setSize(currentIcon.size);
-					marker.icon.setUrl(currentIcon.url);
-				});
-			}
 		}
 		marker.fmFeature = feature;
 		this.addMarker(marker);

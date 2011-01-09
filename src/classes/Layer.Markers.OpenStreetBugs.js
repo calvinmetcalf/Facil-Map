@@ -45,7 +45,7 @@ FacilMap.Layer.Markers.OpenStreetBugs = OpenLayers.Class(FacilMap.Layer.Markers,
 
 	_createMarker: function(id, lonlat, comments, closed)
 	{
-		var marker = FacilMap.Layer.Markers.prototype.createMarker.apply(this, [ lonlat, "x", false, closed ? this.iconClosed : this.iconOpen, true ]);
+		var marker = FacilMap.Layer.Markers.prototype.createMarker.apply(this, [ lonlat, null, false, closed ? this.iconClosed : this.iconOpen, true ]);
 		return marker.fmFeature;
 	},
 
