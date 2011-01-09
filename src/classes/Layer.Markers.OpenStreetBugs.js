@@ -43,10 +43,10 @@ FacilMap.Layer.Markers.OpenStreetBugs = OpenLayers.Class(FacilMap.Layer.Markers,
 		OpenLayers.Layer.OpenStreetBugs.prototype.initialize.apply(this, arguments);
 	},
 
-	_createMarker: function(id, lonlat, comments, closed)
+	_createMarker: function(id, lonlat, comments, closed, icon)
 	{
-		var marker = FacilMap.Layer.Markers.prototype.createMarker.apply(this, [ lonlat, null, false, closed ? this.iconClosed : this.iconOpen, true ]);
-		return marker.fmFeature;
+		var feature = FacilMap.Layer.Markers.prototype.createMarker.apply(this, [ lonlat, null, false, icon, true ]).fmFeature;
+		return feature;
 	},
 
 	CLASS_NAME : "FacilMap.Layer.Markers.OpenStreetBugs"
