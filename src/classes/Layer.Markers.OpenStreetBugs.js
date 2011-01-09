@@ -46,6 +46,21 @@ FacilMap.Layer.Markers.OpenStreetBugs = OpenLayers.Class(FacilMap.Layer.Markers,
 	_createMarker: function(id, lonlat, comments, closed, icon)
 	{
 		var feature = FacilMap.Layer.Markers.prototype.createMarker.apply(this, [ lonlat, null, false, icon, true ]).fmFeature;
+
+		if(id != null) // Existing bug, not bug creation form
+		{
+			// Remove the fading of the popup, as the popup opens on marker mouseover
+			feature.marker.events.register("mouseover", feature, function() {
+				if(!this.osbClicked && this.popup)
+					this.popup.unsetOpacity(0);
+			});
+		}
+
+		// Make the popup intransparent initially
+		FacilMap.Util.wrapFunction(feature, "createPopup", null, function() {
+			FacilMap.Util.wrapFunction(this.popup, "draw", null, function() { this.unsetOpacity(0); });
+		});
+
 		return feature;
 	},
 
