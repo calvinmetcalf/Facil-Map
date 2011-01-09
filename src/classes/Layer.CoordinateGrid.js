@@ -59,16 +59,8 @@ FacilMap.Layer.CoordinateGrid = OpenLayers.Class(OpenLayers.Layer.Vector, {
 
 	projection : new OpenLayers.Projection("EPSG:4326"),
 
-	horizontalLines : null,
-	verticalLines : null,
-	degreeLabels : null,
-
 	initialize : function(name, options) {
-		this.horizontalLines = { };
-		this.verticalLines = { };
-		this.degreeLabels = [ ];
-
-		if(typeof name == "undefined" || name == null)
+		if(name == null)
 			name = OpenLayers.i18n("Coordinate grid");
 		OpenLayers.Layer.Vector.prototype.initialize.apply(this, [ name, options ]);
 	},
@@ -83,33 +75,17 @@ FacilMap.Layer.CoordinateGrid = OpenLayers.Class(OpenLayers.Layer.Vector, {
 		if(!this.map || !this.map.getExtent() || !this.getVisibility()) return;
 
 		var extent = this.map.getExtent().transform(this.map.getProjectionObject(), this.projection);
-		var maxExtent = this.map.maxExtent.clone().transform(this.map.getProjectionObject(), this.projection);
-
-		var addFeatures = [ ];
-		var destroyFeatures = [ ];
-
-		this.destroyFeatures(this.degreeLabels);
-		this.degreeLabels = [ ];
+		this.removeAllFeatures();
 
 		// Display horizontal grid
 		var horizontalDistance = (extent.top-extent.bottom)/this.maxHorizontalLines;
 		var horizontalDivisor = Math.pow(10, Math.ceil(Math.log(horizontalDistance)/Math.LN10));
 		if(5*(extent.top-extent.bottom)/horizontalDivisor <= this.maxHorizontalLines)
 			horizontalDivisor /= 5;
+		else if(4*(extent.top-extent.bottom)/horizontalDivisor <= this.maxHorizontalLines)
+			horizontalDivisor /= 4;
 		else if(2*(extent.top-extent.bottom)/horizontalDivisor <= this.maxHorizontalLines)
 			horizontalDivisor /= 2;
-
-		for(var i in this.horizontalLines)
-		{
-			var r = i/horizontalDivisor;
-			var highlight = (r % 5 == 0);
-			var highlighted = (this.horizontalLines[i].style == this.styleMapHighlight);
-			if(Math.floor(r) != r || highlight != highlighted)
-			{
-				destroyFeatures.push(this.horizontalLines[i]);
-				delete this.horizontalLines[i];
-			}
-		}
 
 		for(var coordinate = Math.ceil(extent.bottom/horizontalDivisor)*horizontalDivisor; coordinate < extent.top; coordinate += horizontalDivisor)
 		{
@@ -118,26 +94,23 @@ FacilMap.Layer.CoordinateGrid = OpenLayers.Class(OpenLayers.Layer.Vector, {
 
 			var highlight = (coordinate/horizontalDivisor % 5 == 0);
 
-			this.degreeLabels.push(new OpenLayers.Feature.Vector(
-				new OpenLayers.Geometry.Point(extent.left, coordinate).transform(this.projection, this.map.getProjectionObject()),
-				null,
-				OpenLayers.Util.extend({ label: (Math.round(coordinate*100000000)/100000000)+"°", labelAlign: "lm" }, highlight ? this.labelStyleMapHighlight : this.labelStyleMapNormal)
-			));
-
-			this.degreeLabels.push(new OpenLayers.Feature.Vector(
-				new OpenLayers.Geometry.Point(extent.right, coordinate).transform(this.projection, this.map.getProjectionObject()),
-				null,
-				OpenLayers.Util.extend({ label: (Math.round(coordinate*100000000)/100000000)+"°", labelAlign: "rm" }, highlight ? this.labelStyleMapHighlight : this.labelStyleMapNormal)
-			));
-
-			if(this.horizontalLines[coordinate])
-				continue;
-			this.horizontalLines[coordinate] = new OpenLayers.Feature.Vector(
-				new OpenLayers.Geometry.LineString([ new OpenLayers.Geometry.Point(maxExtent.left, coordinate).transform(this.projection, this.map.getProjectionObject()), new OpenLayers.Geometry.Point(maxExtent.right, coordinate).transform(this.projection, this.map.getProjectionObject()) ]),
-				null,
-				highlight ? this.styleMapHighlight : this.styleMapNormal
-			);
-			addFeatures.push(this.horizontalLines[coordinate]);
+			this.addFeatures([
+				new OpenLayers.Feature.Vector(
+					new OpenLayers.Geometry.Point(extent.left, coordinate).transform(this.projection, this.map.getProjectionObject()),
+					null,
+					OpenLayers.Util.extend({ label: (Math.round(coordinate*100000000)/100000000)+"°", labelAlign: "lm" }, highlight ? this.labelStyleMapHighlight : this.labelStyleMapNormal)
+				),
+				new OpenLayers.Feature.Vector(
+					new OpenLayers.Geometry.Point(extent.right, coordinate).transform(this.projection, this.map.getProjectionObject()),
+					null,
+					OpenLayers.Util.extend({ label: (Math.round(coordinate*100000000)/100000000)+"°", labelAlign: "rm" }, highlight ? this.labelStyleMapHighlight : this.labelStyleMapNormal)
+				),
+				new OpenLayers.Feature.Vector(
+					new OpenLayers.Geometry.LineString([ new OpenLayers.Geometry.Point(extent.left, coordinate).transform(this.projection, this.map.getProjectionObject()), new OpenLayers.Geometry.Point(extent.right, coordinate).transform(this.projection, this.map.getProjectionObject()) ]),
+					null,
+					highlight ? this.styleMapHighlight : this.styleMapNormal
+				)
+			]);
 		}
 
 		// Display vertical grid
@@ -146,20 +119,10 @@ FacilMap.Layer.CoordinateGrid = OpenLayers.Class(OpenLayers.Layer.Vector, {
 		var verticalDivisor = Math.pow(10, Math.ceil(Math.log(verticalDistance)/Math.LN10));
 		if(5*(extent.right-extent.left)/verticalDivisor <= maxVerticalLines)
 			verticalDivisor /= 5;
+		else if(4*(extent.right-extent.left)/verticalDivisor <= maxVerticalLines)
+			verticalDivisor /= 4;
 		else if(2*(extent.right-extent.left)/verticalDivisor <= maxVerticalLines)
 			verticalDivisor /= 2;
-
-		for(var i in this.verticalLines)
-		{
-			var r = i/verticalDivisor;
-			var highlight = (r % 5 == 0);
-			var highlighted = (this.verticalLines[i].style == this.styleMapHighlight);
-			if(Math.floor(r) != r || highlight != highlighted)
-			{
-				destroyFeatures.push(this.verticalLines[i]);
-				delete this.verticalLines[i];
-			}
-		}
 
 		for(var coordinate = Math.ceil(extent.left/verticalDivisor)*verticalDivisor; coordinate < extent.right; coordinate += verticalDivisor)
 		{
@@ -168,31 +131,24 @@ FacilMap.Layer.CoordinateGrid = OpenLayers.Class(OpenLayers.Layer.Vector, {
 
 			var highlight = (coordinate/verticalDivisor % 5 == 0);
 
-			this.degreeLabels.push(new OpenLayers.Feature.Vector(
-				new OpenLayers.Geometry.Point(coordinate, extent.top).transform(this.projection, this.map.getProjectionObject()),
-				null,
-				OpenLayers.Util.extend({ label: (Math.round(coordinate*100000000)/100000000)+"°", labelAlign: "ct" }, highlight ? this.labelStyleMapHighlight : this.labelStyleMapNormal)
-			));
-
-			this.degreeLabels.push(new OpenLayers.Feature.Vector(
-				new OpenLayers.Geometry.Point(coordinate, extent.bottom).transform(this.projection, this.map.getProjectionObject()),
-				null,
-				OpenLayers.Util.extend({ label: (Math.round(coordinate*100000000)/100000000)+"°", labelAlign: "cb" }, highlight ? this.labelStyleMapHighlight : this.labelStyleMapNormal)
-			));
-
-			if(this.verticalLines[coordinate])
-				continue;
-			this.verticalLines[coordinate] = new OpenLayers.Feature.Vector(
-				new OpenLayers.Geometry.LineString([ new OpenLayers.Geometry.Point(coordinate, maxExtent.top).transform(this.projection, this.map.getProjectionObject()), new OpenLayers.Geometry.Point(coordinate, maxExtent.bottom).transform(this.projection, this.map.getProjectionObject()) ]),
-				null,
-				highlight ? this.styleMapHighlight : this.styleMapNormal
-			);
-			addFeatures.push(this.verticalLines[coordinate]);
+			this.addFeatures([
+				new OpenLayers.Feature.Vector(
+					new OpenLayers.Geometry.Point(coordinate, extent.top).transform(this.projection, this.map.getProjectionObject()),
+					null,
+					OpenLayers.Util.extend({ label: (Math.round(coordinate*100000000)/100000000)+"°", labelAlign: "ct" }, highlight ? this.labelStyleMapHighlight : this.labelStyleMapNormal)
+				),
+				new OpenLayers.Feature.Vector(
+					new OpenLayers.Geometry.Point(coordinate, extent.bottom).transform(this.projection, this.map.getProjectionObject()),
+					null,
+					OpenLayers.Util.extend({ label: (Math.round(coordinate*100000000)/100000000)+"°", labelAlign: "cb" }, highlight ? this.labelStyleMapHighlight : this.labelStyleMapNormal)
+				),
+				new OpenLayers.Feature.Vector(
+					new OpenLayers.Geometry.LineString([ new OpenLayers.Geometry.Point(coordinate, extent.top).transform(this.projection, this.map.getProjectionObject()), new OpenLayers.Geometry.Point(coordinate, extent.bottom).transform(this.projection, this.map.getProjectionObject()) ]),
+					null,
+					highlight ? this.styleMapHighlight : this.styleMapNormal
+				)
+			]);
 		}
-
-		this.destroyFeatures(destroyFeatures);
-		this.addFeatures(addFeatures);
-		this.addFeatures(this.degreeLabels);
 	},
 
 	CLASS_NAME: "FacilMap.Layer.CoordinateGrid"
