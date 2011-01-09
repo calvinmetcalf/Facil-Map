@@ -618,7 +618,7 @@ FacilMap.Util = {
 			{
 				str += tabs+"[\n";
 				for(var i=0; i<obj.length; i++)
-					str += tabs+"\t"+obj[i]+"\n";
+					str += tabs+"\t"+obj2str(obj[i], depth+1)+"\n";
 				str += tabs+"]\n";
 			}
 			else if(obj instanceof Object)
