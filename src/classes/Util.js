@@ -570,6 +570,29 @@ FacilMap.Util = {
 		f.idx++;
 	},
 
+	/**
+	 * “Adds” code to the beginning and the end of a method. Actually, the method is replaced by a new method that
+	 * first calls the “before” method, then the actual method (giving all parameters), and then the “after” method.
+	 * The return value of the actual method is then returned.
+	 * @param Object obj The object that contains the method.
+	 * @param String property The name of the method.
+	 * @param Function before A function to call before calling the actual function (or null)
+	 * @param Function after A function to call after calling the actual function (or null)
+	 * @return mixed Returns the return value of the original method.
+	 */
+	wrapFunction: function(obj, property, before, after)
+	{
+		var funcSave = obj[property];
+		obj[property] = function() {
+			if(before != null)
+				before.apply(obj, [ ]);
+			var ret = funcSave.apply(obj, arguments);
+			if(after != null)
+				after.apply(obj, [ ]);
+			return ret;
+		};
+	},
+
 	debugOutput: function(string) {
 		var debugOutput = FacilMap.Util.debugOutput;
 		if(debugOutput.textarea == null)
