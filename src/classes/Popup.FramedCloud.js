@@ -42,6 +42,16 @@ FacilMap.Popup.FramedCloud = OpenLayers.Class(OpenLayers.Popup.FramedCloud, {
 		OpenLayers.Event.observe(this.div, "mouseover", OpenLayers.Function.bindAsEventListener(function(){ this.unsetOpacity(); }, this));
 		OpenLayers.Event.observe(this.div, "mouseout", OpenLayers.Function.bindAsEventListener(function(){ this.setOpacity(); }, this));
 	},
+	draw : function() {
+		// We don’t want fading on creation of the popup
+		var setOpacitySave = this.setOpacity;
+		this.setOpacity = function(opacity) {
+			setOpacitySave.apply(this, [ opacity, 0 ]);
+		};
+		var ret = OpenLayers.Popup.FramedCloud.prototype.draw.apply(this, arguments);
+		this.setOpacity = setOpacitySave;
+		return ret;
+	},
 	setContentHTML: function(contentDom) {
 		if(typeof contentDom == "object")
 		{
@@ -70,22 +80,22 @@ FacilMap.Popup.FramedCloud = OpenLayers.Class(OpenLayers.Popup.FramedCloud, {
             }
 		}
 	},
-	setOpacity: function(opacity) {
+	setOpacity: function(opacity, period) {
 		if(opacity != undefined)
 			this.opacity = opacity;
 
 		if(this.div != null)
 		{
-			FacilMap.Util.changeOpacity(this.div, this.opacity);
+			FacilMap.Util.changeOpacity(this.div, this.opacity, period);
 			if(this._defaultZIndex)
 				this.div.style.zIndex = this._defaultZIndex;
 		}
 	},
-	unsetOpacity: function() {
+	unsetOpacity: function(period) {
 		if(this.div != null)
 		{
 			this._defaultZIndex = this.div.style.zIndex;
-			FacilMap.Util.changeOpacity(this.div, 1.0);
+			FacilMap.Util.changeOpacity(this.div, 1.0, period);
 			this.div.style.zIndex = 2000;
 		}
 	},

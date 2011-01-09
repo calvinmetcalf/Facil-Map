@@ -398,7 +398,7 @@ FacilMap.Util = {
 			var period = new Date().getTime()-initTime;
 			if(period > ms)
 				period = ms;
-			var newOpacity = initOpacity+(period/ms)*(opacity-initOpacity);
+			var newOpacity = initOpacity+(ms == 0 ? 1 : period/ms)*(opacity-initOpacity);
 			OpenLayers.Util.modifyDOMElement(el, null, null, null, null, null, null, newOpacity);
 
 			if(period < ms)
