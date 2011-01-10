@@ -420,44 +420,67 @@ FacilMap.Util = {
 	 * @var Function success A function that will be called once the loadCheck function returns true for the first time.
 	*/
 	loadJavaScript: function(url, loadCheck, success) {
-		var load = true;
-		if(url == null || (loadCheck != null && loadCheck()))
-			load = false;
-		else
+		if(loadCheck != null && loadCheck())
+		{
+			if(success != null)
+				success();
+			return;
+		}
+
+		var scriptTag = null;
+		if(url != null)
 		{
 			var scripts = document.getElementsByTagName("script");
 			for(var i=0; i<scripts.length; i++)
 			{
 				if(FacilMap.Util.makeAbsoluteURL(scripts[i].src) == FacilMap.Util.makeAbsoluteURL(url))
 				{
+					scriptTag = scripts[i];
 					load = false;
 					break;
 				}
 			}
-		}
 
-		if(load)
-		{
-			var scriptTag = document.createElement("script");
-			scriptTag.type = "text/javascript";
-			scriptTag.src = url;
-			document.getElementsByTagName("head")[0].appendChild(scriptTag);
+			if(scriptTag == null)
+			{
+				scriptTag = document.createElement("script");
+				scriptTag.type = "text/javascript";
+				scriptTag.src = url;
+				document.getElementsByTagName("head")[0].appendChild(scriptTag);
+			}
 		}
 
 		if(loadCheck != null && success != null)
 		{
-			var callback = function(nextWait) {
-				if(loadCheck())
-					success();
-				else
+			var doInterval = true;
+			if(scriptTag != null)
+			{
+				// If the onload event is supported, scriptTag.onload will be set by setting the onload attribute
+				// (see http://perfectionkills.com/detecting-event-support-without-browser-sniffing/)
+				if(scriptTag.onload == undefined)
+					scriptTag.setAttribute("onload", "return true;");
+				if(scriptTag.onload != undefined)
 				{
-					var newWait = nextWait*2;
-					if(newWait > 10000)
-						newWait = 10000;
-					setTimeout(function(){ callback(newWait); }, nextWait);
+					FacilMap.Util.wrapFunction(scriptTag, "onload", function() { if(loadCheck()) success(); });
+					doInterval = false;
 				}
-			};
-			callback(10);
+			}
+
+			if(doInterval)
+			{
+				var callback = function(nextWait) {
+					if(loadCheck())
+						success();
+					else
+					{
+						var newWait = nextWait*2;
+						if(newWait > 10000)
+							newWait = 10000;
+						setTimeout(function(){ callback(newWait); }, nextWait);
+					}
+				};
+				callback(10);
+			}
 		}
 	},
 
