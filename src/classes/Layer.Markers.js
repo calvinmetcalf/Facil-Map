@@ -115,10 +115,16 @@ FacilMap.Layer.Markers = OpenLayers.Class(OpenLayers.Layer.Markers, {
 			if(iconHighlight)
 			{
 				popup.events.register("visibilitychange", popup, function() {
+					var displayPreserve = marker.icon.imageDiv.style.display;
 					var currentIcon = this.visible() ? iconHighlight : icon;
 					marker.icon.offset = currentIcon.offset;
 					marker.icon.setSize(currentIcon.size);
 					marker.icon.setUrl(currentIcon.url);
+					marker.icon.display(true);
+
+					// OpenLayers.Icon.draw() sets display to none when icon position is not set yet without setting
+					// it back later.
+					marker.icon.imageDiv.style.display = displayPreserve;
 				});
 			}
 
