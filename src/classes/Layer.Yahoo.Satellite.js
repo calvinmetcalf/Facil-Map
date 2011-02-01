@@ -22,7 +22,8 @@
 */
 FacilMap.Layer.Yahoo.Satellite = OpenLayers.Class(FacilMap.Layer.Yahoo, {
 	initialize: function(name, options) {
-		FacilMap.Layer.Yahoo.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({type: YAHOO_MAP_SAT}, options) ]);
+		this.type = YAHOO_MAP_SAT;
+		FacilMap.Layer.Yahoo.prototype.initialize.apply(this, arguments);
 	},
 	CLASS_NAME : "FacilMap.Layer.Yahoo.Satellite"
 });

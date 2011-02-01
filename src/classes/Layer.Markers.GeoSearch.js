@@ -150,13 +150,8 @@ FacilMap.Layer.Markers.GeoSearch = OpenLayers.Class(FacilMap.Layer.Markers, {
 			);
 		}
 
-		if(!dontzoom)
-		{
-			if(results.length == 1)
-				this.map.setCenter(results[0].lonlat.clone().transform(new OpenLayers.Projection("EPSG:4326"), this.map.getProjectionObject()), results[0].getZoom(this.map));
-			else if(results.length > 1)
-				this.map.zoomToExtent(this.getDataExtent());
-		}
+		if(!dontzoom && results.length >= 1)
+			this.map.setCenter(results[0].lonlat.clone().transform(new OpenLayers.Projection("EPSG:4326"), this.map.getProjectionObject()), results[0].getZoom(this.map));
 
 		this.lastSearch = query;
 		this.events.triggerEvent("lastSearchChange");

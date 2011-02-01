@@ -26,10 +26,14 @@
 FacilMap.Layer.Markers = OpenLayers.Class(OpenLayers.Layer.Markers, {
 	defaultIcon : new OpenLayers.Icon('http://api.facilmap.org/marker.png', new OpenLayers.Size(21,25), new OpenLayers.Pixel(-9, -25)),
 	openPopupsOnShow : null,
+	zoomableInLayerSwitcher : true,
+	projection: new OpenLayers.Projection("EPSG:4326"),
 	initialize : function(name, options) {
 		this.openPopupsOnShow = [ ];
 
-		OpenLayers.Layer.Markers.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({zoomableInLayerSwitcher: true, projection: new OpenLayers.Projection("EPSG:4326")}, options) ]);
+		FacilMap.Util.addCSSRule('.fmLayerMarkers img', 'cursor:pointer;');
+
+		OpenLayers.Layer.Markers.prototype.initialize.apply(this, [ name, options ]);
 		this.events.addEventType("markersChanged");
 
 		this.events.register("visibilitychanged", this, function() {
@@ -56,30 +60,40 @@ FacilMap.Layer.Markers = OpenLayers.Class(OpenLayers.Layer.Markers, {
 	 * Creates a marker with a popup (OpenLayers.Popup.FramedCloud) on this layer. The visibility of the popup can be toggled by clicking
 	 * on the marker.
 	 * @param OpenLayers.LonLat lonlat The position of the marker.
-	 * @param String|DOMElement popupContent The HTML content of the popup.
+	 * @param String|DOMElement|Function popupContent The HTML content of the popup. If a function is passed instead, this function is
+	 *                                                called once the popup is showed for the first time in order to load the popup
+	 *                                                content. It is expected to call the callback function that it receives as
+	 *                                                parameter, giving the popup content to it as parameter.
 	 * @param boolean popupVisible Should the popup be visible initially?
-	 * @param OpenLayers.Icon Use this icon instead of the default icon.
+	 * @param OpenLayers.Icon icon Use this icon instead of the default icon.
 	 * @param boolean noPan Don’t move the map view to the marker.
+	 * @param OpenLayers.Icon iconHighlight Show this icon when the popup is visible (if null, the icon isn’t changed when the popup is opened)
 	 * @return The newly created OpenLayers.Marker object. It contains the additional property fmFeature, which is the OpenLayers.Feature
 	 * that connects the marker with the popup. The marker triggers the events “open” or “close” when changing the visibility of the popup.
 	*/
-	createMarker : function(lonlat, popupContent, popupVisible, icon, noPan) {
+	createMarker : function(lonlat, popupContent, popupVisible, icon, noPan, iconHighlight) {
+		var popupContentCallback = (typeof popupContent == "function" ? popupContent : function(callback) { callback(popupContent); });
+
+		if(icon == null)
+			icon = this.defaultIcon;
+
 		var feature = new OpenLayers.Feature(this, lonlat.clone().transform(this.projection, this.map.getProjectionObject()));
-		feature.data.icon = icon ? icon : this.defaultIcon.clone();
-		if(popupContent)
-		{
-			feature.popupClass = FacilMap.Popup.FramedCloud;
-			feature.data.popupContentHTML = popupContent;
-		}
+		feature.data.icon = icon.clone();
+		feature.popupClass = FacilMap.Popup.FramedCloud;
 		var marker = feature.createMarker();
 		marker.events.addEventType("close");
 		marker.events.addEventType("open");
-		if(popupContent)
-		{
-			feature.createPopup(true);
-			feature.popup.panMapIfOutOfView = !noPan;
-			this.map.addPopup(feature.popup);
-			feature.popup.events.register("close", feature, function(e)
+
+		var layer = this;
+
+		var createPopupSave = feature.createPopup;
+		feature.createPopup = function() {
+			var popup = createPopupSave.apply(feature, arguments);
+
+			popup.panMapIfOutOfView = !noPan;
+
+			layer.map.addPopup(popup);
+			popup.events.register("close", feature, function(e)
 			{
 				this.popup.hide();
 				OpenLayers.Event.stop(e);
@@ -87,15 +101,6 @@ FacilMap.Layer.Markers = OpenLayers.Class(OpenLayers.Layer.Markers, {
 				this.marker.events.triggerEvent("close");
 			});
 
-			if(popupVisible)
-			{
-				feature.popup.show();
-				feature.popup.updateSize();
-			}
-			else
-				feature.popup.hide();
-
-			var layer = this;
 			marker.events.register("click", feature, function(e) {
 				this.popup.toggle();
 				if(this.popup.visible())
@@ -104,8 +109,50 @@ FacilMap.Layer.Markers = OpenLayers.Class(OpenLayers.Layer.Markers, {
 				this.marker.events.triggerEvent(this.popup.visible() ? "open" : "close");
 				layer.events.triggerEvent("markersChanged");
 			});
-			marker.events.register("mouseover", feature.popup, function(){this.unsetOpacity()}); // FIXME: Fade opacity
-			marker.events.register("mouseout", feature.popup, function(){this.setOpacity()});
+			marker.events.register("mouseover", popup, function(){this.unsetOpacity()});
+			marker.events.register("mouseout", popup, function(){this.setOpacity()});
+
+			if(iconHighlight)
+			{
+				popup.events.register("visibilitychange", popup, function() {
+					var displayPreserve = marker.icon.imageDiv.style.display;
+					var currentIcon = this.visible() ? iconHighlight : icon;
+					marker.icon.offset = currentIcon.offset;
+					marker.icon.setSize(currentIcon.size);
+					marker.icon.setUrl(currentIcon.url);
+					marker.icon.display(true);
+
+					// OpenLayers.Icon.draw() sets display to none when icon position is not set yet without setting
+					// it back later.
+					marker.icon.imageDiv.style.display = displayPreserve;
+				});
+			}
+
+			return popup;
+		};
+
+		if(popupContent)
+		{
+			feature.createPopup(true);
+			feature.popup.hide();
+
+			var showSave = feature.popup.show;
+			feature.popup.show = function() {
+				// Load popup content on first show
+				if(feature.popup.contentDom == null && feature.popup.contentHTML == null)
+				{
+					popupContentCallback(function(content) {
+						feature.popup.setContentHTML(content);
+						feature.popup.updateSize();
+						showSave.apply(feature.popup, arguments);
+					});
+				}
+				else
+					showSave.apply(feature.popup, arguments);
+			};
+
+			if(popupVisible)
+				feature.popup.show();
 		}
 		marker.fmFeature = feature;
 		this.addMarker(marker);

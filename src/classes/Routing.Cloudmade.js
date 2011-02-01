@@ -40,8 +40,8 @@ FacilMap.Routing.Cloudmade = OpenLayers.Class(FacilMap.Routing, {
 		return url;
 	},
 
-	getRouteLength : function(dom) {
-		var extensions = dom.getElementsByTagName("extensions");
+	getRouteLength : function() {
+		var extensions = this.dom.getElementsByTagName("extensions");
 		if(extensions.length > 0)
 		{
 			var distance = extensions[0].getElementsByTagName("distance");
@@ -51,8 +51,8 @@ FacilMap.Routing.Cloudmade = OpenLayers.Class(FacilMap.Routing, {
 		return null;
 	},
 
-	getRouteDuration : function(dom) {
-		var extensions = dom.getElementsByTagName("extensions");
+	getRouteDuration : function() {
+		var extensions = this.dom.getElementsByTagName("extensions");
 		if(extensions.length > 0)
 		{
 			var duration = extensions[0].getElementsByTagName("time");
@@ -60,5 +60,7 @@ FacilMap.Routing.Cloudmade = OpenLayers.Class(FacilMap.Routing, {
 				return duration[0].firstChild.data/3600;
 		}
 		return null;
-	}
+	},
+
+	CLASS_NAME : "FacilMap.Routing.Cloudmade"
 });

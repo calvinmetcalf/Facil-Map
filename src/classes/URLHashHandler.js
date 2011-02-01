@@ -89,10 +89,10 @@ FacilMap.URLHashHandler = OpenLayers.Class({
 
 	/**
 	 * Gets the part after the # in the URL.
-	 * At least in Firefox, location.hash contains “&” if the hash part contains “%26”. This makes searching for URLs (such as OSM PermaLinks) hard and we work around that problem by extracting the desired value from location.href.
 	 * @return String
 	*/
 	getLocationHash : function() {
+		// At least in Firefox, location.hash contains “&” if the hash part contains “%26”. This makes searching for URLs (such as OSM PermaLinks) hard and we work around that problem by extracting the desired value from location.href.
 		var match = location.href.match(/#(.*)$/);
 		if(match)
 			return match[1];
@@ -114,7 +114,11 @@ FacilMap.URLHashHandler = OpenLayers.Class({
 			restart = true;
 		}
 
-		location.hash = "#"+hash;
+		// Konqueror will reload the page when setting an empty location hash
+		if(!hash && (""+navigator.vendor).indexOf("KDE") != -1)
+			location.hash = "#.";
+		else
+			location.hash = hash ? "#"+hash : "";
 
 		if(restart)
 			this.start();

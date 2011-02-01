@@ -21,8 +21,10 @@
  * OpenStreetBrowser rendering of OpenStreetMap data. See http://openstreetbrowser.org/.
 */
 FacilMap.Layer.OSM.OpenStreetBrowser = OpenLayers.Class(OpenLayers.Layer.OSM, {
+	numZoomLevels : 19,
+	attribution : OpenLayers.String.format(OpenLayers.i18n("attribution-osm"), { rendering: "<a href=\"http://www.openstreetbrowser.org/\">OpenStreetBrowser</a>" }),
 	initialize: function(name, options) {
-		OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://www.openstreetbrowser.org/tiles/base/${z}/${x}/${y}.png", OpenLayers.Util.extend({numZoomLevels: 19, attribution: OpenLayers.String.format(OpenLayers.i18n("attribution-osm"), { rendering: "<a href=\"http://www.openstreetbrowser.org/\">OpenStreetBrowser</a>" })}, options) ]);
+		OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://www.openstreetbrowser.org/tiles/base/${z}/${x}/${y}.png", options ]);
 	},
 	CLASS_NAME : "FacilMap.Layer.OSM.OpenStreetBrowser"
 });

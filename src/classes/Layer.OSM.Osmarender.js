@@ -21,11 +21,12 @@
  * Osmarender rendering from openstreetmap.org.
 */
 FacilMap.Layer.OSM.Osmarender = OpenLayers.Class(OpenLayers.Layer.OSM, {
+	numZoomLevels : 18,
 	initialize : function(name, options) {
 		OpenLayers.Layer.OSM.prototype.initialize.apply(this, [
 			name,
 			[ "http://a.tah.openstreetmap.org/Tiles/tile/${z}/${x}/${y}.png", "http://b.tah.openstreetmap.org/Tiles/tile/${z}/${x}/${y}.png", "http://c.tah.openstreetmap.org/Tiles/tile/${z}/${x}/${y}.png" ],
-			OpenLayers.Util.extend({ numZoomLevels: 18 }, options)
+			options
 		]);
 	},
 	CLASS_NAME : "FacilMap.Layer.OSM.Osmarender"

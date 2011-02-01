@@ -21,8 +21,9 @@
  * Google Hybrid (Streets and Satellite) (http://maps.google.com/)
 */
 FacilMap.Layer.Google.MapsHybrid = OpenLayers.Class(FacilMap.Layer.Google, {
-	initialize: function(name, options) {
-		FacilMap.Layer.Google.prototype.initialize.apply(this, [ name, OpenLayers.Util.extend({type: G_HYBRID_MAP}, options) ]);
+	initialize : function() {
+		this.type = G_HYBRID_MAP;
+		FacilMap.Layer.Google.prototype.initialize.apply(this, arguments);
 	},
 	CLASS_NAME : "FacilMap.Layer.Google.MapsHybrid"
 });

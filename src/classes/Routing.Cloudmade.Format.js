@@ -37,5 +37,7 @@ FacilMap.Routing.Cloudmade.Format = OpenLayers.Class(OpenLayers.Format.GPX, {
 		}
 
 		return features;
-	}
+	},
+
+	CLASS_NAME : "FacilMap.Routing.Cloudmade.Format"
 });

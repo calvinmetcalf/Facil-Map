@@ -21,7 +21,8 @@
  * Extends a FramedCloud with various useful features. An event is triggered during closing instead of passing the callback function
  * to the initialize function. You may pass a DOM element for the popup content instead of HTML code.
  * This FramedCloud supports the OpenLayers.Popup.OPACITY setting. On mouse over, the opacity is set to 1.
- * @event close
+ * @event close The close button was pressed.
+ * @event visibilitychange The visibility ({@link #visibile()}) of the popup has changed.
 */
 
 FacilMap.Popup.FramedCloud = OpenLayers.Class(OpenLayers.Popup.FramedCloud, {
@@ -34,11 +35,22 @@ FacilMap.Popup.FramedCloud = OpenLayers.Class(OpenLayers.Popup.FramedCloud, {
 		OpenLayers.Popup.FramedCloud.prototype.initialize.apply(this, [ id, lonlat, contentSize, null, anchor, closeBox, closeCallback ] );
 
 		this.events.addEventType("close");
+		this.events.addEventType("visibilitychange");
 
 		this.setContentHTML(contentDom);
 
-		OpenLayers.Event.observe(this.div, "mouseover", OpenLayers.Function.bindAsEventListener(function(){ FacilMap.Util.changeOpacity(this.div, 1.0); }, this));
-		OpenLayers.Event.observe(this.div, "mouseout", OpenLayers.Function.bindAsEventListener(function(){ FacilMap.Util.changeOpacity(this.div, this.opacity); }, this));
+		OpenLayers.Event.observe(this.div, "mouseover", OpenLayers.Function.bindAsEventListener(function(){ this.unsetOpacity(); }, this));
+		OpenLayers.Event.observe(this.div, "mouseout", OpenLayers.Function.bindAsEventListener(function(){ this.setOpacity(); }, this));
+	},
+	draw : function() {
+		// We don’t want fading on creation of the popup
+		var setOpacitySave = this.setOpacity;
+		this.setOpacity = function(opacity) {
+			setOpacitySave.apply(this, [ opacity, 0 ]);
+		};
+		var ret = OpenLayers.Popup.FramedCloud.prototype.draw.apply(this, arguments);
+		this.setOpacity = setOpacitySave;
+		return ret;
 	},
 	setContentHTML: function(contentDom) {
 		if(typeof contentDom == "object")
@@ -68,24 +80,34 @@ FacilMap.Popup.FramedCloud = OpenLayers.Class(OpenLayers.Popup.FramedCloud, {
             }
 		}
 	},
-	setOpacity: function(opacity) {
+	setOpacity: function(opacity, period) {
 		if(opacity != undefined)
 			this.opacity = opacity;
 
 		if(this.div != null)
 		{
-			OpenLayers.Util.modifyDOMElement(this.div, null, null, null, null, null, null, this.opacity);
+			FacilMap.Util.changeOpacity(this.div, this.opacity, period);
 			if(this._defaultZIndex)
 				this.div.style.zIndex = this._defaultZIndex;
 		}
 	},
-	unsetOpacity: function() {
+	unsetOpacity: function(period) {
 		if(this.div != null)
 		{
 			this._defaultZIndex = this.div.style.zIndex;
-			OpenLayers.Util.modifyDOMElement(this.div, null, null, null, null, null, null, 1.0);
+			FacilMap.Util.changeOpacity(this.div, 1.0, period);
 			this.div.style.zIndex = 2000;
 		}
+	},
+	show : function() {
+		var ret = OpenLayers.Popup.FramedCloud.prototype.show.apply(this, arguments);
+		this.events.triggerEvent("visibilitychange");
+		return ret;
+	},
+	hide : function() {
+		var ret = OpenLayers.Popup.FramedCloud.prototype.hide.apply(this, arguments);
+		this.events.triggerEvent("visibilitychange");
+		return ret;
 	},
 	destroy: function() {
 		this.contentDom = null;

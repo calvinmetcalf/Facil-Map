@@ -26,11 +26,6 @@
 
 FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
 	/**
-	 * This CSS file will be additionally loaded.
-	*/
-	fmTheme : "http://api.facilmap.org/facilmap.css",
-
-	/**
 	 * The projection to use in coordinates in the Permalink.
 	 * @var OpenLayers.Projection
 	*/
@@ -38,14 +33,13 @@ FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
 
 	initialize : function(div, options)
 	{
-		var keyboardControl = new FacilMap.Control.KeyboardDefaults();
 		OpenLayers.Map.prototype.initialize.apply(this, [ div, OpenLayers.Util.extend({
 			controls: [
 				new OpenLayers.Control.Navigation(),
 				new OpenLayers.Control.PanZoomBar(),
 				new FacilMap.Control.LayerSwitcher(),
 				new OpenLayers.Control.Attribution(),
-				keyboardControl,
+				new FacilMap.Control.KeyboardDefaults(),
 				new OpenLayers.Control.MousePosition(),
 				new OpenLayers.Control.ScaleLine() ],
 			//maxExtent: new OpenLayers.Bounds(-180, -85, 180, 85), // FIXME: 4326 as projection does not seem to work
@@ -57,17 +51,12 @@ FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
 			displayProjection: new OpenLayers.Projection("EPSG:4326")
 		}, options) ]);
 
-		this.loadCSSFile(this.fmTheme);
-
 		this.events.addEventType("mapResize");
 		this.events.addEventType("newHash");
 
 		this.events.register("move", this, function(){ this.events.triggerEvent("newHash"); });
 		this.events.register("changebaselayer", this, function(){ this.events.triggerEvent("newHash"); });
 		this.events.register("changelayer", this, function(){ this.events.triggerEvent("newHash"); });
-
-		OpenLayers.Event.observe(this.viewPortDiv, "mouseover", OpenLayers.Function.bindAsEventListener(function(){ keyboardControl.activate(); }, this));
-		OpenLayers.Event.observe(this.viewPortDiv, "mouseout", OpenLayers.Function.bindAsEventListener(function(){ keyboardControl.deactivate(); }, this));
 	},
 
 	updateSize : function()
@@ -123,6 +112,8 @@ FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
 
 	addAllAvailableOSMLayers : function()
 	{
+		var map = this;
+
 		this.addLayer(new FacilMap.Layer.OSM.Mapnik(OpenLayers.i18n("Mapnik"), { shortName : "Mpnk" }));
 		this.addLayer(new FacilMap.Layer.OSM.MapSurfer.Road(OpenLayers.i18n("MapSurfer Road"), { shortName : "MSfR" }));
 		this.addLayer(new FacilMap.Layer.OSM.MapSurfer.Topographic(OpenLayers.i18n("MapSurfer Topographic"), { shortName : "MSfT" }));
@@ -137,6 +128,12 @@ FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
 
 		this.addLayer(new FacilMap.Layer.OSM.OOMStreets(OpenLayers.i18n("Streets overlay"), { shortName : "OOMS", visibility : false }));
 		this.addLayer(new FacilMap.Layer.OSM.OOMLabels(OpenLayers.i18n("Labels overlay"), { shortName : "OOML", visibility : false }));
+		this.addLayer(new FacilMap.Layer.OSM.Hiking(OpenLayers.i18n("Hiking symbols"), { visibility: false, shortName : "Hike" }));
+		this.addLayer(new FacilMap.Layer.Markers.OpenLinkMap(OpenLayers.i18n("POI"), { shortName: "OLiM" }));
+
+		FacilMap.Layer.Markers.OpenStreetBugs.loadAPI(function() {
+			map.addLayer(new FacilMap.Layer.Markers.OpenStreetBugs(_("OpenStreetBugs"), { visibility: false, shortName: "OSBu" }));
+		});
 	},
 
 	addAllAvailableGoogleLayers : function()
@@ -168,7 +165,6 @@ FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
 	addAllAvailableLayers : function()
 	{
 		this.addLayer(new FacilMap.Layer.other.Relief(OpenLayers.i18n("Relief"), { visibility: false, shortName : "Rlie" }));
-		this.addLayer(new FacilMap.Layer.other.Hiking(OpenLayers.i18n("Hiking symbols"), { visibility: false, shortName : "Hike" }));
 
 		this.addAllAvailableOSMLayers();
 		this.addLayer(new FacilMap.Layer.other.OSStreetView(OpenLayers.i18n("Ordnance Survey (UK)"), { shortName : "OSSV" }));
@@ -235,7 +231,7 @@ FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
 				var alreadyExists = false;
 				for(var j=0; j<existingLayers.length; j++)
 				{
-					if(existingLayers[j].CLASS_NAME == "OpenLayers.Layer."+query.r[i]["class"])
+					if(existingLayers[j].CLASS_NAME == query.r[i]["class"])
 					{
 						if(existingLayers[j].name != query.r[i].name)
 						{
@@ -252,7 +248,7 @@ FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
 					continue;
 
 				var classNameParts = query.r[i]["class"].split(/\./);
-				var layerClass = OpenLayers.Layer;
+				var layerClass = window;
 				for(var j=0; j<classNameParts.length; j++)
 				{
 					layerClass = layerClass[classNameParts[j]];
@@ -332,36 +328,25 @@ FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
 			hashObject.l[l.shortName] = l.getQueryObjectFixed();
 			if(l.removableInLayerSwitcher && l.saveInPermalink)
 				hashObject.r[l.shortName] = {
-					"class" : l.CLASS_NAME.replace(/^OpenLayers\.Layer\./, ""),
+					"class" : l.CLASS_NAME,
 					name : l.name
 				};
 		}
 
-		return hashObject;
-	},
-
-	loadCSSFile : function(url) {
-		if(url == null)
-			return;
-
-		var addNode = true;
-		var nodes = document.getElementsByTagName('link');
-		for(var i=0; i<nodes.length; i++)
+		var firstBaseLayer = null;
+		for(var i=0; i<this.layers.length; i++)
 		{
-			if(OpenLayers.Util.isEquivalentUrl(nodes[i].href, url))
+			if(this.layers[i].isBaseLayer)
 			{
-				addNode = false;
+				firstBaseLayer = this.layers[i].shortName;
 				break;
 			}
 		}
-		if(addNode)
-		{
-			var cssNode = document.createElement('link');
-			cssNode.setAttribute('rel', 'stylesheet');
-			cssNode.setAttribute('type', 'text/css');
-			cssNode.setAttribute('href', url);
-			document.getElementsByTagName('head')[0].appendChild(cssNode);
-		}
+		
+		if(FacilMap.Util.encodeQueryString(hashObject) == "lon=0;lat=0;zoom=2;layer="+firstBaseLayer)
+			return { };
+
+		return hashObject;
 	},
 
 	CLASS_NAME : "FacilMap.Map"

@@ -25,5 +25,7 @@ FacilMap.Layer.other.OSStreetView = OpenLayers.Class(OpenLayers.Layer.XYZ, {
 
 	initialize : function(name, options) {
 		OpenLayers.Layer.XYZ.prototype.initialize.apply(this, [ name, [ "http://a.os.openstreetmap.org/sv/${z}/${x}/${y}.png", "http://b.os.openstreetmap.org/sv/${z}/${x}/${y}.png", "http://c.os.openstreetmap.org/sv/${z}/${x}/${y}.png" ], options ]);
-	}
+	},
+
+	CLASS_NAME : "FacilMap.Layer.other.OSStreetView"
 });

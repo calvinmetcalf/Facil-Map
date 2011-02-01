@@ -20,8 +20,11 @@
 /**
  * Hiking symbol overlay by Lonvia (http://osm.lonvia.de/)
 */
-FacilMap.Layer.other.Hiking = OpenLayers.Class(OpenLayers.Layer.OSM, {
-	initialize: function(name, options) {
-		OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://osm.lonvia.de/hiking/${z}/${x}/${y}.png", OpenLayers.Util.extend({ isBaseLayer: false, attribution: OpenLayers.i18n("attribution-hiking") }, options) ]);
-	}
+FacilMap.Layer.OSM.Hiking = OpenLayers.Class(OpenLayers.Layer.OSM, {
+	isBaseLayer : false,
+	attribution : OpenLayers.i18n("attribution-hiking"),
+	initialize : function(name, options) {
+		OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://osm.lonvia.de/hiking/${z}/${x}/${y}.png", options ]);
+	},
+	CLASS_NAME : "FacilMap.Layer.OSM.Hiking"
 });

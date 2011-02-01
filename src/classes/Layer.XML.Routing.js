@@ -43,8 +43,6 @@ FacilMap.Layer.XML.Routing = OpenLayers.Class(FacilMap.Layer.XML, {
 	viaMarkers : null,
 
 	zoomAtNextSuccess : false,
-	distance : null,
-	duration : null,
 	markers : null,
 	markersDrawn : false,
 
@@ -386,8 +384,7 @@ FacilMap.Layer.XML.Routing = OpenLayers.Class(FacilMap.Layer.XML, {
 			return null;
 
 		this.zoomAtNextSuccess = zoom;
-		this.distance = null;
-		this.duration = null;
+		this.provider.setDOM(null);
 
 		this.setUrl(this.provider.getGPXURL());
 	},
@@ -401,18 +398,21 @@ FacilMap.Layer.XML.Routing = OpenLayers.Class(FacilMap.Layer.XML, {
 	},
 
 	getDistance : function() {
-		return this.distance;
+		return this.provider.getRouteLength();
 	},
 
 	getDuration : function() {
-		return this.duration;
+		return this.provider.getRouteDuration();
+	},
+
+	getElevationProfileURL : function(size) {
+		return this.provider.getElevationProfileURL(size);
 	},
 
 	requestSuccess : function(request) {
 		if(request.responseXML)
 		{ // Do this before calling the parent function as that invokes the loadend event
-			this.distance = this.provider.getRouteLength(request.responseXML);
-			this.duration = this.provider.getRouteDuration(request.responseXML);
+			this.provider.setDOM(request.responseXML);
 		}
 
 		FacilMap.Layer.XML.prototype.requestSuccess.apply(this, arguments);
@@ -537,5 +537,7 @@ FacilMap.Layer.XML.Routing = OpenLayers.Class(FacilMap.Layer.XML, {
 				this.drawMarker(this.markers[i]);
             this.markersDrawn = true;
 		}
-	}
+	},
+
+	CLASS_NAME : "FacilMap.Layer.XML.Routing"
 });

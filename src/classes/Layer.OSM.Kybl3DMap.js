@@ -21,9 +21,10 @@
  * Izometrická 3D mapa ČR (http://osm.kyblsoft.cz/3dmapa/).
 */
 FacilMap.Layer.OSM.Kybl3DMap = OpenLayers.Class(OpenLayers.Layer.OSM, {
+	numZoomLevels : 18,
 	attribution : OpenLayers.String.format(OpenLayers.i18n("attribution-osm"), { rendering: "<a href=\"http://osm.kyblsoft.cz/3dmapa/\">OpenKyblMap</a>" }),
 	initialize : function(name, options) {
-		OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://osm.kyblsoft.cz/3dmapa/tiles/${z}/${x}/${y}.jpg", OpenLayers.Util.extend({ numZoomLevels: 18 }, options) ]);
+		OpenLayers.Layer.OSM.prototype.initialize.apply(this, [ name, "http://osm.kyblsoft.cz/3dmapa/tiles/${z}/${x}/${y}.jpg", options ]);
 	},
 	CLASS_NAME : "FacilMap.Layer.OSM.Kybl3DMap"
 });

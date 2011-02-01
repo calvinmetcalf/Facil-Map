@@ -21,11 +21,12 @@
  * Mapnik rendering from openstreetmap.org.
 */
 FacilMap.Layer.OSM.Mapnik = OpenLayers.Class(OpenLayers.Layer.OSM, {
+	numZoomLevels: 19,
 	initialize : function(name, options) {
 		OpenLayers.Layer.OSM.prototype.initialize.apply(this, [
 			name,
 			[ "http://a.tile.openstreetmap.org/${z}/${x}/${y}.png", "http://b.tile.openstreetmap.org/${z}/${x}/${y}.png", "http://c.tile.openstreetmap.org/${z}/${x}/${y}.png" ],
-			OpenLayers.Util.extend({ numZoomLevels: 19 }, options)
+			options
 		]);
 	},
 	CLASS_NAME : "FacilMap.Layer.OSM.Mapnik"

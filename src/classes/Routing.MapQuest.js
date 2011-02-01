@@ -20,6 +20,7 @@
 FacilMap.Routing.MapQuest = OpenLayers.Class(FacilMap.Routing, {
 	routingURL : "http://open.mapquestapi.com/directions/v0/route",
 	orderedURL : "http://open.mapquestapi.com/directions/v0/optimizedRoute",
+	elevationChartURL : "http://open.mapquestapi.com/elevation/v1/getElevationChart",
 	attribution : OpenLayers.i18n("attribution-routing-mapquest"),
 
 	getGPXURL : function() {
@@ -33,8 +34,10 @@ FacilMap.Routing.MapQuest = OpenLayers.Class(FacilMap.Routing, {
 
 		json += ",options:{unit:k,generalize:0,narrativeType:none";
 
-		if(this.medium == FacilMap.Routing.Medium.FOOT || this.medium == FacilMap.Routing.Medium.BICYCLE)
+		if(this.medium == FacilMap.Routing.Medium.FOOT)
 			json += ",routeType:pedestrian";
+		else if(this.medium == FacilMap.Routing.Medium.BICYCLE)
+			json += ",routeType:" + this.medium;
 		else
 			json += ",routeType:" + this.routingType;
 
@@ -43,8 +46,8 @@ FacilMap.Routing.MapQuest = OpenLayers.Class(FacilMap.Routing, {
 		return this.routingURL + "?inFormat=json&outFormat=xml&json=" + encodeURIComponent(json);
 	},
 
-	getRouteLength : function(dom) {
-		var els = dom.getElementsByTagName("route")[0].childNodes;
+	getRouteLength : function() {
+		var els = this.dom.getElementsByTagName("route")[0].childNodes;
 		for(var i=0; i<els.length; i++)
 		{
 			if(els[i].tagName == "distance")
@@ -52,8 +55,8 @@ FacilMap.Routing.MapQuest = OpenLayers.Class(FacilMap.Routing, {
 		}
 	},
 
-	getRouteDuration : function(dom) {
-		var els = dom.getElementsByTagName("route")[0].childNodes;
+	getRouteDuration : function() {
+		var els = this.dom.getElementsByTagName("route")[0].childNodes;
 		var time = null;
 		for(var i=0; i<els.length; i++)
 		{
@@ -66,11 +69,7 @@ FacilMap.Routing.MapQuest = OpenLayers.Class(FacilMap.Routing, {
 
 		if(time != null)
 		{
-			// NOTE: Workaround for missing bicycle routing support: Divide the time to walk by 3.
-			if(this.medium == FacilMap.Routing.Medium.BICYCLE)
-				return time/3;
-			else
-				return time;
+			return time;
 		}
 	},
 
@@ -97,6 +96,8 @@ FacilMap.Routing.MapQuest = OpenLayers.Class(FacilMap.Routing, {
 
 		if(this.medium == FacilMap.Routing.Medium.FOOT || this.medium == FacilMap.Routing.Medium.BICYCLE)
 			json += ",routeType:pedestrian";
+		else if(this.medium == FacilMap.Routing.Medium.BICYCLE)
+			json += ",routeType:" + this.medium;
 		else
 			json += ",routeType:" + this.routingType;
 
@@ -140,5 +141,47 @@ FacilMap.Routing.MapQuest = OpenLayers.Class(FacilMap.Routing, {
 			},
 			scope: this
 		});
-	}
+	},
+
+	getElevationProfileURL : function(size) {
+		var minDist = 2 * this.getRouteLength() / size.w;
+
+		var calcDist = function(lonlat1, lonlat2) {
+			// Source: http://www.movable-type.co.uk/scripts/latlong.html
+			var R = 6371; // km
+			var dLat = (lonlat2.lat-lonlat1.lat) * Math.PI/180;
+			var dLon = (lonlat2.lon-lonlat1.lon) * Math.PI/180;
+			var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+					Math.cos(lonlat1.lat * Math.PI/180) * Math.cos(lonlat2.lat * Math.PI/180) *
+					Math.sin(dLon/2) * Math.sin(dLon/2);
+			var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+			return R * c;
+		};
+
+		var points = this.dom.getElementsByTagName("shapePoints")[0].getElementsByTagName("latLng");
+		var last = null;
+		var latlons = [ ];
+		var dist = 0;
+		for(var i=0; i < points.length; i++)
+		{
+			var it = new OpenLayers.LonLat(points[i].getElementsByTagName("lng")[0].firstChild.data, points[i].getElementsByTagName("lat")[0].firstChild.data);
+
+			if(last != null)
+				dist += calcDist(last, it);
+			last = it;
+
+			if(i == 0 || i == points.length-1 || dist >= minDist)
+			{
+				latlons.push(it.lat);
+				latlons.push(it.lon);
+				dist = 0;
+			}
+		}
+
+		var json = "{shapeFormat:'raw',unit:'k',width:'"+size.w+"',height:'"+size.h+"',latLngCollection:["+latlons.join(",")+"]}";
+
+		return this.elevationChartURL + "?inFormat=json&json="+encodeURIComponent(json);
+	},
+
+	CLASS_NAME : "FacilMap.Routing.MapQuest"
 });

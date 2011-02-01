@@ -64,5 +64,6 @@ OpenLayers.Lang.nl = OpenLayers.Util.extend(OpenLayers.Lang.nl, {
 	"Coordinate grid" : "Coördinatensysteem",
 	"Izometrická 3D mapa ČR" : "Izometrická 3D mapa ČR",
 	"Streets overlay" : "Stratenlaag",
-	"Labels overlay" : "Bijschriften"
+	"Labels overlay" : "Bijschriften",
+	"OpenStreetBugs" : "OpenStreetBugs"
 });

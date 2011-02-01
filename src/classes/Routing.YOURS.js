@@ -63,11 +63,13 @@ FacilMap.Routing.YOURS = OpenLayers.Class(FacilMap.Routing, {
 		return url;
 	},
 
-	getRouteLength : function(dom) {
-		var distanceEls = dom.getElementsByTagName("distance");
+	getRouteLength : function() {
+		var distanceEls = this.dom.getElementsByTagName("distance");
 		if(distanceEls.length > 0)
 			return 1*distanceEls[0].firstChild.data;
 		else
 			return null;
-	}
+	},
+
+	CLASS_NAME : "FacilMap.Routing.YOURS"
 });

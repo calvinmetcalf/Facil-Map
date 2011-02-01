@@ -116,7 +116,7 @@ FacilMap.Util = {
 	*/
 	htmlspecialchars: function(str) {
 		if(!str) return "";
-		return str.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;");
+		return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 	},
 
 	/**
@@ -398,7 +398,7 @@ FacilMap.Util = {
 			var period = new Date().getTime()-initTime;
 			if(period > ms)
 				period = ms;
-			var newOpacity = initOpacity+(period/ms)*(opacity-initOpacity);
+			var newOpacity = initOpacity+(ms == 0 ? 1 : period/ms)*(opacity-initOpacity);
 			OpenLayers.Util.modifyDOMElement(el, null, null, null, null, null, null, newOpacity);
 
 			if(period < ms)
@@ -420,44 +420,67 @@ FacilMap.Util = {
 	 * @var Function success A function that will be called once the loadCheck function returns true for the first time.
 	*/
 	loadJavaScript: function(url, loadCheck, success) {
-		var load = true;
-		if(url == null || (loadCheck != null && loadCheck()))
-			load = false;
-		else
+		if(loadCheck != null && loadCheck())
+		{
+			if(success != null)
+				success();
+			return;
+		}
+
+		var scriptTag = null;
+		if(url != null)
 		{
 			var scripts = document.getElementsByTagName("script");
 			for(var i=0; i<scripts.length; i++)
 			{
 				if(FacilMap.Util.makeAbsoluteURL(scripts[i].src) == FacilMap.Util.makeAbsoluteURL(url))
 				{
+					scriptTag = scripts[i];
 					load = false;
 					break;
 				}
 			}
-		}
 
-		if(load)
-		{
-			var scriptTag = document.createElement("script");
-			scriptTag.type = "text/javascript";
-			scriptTag.src = url;
-			document.getElementsByTagName("head")[0].appendChild(scriptTag);
+			if(scriptTag == null)
+			{
+				scriptTag = document.createElement("script");
+				scriptTag.type = "text/javascript";
+				scriptTag.src = url;
+				document.getElementsByTagName("head")[0].appendChild(scriptTag);
+			}
 		}
 
 		if(loadCheck != null && success != null)
 		{
-			var callback = function(nextWait) {
-				if(loadCheck())
-					success();
-				else
+			var doInterval = true;
+			if(scriptTag != null)
+			{
+				// If the onload event is supported, scriptTag.onload will be set by setting the onload attribute
+				// (see http://perfectionkills.com/detecting-event-support-without-browser-sniffing/)
+				if(scriptTag.onload == undefined)
+					scriptTag.setAttribute("onload", "return true;");
+				if(typeof scriptTag.onload == "function")
 				{
-					var newWait = nextWait*2;
-					if(newWait > 10000)
-						newWait = 10000;
-					setTimeout(function(){ callback(newWait); }, nextWait);
+					FacilMap.Util.wrapFunction(scriptTag, "onload", function() { if(loadCheck()) success(); });
+					doInterval = false;
 				}
-			};
-			callback(10);
+			}
+
+			if(doInterval)
+			{
+				var callback = function(nextWait) {
+					if(loadCheck())
+						success();
+					else
+					{
+						var newWait = nextWait*2;
+						if(newWait > 10000)
+							newWait = 10000;
+						setTimeout(function(){ callback(newWait); }, nextWait);
+					}
+				};
+				callback(10);
+			}
 		}
 	},
 
@@ -469,7 +492,7 @@ FacilMap.Util = {
 	makeAbsoluteURL: function(url) {
 		// See http://stackoverflow.com/questions/470832/getting-an-absolute-url-from-a-relative-one-ie6-issue/472729#472729
 		var el = document.createElement("div");
-		el.innerHTML = "<a href=\"" + url.replace("&", "&amp;").replace("\"", "&quot;").replace("<", "&lt;").replace(">", "&gt;") + "\">x</a>";
+		el.innerHTML = "<a href=\"" + FacilMap.Util.htmlspecialchars(url) + "\">x</a>";
 		return el.firstChild.href;
 	},
 
@@ -547,11 +570,50 @@ FacilMap.Util = {
 		return ret;
 	},
 
-	alert_r: function(data) {
-		var str = "";
-		for(var i in data)
-			str += i+": "+data[i]+"\n";
-		alert(str);
+	/**
+	 * Add the specified CSS rule to the document. The rules are added from the top so they can be overridden
+	 * in the HTML code.
+	 * @param String selector The selector, for example ".class"
+	 * @param String rules The rules, for example "font-weight:bold;"
+	 */
+	addCSSRule: function(selector, rules) {
+		// See http://www.hunlock.com/blogs/Totally_Pwn_CSS_with_Javascript
+
+		var f = FacilMap.Util.addCSSRule;
+		if(f.idx == null)
+			f.idx = 0;
+
+		var s = document.styleSheets[0];
+		var rule;
+		if(s.addRule) // M$IE
+			rule = s.addRule(selector, rules, f.idx);
+		else
+			rule = s.insertRule(selector + " { " + rules + " }", f.idx);
+		OpenLayers.Util.extend(s.style, rules);
+		f.idx++;
+	},
+
+	/**
+	 * “Adds” code to the beginning and the end of a method. Actually, the method is replaced by a new method that
+	 * first calls the “before” method, then the actual method (giving all parameters), and then the “after” method.
+	 * The return value of the actual method is then returned.
+	 * @param Object obj The object that contains the method.
+	 * @param String property The name of the method.
+	 * @param Function before A function to call before calling the actual function (or null)
+	 * @param Function after A function to call after calling the actual function (or null)
+	 * @return mixed Returns the return value of the original method.
+	 */
+	wrapFunction: function(obj, property, before, after)
+	{
+		var funcSave = obj[property];
+		obj[property] = function() {
+			if(before != null)
+				before.apply(obj, [ ]);
+			var ret = funcSave.apply(obj, arguments);
+			if(after != null)
+				after.apply(obj, [ ]);
+			return ret;
+		};
 	},
 
 	debugOutput: function(string) {
@@ -570,6 +632,29 @@ FacilMap.Util = {
 			debugOutput.textarea.onmouseout = function(){ FacilMap.Util.changeOpacity(this, 0.5); };
 			debugOutput.textarea.onmouseout();
 		}
-		debugOutput.textarea.value = new Date()+": "+string+"\n\n"+debugOutput.textarea.value;
+		var obj2str = function(obj, depth) {
+			var tabs = "";
+			for(var i=0; i<depth; i++)
+				tabs += "\t";
+			var str = "";
+			if(obj instanceof Array)
+			{
+				str += tabs+"[\n";
+				for(var i=0; i<obj.length; i++)
+					str += tabs+"\t"+obj2str(obj[i], depth+1)+"\n";
+				str += tabs+"]\n";
+			}
+			else if(obj instanceof Object)
+			{
+				str += tabs+"{\n";
+				for(var i in obj)
+					str += tabs+"\t"+i+": "+obj2str(obj[i], depth+1)+"\n";
+				str += tabs+"}\n";
+			}
+			else
+				str = ""+obj;
+			return str;
+		}
+		debugOutput.textarea.value = new Date()+": "+obj2str(string)+"\n\n"+debugOutput.textarea.value;
 	}
 }
