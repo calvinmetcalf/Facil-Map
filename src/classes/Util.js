@@ -459,7 +459,7 @@ FacilMap.Util = {
 				// (see http://perfectionkills.com/detecting-event-support-without-browser-sniffing/)
 				if(scriptTag.onload == undefined)
 					scriptTag.setAttribute("onload", "return true;");
-				if(scriptTag.onload != undefined)
+				if(typeof scriptTag.onload == "function")
 				{
 					FacilMap.Util.wrapFunction(scriptTag, "onload", function() { if(loadCheck()) success(); });
 					doInterval = false;
