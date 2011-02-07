@@ -31,6 +31,8 @@ FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
 	*/
 	permalinkProjection : new OpenLayers.Projection("EPSG:4326"),
 
+	attributionIcon : new OpenLayers.Icon(FacilMap.apiUrl+"/logo.png", new OpenLayers.Size(170, 129), new OpenLayers.Pixel(-25, -108)),
+
 	initialize : function(div, options)
 	{
 		OpenLayers.Map.prototype.initialize.apply(this, [ div, OpenLayers.Util.extend({
@@ -41,7 +43,7 @@ FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
 				new OpenLayers.Control.Attribution(),
 				new FacilMap.Control.KeyboardDefaults(),
 				new OpenLayers.Control.MousePosition(),
-				new OpenLayers.Control.ScaleLine() ],
+				new FacilMap.Control.ScaleLine() ],
 			//maxExtent: new OpenLayers.Bounds(-180, -85, 180, 85), // FIXME: 4326 as projection does not seem to work
 			maxExtent: new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34),
 			maxResolution: 156543.0399,
@@ -57,6 +59,22 @@ FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
 		this.events.register("move", this, function(){ this.events.triggerEvent("newHash"); });
 		this.events.register("changebaselayer", this, function(){ this.events.triggerEvent("newHash"); });
 		this.events.register("changelayer", this, function(){ this.events.triggerEvent("newHash"); });
+
+		if(this.attributionIcon != null)
+		{
+			var div = this.attributionIcon.draw(new OpenLayers.Pixel(0, 0));
+			div.style.zIndex = 10000;
+			this.div.appendChild(div);
+			var drawFunc = function() {
+				var left = 0;
+				if(OpenLayers.Layer.Google.cache[this.id] && OpenLayers.Layer.Google.cache[this.id].poweredBy && OpenLayers.Layer.Google.cache[this.id].poweredBy.style.display != "none")
+					left = 55;
+				this.attributionIcon.moveTo(new OpenLayers.Pixel(left, this.getSize().h));
+			};
+			this.events.register("mapResize", this, drawFunc);
+			this.events.register("changebaselayer", this, drawFunc);
+			drawFunc.apply(this);
+		}
 	},
 
 	updateSize : function()
@@ -342,7 +360,7 @@ FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
 				break;
 			}
 		}
-		
+
 		if(FacilMap.Util.encodeQueryString(hashObject) == "lon=0;lat=0;zoom=2;layer="+firstBaseLayer)
 			return { };
 
