@@ -31,7 +31,7 @@ FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
 	*/
 	permalinkProjection : new OpenLayers.Projection("EPSG:4326"),
 
-	attributionIcon : new OpenLayers.Icon(FacilMap.apiUrl+"/logo.png", new OpenLayers.Size(170, 129), new OpenLayers.Pixel(-25, -108)),
+	attributionIcon : new OpenLayers.Icon(FacilMap.apiUrl+"/logo_beta.png", new OpenLayers.Size(170, 129), new OpenLayers.Pixel(-25, -108)),
 
 	initialize : function(div, options)
 	{
