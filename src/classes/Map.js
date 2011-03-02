@@ -150,7 +150,7 @@ FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
 		this.addLayer(new FacilMap.Layer.Markers.OpenLinkMap(OpenLayers.i18n("POI"), { shortName: "OLiM" }));
 
 		FacilMap.Layer.Markers.OpenStreetBugs.loadAPI(function() {
-			map.addLayer(new FacilMap.Layer.Markers.OpenStreetBugs(_("OpenStreetBugs"), { visibility: false, shortName: "OSBu" }));
+			map.addLayer(new FacilMap.Layer.Markers.OpenStreetBugs(OpenLayers.i18n("OpenStreetBugs"), { visibility: false, shortName: "OSBu" }));
 		});
 	},
 
