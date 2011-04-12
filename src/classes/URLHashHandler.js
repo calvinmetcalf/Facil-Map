@@ -50,8 +50,14 @@ FacilMap.URLHashHandler = OpenLayers.Class({
 	*/
 	events : null,
 
+	eventHandler : null,
+	started : false,
+
 	initialize : function() {
 		this.events = new OpenLayers.Events(this, null, [ "hashChanged" ]);
+
+		if("onhashchange" in window)
+			this.eventHandler = OpenLayers.Function.bindAsEventListener(this.checkHash, this);;
 	},
 
 	/**
@@ -59,10 +65,18 @@ FacilMap.URLHashHandler = OpenLayers.Class({
 	 * @return void
 	*/
 	start : function() {
+		if(this.started)
+			return;
+
 		var obj = this;
 		this.lastHash = this.getLocationHash();
-		if(this.intervalObject == null)
+
+		if(this.eventHandler)
+			OpenLayers.Event.observe(window, "hashchange", this.eventHandler);
+		else
 			this.intervalObject = setInterval(function(){ obj.checkHash(); }, this.interval);
+
+		this.started = true;
 	},
 
 	/**
@@ -70,10 +84,18 @@ FacilMap.URLHashHandler = OpenLayers.Class({
 	 * @return void
 	*/
 	stop : function() {
-		if(this.intervalObject == null)
+		if(!this.started)
 			return;
-		clearInterval(this.intervalObject);
-		this.intervalObject = null;
+
+		if(this.eventHandler)
+			OpenLayers.Event.observe(window, "hashchange", this.eventHandler);
+		else
+		{
+			clearInterval(this.intervalObject);
+			this.intervalObject = null;
+		}
+
+		this.started = false;
 	},
 
 	/**
@@ -101,14 +123,17 @@ FacilMap.URLHashHandler = OpenLayers.Class({
 	},
 
 	/**
-	 * Sets the location has to the given hash.
+	 * Sets the location has to the given hash. The hashChanged event will not be fired.
 	 * @param String hash The hash part without #
 	 * @return void
 	*/
 	setLocationHash : function(hash)
 	{
+		if(hash == this.getLocationHash())
+			return;
+
 		var restart = false;
-		if(this.intervalObject)
+		if(this.started)
 		{
 			this.stop();
 			restart = true;
