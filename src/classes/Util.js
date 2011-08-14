@@ -491,8 +491,9 @@ FacilMap.Util = {
 	/**
 	 * Loads the given CSS file if it is not already loaded.
 	 * @param {String} url
+	 * @param {Boolean} onTop If ture, add before all other CSS rules
 	 */
-	loadCSSFile : function(url) {
+	loadCSSFile : function(url, onTop) {
 		var urlA = fm.Utils.makeAbsoluteURL(url);
 		var exists = false;
 
@@ -505,7 +506,7 @@ FacilMap.Util = {
 		});
 
 		if(!exists)
-			$("head").append($("<link rel=\"stylesheet\" type=\"text/css\" />").attr("href", url));
+			$("head")[onTop ? "prepend" : "append"]($("<link rel=\"stylesheet\" type=\"text/css\" />").attr("href", url));
 	},
 
 	/**

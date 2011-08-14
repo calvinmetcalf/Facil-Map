@@ -36,4 +36,8 @@ var FacilMap = {
 		}
 	}
 
+	setTimeout(function(){
+		fm.Util.loadCSSFile(fm.apiUrl+"/css/jquery-ui-1.8.15.custom.css", true);
+	}, 0);
+
 })(FacilMap, OpenLayers, FacilMap.$);
