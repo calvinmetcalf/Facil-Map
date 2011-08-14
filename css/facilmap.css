@@ -12,6 +12,19 @@
 	bottom:6em;
 }
 
+.olMap .fmControlLayerSwitcher .layersDiv {
+	background-color:#00272a;
+	border-top-left-radius:10px;
+	border-bottom-left-radius:10px;
+	opacity:0.75;
+
+	-moz-border-top-left-radius:10px;
+	-moz-border-bottom-left-radius:10px;
+	filter:alpha(opacity=75);
+	-moz-opacity:0.75;
+	-khtml-opacity:0.75;
+}
+
 .olMap .fmControlScaleLine {
 	left:auto;
 	bottom:50px;
@@ -21,12 +34,15 @@
 .olMap .fmControlScaleLine .olControlScaleLineTop {
 	margin-left:auto
 }
+
 .olMap .fmControlScaleLine .olControlScaleLineBottom {
 	margin-left:auto
 }
+
 .fmLayerMarkers img {
 	cursor:pointer
 }
+
 .fmAutocomplete {
 	margin:0 -1px !important
 	padding:0 !important;

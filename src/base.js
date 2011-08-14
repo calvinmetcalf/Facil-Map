@@ -25,18 +25,20 @@ var FacilMap = {
 
 (function(fm, ol, $){
 
-	var els = document.getElementsByTagName("script");
-	for(var i=0; i<els.length; i++)
-	{
-		var m = els[i].src.match(/^(.*)\/facilmap(_.*)?\.js(\?|$)/i);
+	$("script").each(function(){
+		var m = (""+$(this).attr("src")).match(/^(.*)\/facilmap(_.*)?\.js(\?|$)/i);
 		if(m)
 		{
 			fm.apiUrl = m[1];
-			break;
+			return false;
 		}
-	}
+	});
+
+	OpenLayers.ImgPath = fm.apiUrl+"/img/openlayers/";
 
 	setTimeout(function(){
+		// Execute after loading all the JavaScript files
+
 		fm.Util.loadCSSFile(fm.apiUrl+"/css/jquery/jquery-ui-1.8.15.custom.css", true);
 		fm.Util.loadCSSFile(fm.apiUrl+"/css/facilmap.css", true);
 	}, 0);

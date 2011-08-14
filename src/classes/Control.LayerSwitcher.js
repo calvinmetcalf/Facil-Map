@@ -17,14 +17,18 @@
 	Obtain the source code from http://gitorious.org/facilmap.
 */
 
+(function(fm, ol, $){
+
 /**
  * A layer switcher that has a scroll bar if the height of the map is too small.
  * Additionally, overlay layers that have the “zoomableInLayerSwitcher” property get a button that zooms to the data extent of the layer.
  * Overlay layers that have the “removableInLayerSwitcher” property set get a button to remove the layer from the map.
 */
-FacilMap.Control.LayerSwitcher = OpenLayers.Class(OpenLayers.Control.LayerSwitcher, {
+fm.Control.LayerSwitcher = ol.Class(ol.Control.LayerSwitcher, {
+	roundedCorner : false, // Is done in CSS instead
+
 	loadContents : function() {
-		var ret = OpenLayers.Control.LayerSwitcher.prototype.loadContents.apply(this, arguments);
+		var ret = ol.Control.LayerSwitcher.prototype.loadContents.apply(this, arguments);
 		this.layersDiv.style.padding = ".5em";
 		this.layersDiv.style.width = "19em";
 		this.layersDiv.style.overflow = "auto";
@@ -42,7 +46,7 @@ FacilMap.Control.LayerSwitcher = OpenLayers.Class(OpenLayers.Control.LayerSwitch
 
 		if(force)
 			this.layerStates = [];
-		var ret = OpenLayers.Control.LayerSwitcher.prototype.redraw.apply(this, arguments);
+		var ret = ol.Control.LayerSwitcher.prototype.redraw.apply(this, arguments);
 		this.onMapResize();
 
 		var spans = this.dataLayersDiv.getElementsByTagName("span");
@@ -57,8 +61,8 @@ FacilMap.Control.LayerSwitcher = OpenLayers.Class(OpenLayers.Control.LayerSwitch
 			{
 				var a_zoom = document.createElement("a");
 				a_zoom.href = "#";
-				OpenLayers.Event.observe(a_zoom, "click", OpenLayers.Function.bindAsEventListener(function(){ var extent = this.getDataExtent(); if(extent) this.map.zoomToExtent(extent); return false; }, layer));
-				a_zoom.appendChild(document.createTextNode(OpenLayers.i18n("[Zoom]")));
+				ol.Event.observe(a_zoom, "click", ol.Function.bindAsEventListener(function(){ var extent = this.getDataExtent(); if(extent) this.map.zoomToExtent(extent); return false; }, layer));
+				a_zoom.appendChild(document.createTextNode(ol.i18n("[Zoom]")));
 
 				append.push(document.createTextNode(" "));
 				append.push(a_zoom);
@@ -68,8 +72,8 @@ FacilMap.Control.LayerSwitcher = OpenLayers.Class(OpenLayers.Control.LayerSwitch
 			{
 				var a_remove = document.createElement("a");
 				a_remove.href = "#";
-				OpenLayers.Event.observe(a_remove, "click", OpenLayers.Function.bindAsEventListener(function(){ this.map.removeLayer(this); this.destroy(); return false; }, layer));
-				a_remove.appendChild(document.createTextNode(OpenLayers.i18n("[Remove]")));
+				ol.Event.observe(a_remove, "click", ol.Function.bindAsEventListener(function(){ this.map.removeLayer(this); this.destroy(); return false; }, layer));
+				a_remove.appendChild(document.createTextNode(ol.i18n("[Remove]")));
 
 				append.push(document.createTextNode(" "));
 				append.push(a_remove);
@@ -90,3 +94,5 @@ FacilMap.Control.LayerSwitcher = OpenLayers.Class(OpenLayers.Control.LayerSwitch
 
 	CLASS_NAME : "FacilMap.Control.LayerSwitcher"
 });
+
+})(FacilMap, OpenLayers, FacilMap.$);
