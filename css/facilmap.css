@@ -15,7 +15,7 @@
 .olMap .fmControlAttribution {
 	font-size:smaller;
 	right:3px;
-	bottom:1.5em;
+	bottom:4.5em;
 	position:absolute;
 }
 
@@ -41,7 +41,6 @@
 
 .olMap .fmControlScaleLine {
 	left:auto;
-	bottom:50px;
 	right:5px;
 }
 

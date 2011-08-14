@@ -45,7 +45,9 @@ fm.Map = ol.Class(ol.Map, {
 				new fm.Control.Attribution(),
 				new fm.Control.KeyboardDefaults(),
 				new ol.Control.MousePosition(),
-				new fm.Control.ScaleLine() ],
+				new fm.Control.ScaleLine(),
+				new fm.Control.GeoLocation()
+			],
 			//maxExtent: new ol.Bounds(-180, -85, 180, 85), // FIXME: 4326 as projection does not seem to work
 			maxExtent: new ol.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34),
 			maxResolution: 156543.0399,
