@@ -19,7 +19,8 @@
 
 var FacilMap = {
 	olBackup : { },
-	apiUrl : "."
+	apiUrl : ".",
+	$ : jQuery.noConflict(true)
 };
 
 (function() {
