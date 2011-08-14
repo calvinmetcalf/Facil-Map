@@ -64,7 +64,7 @@ FacilMap.Control.GeoLocation = OpenLayers.Class(OpenLayers.Control, {
 
 	/**
 	 * Requests the geolocation from the browser if it is supported and zooms there.
-	 * @return void
+	 * @return {void}
 	*/
 	goToGeoLocation : function() {
 		if(!this.map || !navigator.geolocation) return;

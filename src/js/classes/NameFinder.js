@@ -30,8 +30,8 @@ FacilMap.NameFinder = OpenLayers.Class({
 	/**
 	 * Perform a search through a NameFinder. This function itself does not connect to an actual NameFinder, it only finds one result if
 	 * the query String consists of coordinates encoded in a Lat,Lon string or an OpenStreetMap Permalink.
-	 * @param String query The query string.
-	 * @param Function callbackFunction A function that is executed when the search has been performed. The function takes one argument that
+	 * @param query {String} The query string.
+	 * @param callbackFunction {Function} A function that is executed when the search has been performed. The function takes one argument that
 	 *                                  contains an array with the results. It is undefined if an error has occurred. Each result is an object
 	 *                                  with the following properties:
 	 *                                  * OpenLayers.LonLat lonlat The coordinates of the result
@@ -39,7 +39,7 @@ FacilMap.NameFinder = OpenLayers.Class({
 	 *                                  * String info: Some additional information about the result, such as the type.
 	 *                                  * function getZoom(OpenLayers.Map): Returns the zoom level that the search result should be displayed at on the given map.
 	 *                                  * Node osm: The associated OSM object or null.
-	 * @return void
+	 * @return {void}
 	*/
 	find : function(query, callbackFunction) {
 		query.replace(/^\s+/, "").replace(/\s+$/, "");
@@ -95,8 +95,8 @@ FacilMap.NameFinder = OpenLayers.Class({
 	 * "supermarket, London, UK" then this function would return (13, 9) which is "London, UK" in that string.
 	 * This is important for the auto-suggest feature as you only want to get suggestions for actual places, not
 	 * for POIs that you search for.
-	 * @param String query
-	 * @return Array An array of offset and length of the location part or null if there is no such
+	 * @param query {String}
+	 * @return {Array} An array of offset and length of the location part or null if there is no such
 	*/
 	getLocationPart : function(query) {
 		return [ 0, query.length ];
@@ -113,8 +113,8 @@ FacilMap.NameFinder = OpenLayers.Class({
 	 * - fmAutocompleteResults: The list of results returned by the namefinder
 	 * - fmAutocompleteSelected
 	 * - fmAutocompletePrevious
-	 * @param Element input The DOM node of a text input field.
-	 * @return void
+	 * @param input {Element} The DOM node of a text input field.
+	 * @return {void}
 	*/
 	initAutoSuggest : function(input) {
 		input.setAttribute("autocomplete", "off");

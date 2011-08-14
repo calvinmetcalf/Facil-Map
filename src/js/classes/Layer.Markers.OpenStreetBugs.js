@@ -70,7 +70,7 @@ FacilMap.Layer.Markers.OpenStreetBugs = OpenLayers.Class(FacilMap.Layer.Markers,
 /**
  * Loads the OpenStreetBugs API and executes a callback function once it is loaded. When the API is already loaded,
  * the function is called immediately.
- * @param Function callback A function to call as soon as the API is loaded.
+ * @param callback {Function} A function to call as soon as the API is loaded.
  */
 FacilMap.Layer.Markers.OpenStreetBugs.loadAPI = function(callback) {
 	FacilMap.Util.loadJavaScript("http://api.facilmap.org/osblayer/osblayer.js", function() { return OpenLayers.Layer.OpenStreetBugs != undefined; }, callback);

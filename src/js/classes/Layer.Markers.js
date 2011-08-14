@@ -24,7 +24,7 @@
 */
 
 FacilMap.Layer.Markers = OpenLayers.Class(OpenLayers.Layer.Markers, {
-	defaultIcon : new OpenLayers.Icon('http://api.facilmap.org/marker.png', new OpenLayers.Size(21,25), new OpenLayers.Pixel(-9, -25)),
+	defaultIcon : new OpenLayers.Icon(FacilMap.apiUrl+"/img/marker.png", new OpenLayers.Size(21,25), new OpenLayers.Pixel(-9, -25)),
 	openPopupsOnShow : null,
 	zoomableInLayerSwitcher : true,
 	projection: new OpenLayers.Projection("EPSG:4326"),
@@ -59,16 +59,16 @@ FacilMap.Layer.Markers = OpenLayers.Class(OpenLayers.Layer.Markers, {
 	/**
 	 * Creates a marker with a popup (OpenLayers.Popup.FramedCloud) on this layer. The visibility of the popup can be toggled by clicking
 	 * on the marker.
-	 * @param OpenLayers.LonLat lonlat The position of the marker.
-	 * @param String|DOMElement|Function popupContent The HTML content of the popup. If a function is passed instead, this function is
+	 * @param lonlat {OpenLayers.LonLat} The position of the marker.
+	 * @param popupContent {String|DOMElement|Function} The HTML content of the popup. If a function is passed instead, this function is
 	 *                                                called once the popup is showed for the first time in order to load the popup
 	 *                                                content. It is expected to call the callback function that it receives as
 	 *                                                parameter, giving the popup content to it as parameter.
-	 * @param boolean popupVisible Should the popup be visible initially?
-	 * @param OpenLayers.Icon icon Use this icon instead of the default icon.
-	 * @param boolean noPan Don’t move the map view to the marker.
-	 * @param OpenLayers.Icon iconHighlight Show this icon when the popup is visible (if null, the icon isn’t changed when the popup is opened)
-	 * @return The newly created OpenLayers.Marker object. It contains the additional property fmFeature, which is the OpenLayers.Feature
+	 * @param popupVisible {boolean} Should the popup be visible initially?
+	 * @param icon {OpenLayers.Icon} Use this icon instead of the default icon.
+	 * @param noPan {boolean} Don’t move the map view to the marker.
+	 * @param iconHighlight {OpenLayers.Icon} Show this icon when the popup is visible (if null, the icon isn’t changed when the popup is opened)
+	 * @return {The} newly created OpenLayers.Marker object. It contains the additional property fmFeature, which is the OpenLayers.Feature
 	 * that connects the marker with the popup. The marker triggers the events “open” or “close” when changing the visibility of the popup.
 	*/
 	createMarker : function(lonlat, popupContent, popupVisible, icon, noPan, iconHighlight) {

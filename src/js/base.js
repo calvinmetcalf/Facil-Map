@@ -23,15 +23,17 @@ var FacilMap = {
 	$ : jQuery.noConflict(true)
 };
 
-(function() {
+(function(fm, ol, $){
+
 	var els = document.getElementsByTagName("script");
 	for(var i=0; i<els.length; i++)
 	{
 		var m = els[i].src.match(/^(.*)\/facilmap(_.*)?\.js(\?|$)/i);
 		if(m)
 		{
-			FacilMap.apiUrl = m[1];
+			fm.apiUrl = m[1];
 			break;
 		}
 	}
-})();
+
+})(FacilMap, OpenLayers, FacilMap.$);

@@ -31,7 +31,7 @@ FacilMap.Layer.Markers.LonLat = OpenLayers.Class(FacilMap.Layer.Markers, {
 	readableProjection : new OpenLayers.Projection("EPSG:4326"),
 
 	/**
-	 * @param OpenLayers.Icon defaultIcon The icon to be used for the markers added by addLonLatMarker()
+	 * @param defaultIcon {OpenLayers.Icon} The icon to be used for the markers added by addLonLatMarker()
 	*/
 	initialize : function(name, options) {
 		FacilMap.Layer.Markers.prototype.initialize.apply(this, arguments);

@@ -17,11 +17,13 @@
 	Obtain the source code from http://gitorious.org/facilmap.
 */
 
+(function(fm, ol, $){
+
 FacilMap.Util = {
 	/**
 	 * decodeURIComponent() throws an exception if the string contains invalid constructions (such as a % sign not followed by a 2-digits hexadecimal number). This function returns the original string in case of an error.
-	 * @param String str
-	 * @return String
+	 * @param {String} str
+	 * @return {{String}}
 	*/
 	decodeURIComponentTolerantly: function(str) {
 		try
@@ -36,8 +38,8 @@ FacilMap.Util = {
 
 	/**
 	 * Decodes a URL query string (the part after the ?).
-	 * @param String str
-	 * @return Object
+	 * @param {String} str
+	 * @return {{Object}}
 	*/
 	decodeQueryString: function(str) {
 		var obj = { };
@@ -56,7 +58,7 @@ FacilMap.Util = {
 				var cur_el = obj;
 				for(var j=0; j<arr_indexes.length; j++)
 				{
-					var cur_key = FacilMap.Util.decodeURIComponentTolerantly(arr_indexes[j]);
+					var cur_key = fm.Util.decodeURIComponentTolerantly(arr_indexes[j]);
 					if(cur_key.length == 0)
 					{
 						cur_key = 0;
@@ -64,7 +66,7 @@ FacilMap.Util = {
 							cur_key++;
 					}
 					if(j == arr_indexes.length-1)
-						cur_el[cur_key] = FacilMap.Util.decodeURIComponentTolerantly(str_split[i].substr(equal_sign+1));
+						cur_el[cur_key] = fm.Util.decodeURIComponentTolerantly(str_split[i].substr(equal_sign+1));
 					else
 					{
 						if(!cur_el[cur_key] || typeof cur_el[cur_key] != "object")
@@ -74,14 +76,15 @@ FacilMap.Util = {
 				}
 			}
 			else
-				obj[FacilMap.Util.decodeURIComponentTolerantly(key)] = FacilMap.Util.decodeURIComponentTolerantly(str_split[i].substr(equal_sign+1));
+				obj[fm.Util.decodeURIComponentTolerantly(key)] = fm.Util.decodeURIComponentTolerantly(str_split[i].substr(equal_sign+1));
 		}
 		return obj;
 	},
 
 	/**
 	 * Encodes an Object to a URL query string.
-	 * @param Object obj
+	 * @param {Object} obj
+	 * @return {{String}}
 	*/
 	encodeQueryString: function(obj, prefix, arr) {
 		if(obj == null)
@@ -97,7 +100,7 @@ FacilMap.Util = {
 			switch(typeof obj[i])
 			{
 				case "object":
-					FacilMap.Util.encodeQueryString(obj[i], key, arr);
+					fm.Util.encodeQueryString(obj[i], key, arr);
 					break;
 				case "boolean":
 					arr.push(key+"="+(obj[i] ? "1" : "0"));
@@ -113,6 +116,8 @@ FacilMap.Util = {
 
 	/**
 	 * Replaces <, > and " in the string with their HTML entities.
+	 * @param {String} str
+	 * @return {{Object}}
 	*/
 	htmlspecialchars: function(str) {
 		if(!str) return "";
@@ -121,10 +126,10 @@ FacilMap.Util = {
 
 	/**
 	 * Returns HTML code with Permalinks to various Map services at the specified position with the specified zoom level.
-	 * @param OpenLayers.LonLat lonlat
-	 * @param Number zoom
-	 * @param DOMElement osm An XML OpenStreetMap object to show the tags of.
-	 * @return DOMElement
+	 * @param lonlat {OpenLayers.LonLat}
+	 * @param zoom {Number}
+	 * @param osm {Element} An XML OpenStreetMap object to show the tags of.
+	 * @return {DOMElement}
 	*/
 	makePermalinks: function(lonlat, zoom, osm) {
 		var div = document.createElement("div");
@@ -134,13 +139,13 @@ FacilMap.Util = {
 		var dl = document.createElement("dl");
 		var el;
 		el = document.createElement("dt");
-		el.appendChild(document.createTextNode(OpenLayers.i18n("Latitude")));
+		el.appendChild(document.createTextNode(ol.i18n("Latitude")));
 		dl.appendChild(el);
 		el = document.createElement("dd");
 		el.appendChild(document.createTextNode(Math.round(lonlat.lat*100000000)/100000000));
 		dl.appendChild(el);
 		el = document.createElement("dt");
-		el.appendChild(document.createTextNode(OpenLayers.i18n("Longitude")));
+		el.appendChild(document.createTextNode(ol.i18n("Longitude")));
 		dl.appendChild(el);
 		el = document.createElement("dd");
 		el.appendChild(document.createTextNode(Math.round(lonlat.lon*100000000)/100000000));
@@ -155,7 +160,7 @@ FacilMap.Util = {
 		var legendLink = document.createElement("a");
 		legendLink.href = "javascript:";
 		legendLink.onclick = function() { fieldset.className = (fieldset.className == "content-hidden" ? "content-visible" : "content-hidden"); };
-		legendLink.appendChild(document.createTextNode(OpenLayers.i18n("Links to other maps")));
+		legendLink.appendChild(document.createTextNode(ol.i18n("Links to other maps")));
 		legend.appendChild(legendLink);
 		fieldset.appendChild(legend);
 
@@ -164,7 +169,7 @@ FacilMap.Util = {
 			var li = document.createElement("li");
 			var link = document.createElement("a");
 			link.href = href;
-			link.appendChild(document.createTextNode(OpenLayers.i18n(text)));
+			link.appendChild(document.createTextNode(ol.i18n(text)));
 			li.appendChild(link);
 			return li;
 		};
@@ -172,7 +177,7 @@ FacilMap.Util = {
 		var ul = document.createElement("ul");
 		ul.className = "fieldset-content";
 		ul.appendChild(makeEntry("http://www.openstreetmap.org/?mlat="+lonlat.lat+"&mlon="+lonlat.lon+"&zoom="+zoom, "OpenStreetMap Permalink"));
-		ul.appendChild(makeEntry("http://osm.org/go/"+FacilMap.Util.encodeShortLink(lonlat, zoom)+"?m", "OpenStreetMap Shortlink"));
+		ul.appendChild(makeEntry("http://osm.org/go/"+fm.Util.encodeShortLink(lonlat, zoom)+"?m", "OpenStreetMap Shortlink"));
 		ul.appendChild(makeEntry("http://maps.google.com/?q="+lonlat.lat+","+lonlat.lon, "Google Maps Permalink"));
 		ul.appendChild(makeEntry("http://maps.yahoo.com/broadband/#lat="+lonlat.lat+"&lon="+lonlat.lon+"&zoom="+zoom, "Yahoo Maps Permalink"));
 		ul.appendChild(makeEntry("http://osmtools.de/osmlinks/?lat="+lonlat.lat+"&lon="+lonlat.lon+"&zoom="+zoom, "OpenStreetMap Links"));
@@ -191,7 +196,7 @@ FacilMap.Util = {
 			var tagLegendLink = document.createElement("a");
 			tagLegendLink.href = "javascript:";
 			tagLegendLink.onclick = function() { tagFieldset.className = (tagFieldset.className == "content-hidden" ? "content-visible" : "content-hidden"); };
-			tagLegendLink.appendChild(document.createTextNode(OpenLayers.i18n("Tags")));
+			tagLegendLink.appendChild(document.createTextNode(ol.i18n("Tags")));
 			tagLegend.appendChild(tagLegendLink);
 			tagFieldset.appendChild(tagLegend);
 
@@ -203,7 +208,7 @@ FacilMap.Util = {
 				var tagDt = document.createElement("dt");
 				tagDt.appendChild(document.createTextNode(tags[i].getAttribute("k")));
 				var tagDd = document.createElement("dd");
-				tagDd.appendChild(FacilMap.Util.formatTagValue(tags[i].getAttribute("v"), tags[i].getAttribute("k")));
+				tagDd.appendChild(fm.Util.formatTagValue(tags[i].getAttribute("v"), tags[i].getAttribute("k")));
 				tagDl.appendChild(tagDt);
 				tagDl.appendChild(tagDd);
 			}
@@ -229,9 +234,9 @@ FacilMap.Util = {
 
 	/**
 	 * Creates the relevant string of an OSM Shortlink. Copied from http://www.openstreetmap.org/javascripts/site.js, function makeShortCode().
-	 * @param OpenLayers.LonLat lonlat Coordinates in WGS-84
-	 * @param Number zoom
-	 * @return String
+	 * @param lonlat {OpenLayers.LonLat} Coordinates in WGS-84
+	 * @param zoom {Number}
+	 * @return {String}
 	*/
 	encodeShortLink: function(lonlat, zoom) {
 		var x = Math.round((1*lonlat.lon + 180.0) * ((1 << 30) / 90.0));
@@ -254,13 +259,13 @@ FacilMap.Util = {
 		var str = "";
 		for (var i = 0; i < Math.ceil((zoom + 8) / 3.0) && i < 5; ++i)
 		{
-			digit = (c1 >> (24 - 6 * i)) & 0x3f;
-			str += FacilMap.Util.shortLinkCharArray.charAt(digit);
+			var digit = (c1 >> (24 - 6 * i)) & 0x3f;
+			str += fm.Util.shortLinkCharArray.charAt(digit);
 		}
 		for (var i = 5; i < Math.ceil((zoom + 8) / 3.0); ++i)
 		{
-			digit = (c2 >> (24 - 6 * (i - 5))) & 0x3f;
-			str += FacilMap.Util.shortLinkCharArray.charAt(digit);
+			var digit = (c2 >> (24 - 6 * (i - 5))) & 0x3f;
+			str += fm.Util.shortLinkCharArray.charAt(digit);
 		}
 		for (var i = 0; i < ((zoom + 8) % 3); ++i)
 		{
@@ -271,8 +276,8 @@ FacilMap.Util = {
 
 	/**
 	 * Decodes a string from FacilMap.Util.encodeShortLink().
-	 * @param String encoded
-	 * @return Object (lonlat: OpenLayers.LonLat, zoom: Number)
+	 * @param encoded {String}
+	 * @return {Object} (lonlat: OpenLayers.LonLat, zoom: Number)
 	*/
 	decodeShortLink: function(encoded) {
 		var lon,lat,zoom;
@@ -285,7 +290,7 @@ FacilMap.Util = {
 		var c2 = 0;
 		for(var i=0,j=54; i<m[1].length; i++,j-=6)
 		{
-			var bits = FacilMap.Util.shortLinkCharArray.indexOf(m[1].charAt(i));
+			var bits = fm.Util.shortLinkCharArray.indexOf(m[1].charAt(i));
 			if(j <= 30)
 				c1 |= bits >>> (30-j);
 			else if(j > 30)
@@ -315,7 +320,7 @@ FacilMap.Util = {
 		lat = y*45.0/(1<<30)-90.0;
 
 		return {
-			lonlat : new OpenLayers.LonLat(lon, lat),
+			lonlat : new ol.LonLat(lon, lat),
 			zoom : zoom
 		};
 	},
@@ -324,8 +329,8 @@ FacilMap.Util = {
 	 * Makes a usable class name out of an OpenLayers.Class object. Adds all parent classes to the class name, too.
 	 * The class name for an FacilMap.Map object would be "fmMap olMap" for example.
 	 * The class name is determined by the CLASS_NAME property.
-	 * @param Object olObject Either a class returned by OpenLayers.Class() or an instance of such a class.
-	 * @return String
+	 * @param olObject {Object} Either a class returned by OpenLayers.Class() or an instance of such a class.
+	 * @return {String}
 	*/
 	makeClassName: function(olObject) {
 		var array = arguments[1];
@@ -340,7 +345,7 @@ FacilMap.Util = {
 			if(olClass.fmParentClasses != undefined)
 			{
 				for(var i=0; i<olClass.fmParentClasses.length; i++)
-					FacilMap.Util.makeClassName(olClass.fmParentClasses[i], array);
+					fm.Util.makeClassName(olClass.fmParentClasses[i], array);
 			}
 		}
 
@@ -359,13 +364,13 @@ FacilMap.Util = {
 
 	/**
 	 * Changes the opacity of the given element to a new value, slowly fading there.
-	 * @param Element el The DOM element to change the opacity for
-	 * @param Number opacity The new opacity (1.0 for not transparent, 0.0 for invisible).
-	 * @param Number ms The time span for the fading in milliseconds (defaults to 750).
-	 * @return void
+	 * @param el {Element} The DOM element to change the opacity for
+	 * @param opacity {Number} The new opacity (1.0 for not transparent, 0.0 for invisible).
+	 * @param ms {Number} The time span for the fading in milliseconds (defaults to 750).
+	 * @return {void}
 	*/
 	changeOpacity: function(el, opacity, ms) {
-		var changeOpacity = FacilMap.Util.changeOpacity;
+		var changeOpacity = fm.Util.changeOpacity;
 
 		if(changeOpacity.timeouts == undefined)
 			changeOpacity.timeouts = { };
@@ -399,7 +404,7 @@ FacilMap.Util = {
 			if(period > ms)
 				period = ms;
 			var newOpacity = initOpacity+(ms == 0 ? 1 : period/ms)*(opacity-initOpacity);
-			OpenLayers.Util.modifyDOMElement(el, null, null, null, null, null, null, newOpacity);
+			ol.Util.modifyDOMElement(el, null, null, null, null, null, null, newOpacity);
 
 			if(period < ms)
 				changeOpacity.timeouts[timeoutObj].timeout = setTimeout(callback, 100);
@@ -433,10 +438,9 @@ FacilMap.Util = {
 			var scripts = document.getElementsByTagName("script");
 			for(var i=0; i<scripts.length; i++)
 			{
-				if(FacilMap.Util.makeAbsoluteURL(scripts[i].src) == FacilMap.Util.makeAbsoluteURL(url))
+				if(fm.Util.makeAbsoluteURL(scripts[i].src) == fm.Util.makeAbsoluteURL(url))
 				{
 					scriptTag = scripts[i];
-					load = false;
 					break;
 				}
 			}
@@ -461,7 +465,7 @@ FacilMap.Util = {
 					scriptTag.setAttribute("onload", "return true;");
 				if(typeof scriptTag.onload == "function")
 				{
-					FacilMap.Util.wrapFunction(scriptTag, "onload", function() { if(loadCheck()) success(); });
+					fm.Util.wrapFunction(scriptTag, "onload", function() { if(loadCheck()) success(); });
 					doInterval = false;
 				}
 			}
@@ -485,14 +489,34 @@ FacilMap.Util = {
 	},
 
 	/**
+	 * Loads the given CSS file if it is not already loaded.
+	 * @param {String} url
+	 */
+	loadCSSFile : function(url) {
+		var urlA = fm.Utils.makeAbsoluteURL(url);
+		var exists = false;
+
+		$("link[rel=stylesheet]").each(function(){
+			if(fm.Utils.makeAbsoluteURL($(this).attr("href")) == urlA)
+			{
+				exists = true;
+				return false;
+			}
+		});
+
+		if(!exists)
+			$("head").append($("<link rel=\"stylesheet\" type=\"text/css\" />").attr("href", url));
+	},
+
+	/**
 	 * Convert a relative URL to an absolute URL.
-	 * @param String url
-	 * @return String
+	 * @param url {String}
+	 * @return {String}
 	*/
 	makeAbsoluteURL: function(url) {
 		// See http://stackoverflow.com/questions/470832/getting-an-absolute-url-from-a-relative-one-ie6-issue/472729#472729
 		var el = document.createElement("div");
-		el.innerHTML = "<a href=\"" + FacilMap.Util.htmlspecialchars(url) + "\">x</a>";
+		el.innerHTML = "<a href=\"" + fm.Util.htmlspecialchars(url) + "\">x</a>";
 		return el.firstChild.href;
 	},
 
@@ -500,9 +524,9 @@ FacilMap.Util = {
 	 * Returns a DOM node with a formatted value of the value paramter. The value paramter is the value of a tag of an OSM object, the key
 	 * paramter is the appropriate key after whose rules the value will be formatted (for example the value for the url key will be formatted
 	 * as a link to this url).
-	 * @param String value The value of an OSM tag
-	 * @param String key The key of an OSM tag
-	 * @return Element A DOM element with the formatted value
+	 * @param value {String} The value of an OSM tag
+	 * @param key {String} The key of an OSM tag
+	 * @return {Element} A DOM element with the formatted value
 	*/
 	formatTagValue: function(value, key) {
 		var SEPARATOR_PATTERN = /;/;
@@ -560,8 +584,8 @@ FacilMap.Util = {
 
 	/**
 	 * Get an array of the keys of an object.
-	 * @param Object obj
-	 * @return Array<String>
+	 * @param obj {Object}
+	 * @return {Array<String>}
 	*/
 	getIndexes: function(obj) {
 		var ret = [ ];
@@ -573,18 +597,18 @@ FacilMap.Util = {
 	/**
 	 * Add the specified CSS rule to the document. The rules are added from the top so they can be overridden
 	 * in the HTML code.
-	 * @param String selector The selector, for example ".class"
-	 * @param String rules The rules, for example "font-weight:bold;"
+	 * @param selector {String} The selector, for example ".class"
+	 * @param rules {String} The rules, for example "font-weight:bold;"
 	 */
 	addCSSRule: function(selector, rules) {
 		// See http://www.hunlock.com/blogs/Totally_Pwn_CSS_with_Javascript
 
-		var f = FacilMap.Util.addCSSRule;
+		var f = fm.Util.addCSSRule;
 		if(f.idx == null)
 			f.idx = 0;
 		
 		if(document.styleSheets.length == 0)
-			FacilMap.$("head").append("<style type=\"text/css\"></style>");
+			fm.$("head").append("<style type=\"text/css\"></style>");
 
 		var s = document.styleSheets[0];
 		var rule;
@@ -592,7 +616,7 @@ FacilMap.Util = {
 			rule = s.addRule(selector, rules, f.idx);
 		else
 			rule = s.insertRule(selector + " { " + rules + " }", f.idx);
-		OpenLayers.Util.extend(s.style, rules);
+		ol.Util.extend(s.style, rules);
 		f.idx++;
 	},
 
@@ -600,11 +624,11 @@ FacilMap.Util = {
 	 * “Adds” code to the beginning and the end of a method. Actually, the method is replaced by a new method that
 	 * first calls the “before” method, then the actual method (giving all parameters), and then the “after” method.
 	 * The return value of the actual method is then returned.
-	 * @param Object obj The object that contains the method.
-	 * @param String property The name of the method.
-	 * @param Function before A function to call before calling the actual function (or null)
-	 * @param Function after A function to call after calling the actual function (or null)
-	 * @return mixed Returns the return value of the original method.
+	 * @param obj {Object} The object that contains the method.
+	 * @param property {String} The name of the method.
+	 * @param before {Function} A function to call before calling the actual function (or null)
+	 * @param after {Function} A function to call after calling the actual function (or null)
+	 * @return {mixed} Returns the return value of the original method.
 	 */
 	wrapFunction: function(obj, property, before, after)
 	{
@@ -617,47 +641,7 @@ FacilMap.Util = {
 				after.apply(obj, [ ]);
 			return ret;
 		};
-	},
-
-	debugOutput: function(string) {
-		var debugOutput = FacilMap.Util.debugOutput;
-		if(debugOutput.textarea == null)
-		{
-			debugOutput.textarea = document.createElement("textarea");
-			debugOutput.textarea.style.width = "75%";
-			debugOutput.textarea.style.height = "50%";
-			debugOutput.textarea.style.bottom = "0";
-			debugOutput.textarea.style.left = "0";
-			debugOutput.textarea.style.position = "fixed";
-			debugOutput.textarea.id = "fm-debug";
-			document.getElementsByTagName("body")[0].appendChild(debugOutput.textarea);
-			debugOutput.textarea.onmouseover = function(){ FacilMap.Util.changeOpacity(this, 1); };
-			debugOutput.textarea.onmouseout = function(){ FacilMap.Util.changeOpacity(this, 0.5); };
-			debugOutput.textarea.onmouseout();
-		}
-		var obj2str = function(obj, depth) {
-			var tabs = "";
-			for(var i=0; i<depth; i++)
-				tabs += "\t";
-			var str = "";
-			if(obj instanceof Array)
-			{
-				str += tabs+"[\n";
-				for(var i=0; i<obj.length; i++)
-					str += tabs+"\t"+obj2str(obj[i], depth+1)+"\n";
-				str += tabs+"]\n";
-			}
-			else if(obj instanceof Object)
-			{
-				str += tabs+"{\n";
-				for(var i in obj)
-					str += tabs+"\t"+i+": "+obj2str(obj[i], depth+1)+"\n";
-				str += tabs+"}\n";
-			}
-			else
-				str = ""+obj;
-			return str;
-		}
-		debugOutput.textarea.value = new Date()+": "+obj2str(string)+"\n\n"+debugOutput.textarea.value;
 	}
 }
+
+})(FacilMap, OpenLayers, FacilMap.$);

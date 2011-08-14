@@ -57,7 +57,7 @@ FacilMap.Routing = OpenLayers.Class({
 	/**
 	 * Returns the URL of the GPX file containing the route with the set parameters. May return an array of URLs if multiple files
 	 * have to be loaded.
-	 * @return String|Array[String]
+	 * @return {String|Array[String]}
 	*/
 	getGPXURL : function() {
 		return null;
@@ -65,7 +65,7 @@ FacilMap.Routing = OpenLayers.Class({
 
 	/**
 	 * Returns a Permalink to the original page that created the route or null if not appropriate.
-	 * @return String
+	 * @return {String}
 	*/
 	getPermalinkURL : function() {
 		return null;
@@ -73,7 +73,7 @@ FacilMap.Routing = OpenLayers.Class({
 
 	/**
 	 * Extracts the length of the route in kilometers from the GPX DOM tree.
-	 * @return Number
+	 * @return {Number}
 	*/
 	getRouteLength : function() {
 		return null;
@@ -81,7 +81,7 @@ FacilMap.Routing = OpenLayers.Class({
 
 	/**
 	 * Extracts the duration of the route in hours from the GPX DOM tree.
-	 * @return Number
+	 * @return {Number}
 	*/
 	getRouteDuration : function() {
 		return null;
@@ -90,17 +90,17 @@ FacilMap.Routing = OpenLayers.Class({
 	/**
 	 * Reorders the via points so that the total driving time/distance is minimised but still all the targets are
 	 * reached. Only does something when there are 2 or more via points (otherwise calls the callback function immediately).
-	 * @param Function callback A callback function that is called in any case after the ordering has been done
+	 * @param callback {Function} A callback function that is called in any case after the ordering has been done
 	 *                          or an error has occurred. May receive an error message as first parameter.
-	 * @return void
+	 * @return {void}
 	*/
 	reorderViaPoints : function(callback) {
 	},
 
 	/**
 	 * Returns a URL to an image containing the elevation profile of this route.
-	 * @param OpenLayers.Size size The desired size of the image
-	 * @return String
+	 * @param size {OpenLayers.Size} The desired size of the image
+	 * @return {String}
 	*/
 	getElevationProfileURL : function(size) {
 		return null;

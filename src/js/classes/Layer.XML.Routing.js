@@ -26,9 +26,9 @@
 FacilMap.Layer.XML.Routing = OpenLayers.Class(FacilMap.Layer.XML, {
 	HOVER_MAX_DISTANCE : 10,
 
-	fromIcon : new OpenLayers.Icon('http://api.facilmap.org/route-start.png', new OpenLayers.Size(20,34), new OpenLayers.Pixel(-10, -34)),
-	toIcon : new OpenLayers.Icon('http://api.facilmap.org/route-stop.png', new OpenLayers.Size(20,34), new OpenLayers.Pixel(-10, -34)),
-	viaIcon : new OpenLayers.Icon('http://api.facilmap.org/yellow.png', new OpenLayers.Size(20,34), new OpenLayers.Pixel(-10, -34)),
+	fromIcon : new OpenLayers.Icon(FacilMap.apiUrl+"/img/route-start.png", new OpenLayers.Size(20,34), new OpenLayers.Pixel(-10, -34)),
+	toIcon : new OpenLayers.Icon(FacilMap.apiUrl+"/img/route-stop.png", new OpenLayers.Size(20,34), new OpenLayers.Pixel(-10, -34)),
+	viaIcon : new OpenLayers.Icon(FacilMap.apiUrl+"/img/yellow.png", new OpenLayers.Size(20,34), new OpenLayers.Pixel(-10, -34)),
 
 	colour : "blue",
 
@@ -257,9 +257,9 @@ FacilMap.Layer.XML.Routing = OpenLayers.Class(FacilMap.Layer.XML, {
 	/**
 	 * Reorders the via points so that the total driving time/distance is minimised but still all the targets are
 	 * reached. Only does something when there are 2 or more via points. In case of an error, nothing is done.
-	 * @param Function callback A callback function to be called as soon as the points are ordered or an error has
+	 * @param callback {Function} A callback function to be called as soon as the points are ordered or an error has
 	 *                          occurred. On success, the first parameter is null, else it may be an error message.
-	 * @return void
+	 * @return {void}
 	*/
 	reorderViaPoints : function(callback) {
 		var layer = this;
@@ -274,9 +274,9 @@ FacilMap.Layer.XML.Routing = OpenLayers.Class(FacilMap.Layer.XML, {
 
 	/**
 	 * Set the start point of this route. Recalculates the route.
-	 * @param OpenLayers.LonLat from The start point to set for this route.
-	 * @param boolean zoom Zoom the map to this route after it has been loaded?
-	 * @return void
+	 * @param from {OpenLayers.LonLat} The start point to set for this route.
+	 * @param zoom {boolean} Zoom the map to this route after it has been loaded?
+	 * @return {void}
 	*/
 	setFrom : function(from, zoom) {
 		if(from == this.provider.from)
@@ -292,9 +292,9 @@ FacilMap.Layer.XML.Routing = OpenLayers.Class(FacilMap.Layer.XML, {
 
 	/**
 	 * Set the destination point of this route. Recalculates the route.
-	 * @param OpenLayers.LonLat to The destination point to set for this route.
-	 * @param boolean zoom Zoom the map to this route after it has been loaded?
-	 * @return void
+	 * @param to {OpenLayers.LonLat} The destination point to set for this route.
+	 * @param zoom {boolean} Zoom the map to this route after it has been loaded?
+	 * @return {void}
 	*/
 	setTo : function(to, zoom) {
 		if(to == this.provider.to)
@@ -310,9 +310,9 @@ FacilMap.Layer.XML.Routing = OpenLayers.Class(FacilMap.Layer.XML, {
 
 	/**
 	 * Set the means of transportation for this route. Recalculates the route.
-	 * @param FacilMap.Layer.XML.Routing.Medium medium The means of transportation to use for this route.
-	 * @param boolean zoom Zoom the map to this route after it has been loaded?
-	 * @return void
+	 * @param medium {FacilMap.Layer.XML.Routing.Medium} The means of transportation to use for this route.
+	 * @param zoom {boolean} Zoom the map to this route after it has been loaded?
+	 * @return {void}
 	*/
 	setMedium : function(medium, zoom) {
 		if(medium == this.provider.medium)
@@ -327,9 +327,9 @@ FacilMap.Layer.XML.Routing = OpenLayers.Class(FacilMap.Layer.XML, {
 
 	/**
 	 * Set the route calculation mechanism for this route. Recalculates the route.
-	 * @param FacilMap.Layer.XML.Routing.Type type The route calculation mechanism to use for this route.
-	 * @param boolean zoom Zoom the map to this route after it has been loaded?
-	 * @return void
+	 * @param type {FacilMap.Layer.XML.Routing.Type} The route calculation mechanism to use for this route.
+	 * @param zoom {boolean} Zoom the map to this route after it has been loaded?
+	 * @return {void}
 	*/
 	setType : function(type, zoom) {
 		if(type == this.provider.routingType)
@@ -391,7 +391,7 @@ FacilMap.Layer.XML.Routing = OpenLayers.Class(FacilMap.Layer.XML, {
 
 	/**
 	 * Returns a link to a web page displaying detailed information about the route, such as driving instructions.
-	 * @return String A link to a web page or null if this route is not initialised yet.
+	 * @return {String} A link to a web page or null if this route is not initialised yet.
 	*/
 	getDetailedLink : function() {
 		return this.provider.getPermalinkURL();

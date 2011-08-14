@@ -36,8 +36,8 @@ FacilMap.Layer.Yahoo.APPID = null;
 /**
  * Loads the Yahoo Maps API with the App ID set in {@link FacilMap.Layer.Yahoo.APPID} and calls the given callback
  * function as soon as it’s loaded.
- * @param Function callback
- * @return void
+ * @param callback {Function}
+ * @return {void}
 */
 FacilMap.Layer.Yahoo.loadAPI = function(callback) {
 	var url = null;

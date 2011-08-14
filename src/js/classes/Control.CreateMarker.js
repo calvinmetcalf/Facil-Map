@@ -31,7 +31,7 @@ FacilMap.Control.CreateMarker = OpenLayers.Class(OpenLayers.Control, {
 	title : OpenLayers.i18n("Create a marker"),
 
 	/**
-	 * @param FacilMap.Layer.Markers.LonLat fmLayer
+	 * @param fmLayer {FacilMap.Layer.Markers.LonLat}
 	*/
 	initialize: function(fmLayer, options) {
 		this.fmLayer = fmLayer;

@@ -62,7 +62,7 @@ FacilMap.URLHashHandler = OpenLayers.Class({
 
 	/**
 	 * Starts the Interval that looks for changes.
-	 * @return void
+	 * @return {void}
 	*/
 	start : function() {
 		if(this.started)
@@ -81,7 +81,7 @@ FacilMap.URLHashHandler = OpenLayers.Class({
 
 	/**
 	 * Stops the Interval that looks for changes.
-	 * @return void
+	 * @return {void}
 	*/
 	stop : function() {
 		if(!this.started)
@@ -100,7 +100,7 @@ FacilMap.URLHashHandler = OpenLayers.Class({
 
 	/**
 	 * Checks if location.hash has changed and triggers an event then.
-	 * @return void
+	 * @return {void}
 	*/
 	checkHash : function() {
 		var oldHash = this.lastHash;
@@ -111,7 +111,7 @@ FacilMap.URLHashHandler = OpenLayers.Class({
 
 	/**
 	 * Gets the part after the # in the URL.
-	 * @return String
+	 * @return {String}
 	*/
 	getLocationHash : function() {
 		// At least in Firefox, location.hash contains “&” if the hash part contains “%26”. This makes searching for URLs (such as OSM PermaLinks) hard and we work around that problem by extracting the desired value from location.href.
@@ -124,8 +124,8 @@ FacilMap.URLHashHandler = OpenLayers.Class({
 
 	/**
 	 * Sets the location has to the given hash. The hashChanged event will not be fired.
-	 * @param String hash The hash part without #
-	 * @return void
+	 * @param hash {String} The hash part without #
+	 * @return {void}
 	*/
 	setLocationHash : function(hash)
 	{

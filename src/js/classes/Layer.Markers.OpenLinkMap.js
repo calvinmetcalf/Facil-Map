@@ -29,8 +29,8 @@ FacilMap.Layer.Markers.OpenLinkMap = OpenLayers.Class(FacilMap.Layer.Markers, {
 	api : "http://olm.openstreetmap.de/api",
 	apiProjection : new OpenLayers.Projection("EPSG:4326"),
 	zoomableInLayerSwitcher : false,
-	markerIcon : new OpenLayers.Icon('http://api.facilmap.org/circle.png', new OpenLayers.Size(32,32), new OpenLayers.Pixel(-16, -16)),
-	markerIconHighlight : new OpenLayers.Icon('http://api.facilmap.org/circle_red.png', new OpenLayers.Size(32,32), new OpenLayers.Pixel(-16, -16)),
+	markerIcon : new OpenLayers.Icon(FacilMap.apiUrl+"/img/circle.png", new OpenLayers.Size(32,32), new OpenLayers.Pixel(-16, -16)),
+	markerIconHighlight : new OpenLayers.Icon(FacilMap.apiUrl+"/img/circle_red.png", new OpenLayers.Size(32,32), new OpenLayers.Pixel(-16, -16)),
 	minZoomLevel : 13,
 	attribution : OpenLayers.i18n("attribution-poi"),
 
@@ -104,9 +104,9 @@ FacilMap.Layer.Markers.OpenLinkMap = OpenLayers.Class(FacilMap.Layer.Markers, {
 
 	/**
 	 * Is called by the {#loadMarkers} function and adds a single marker to the map.
-	 * @param OpenLayers.LonLat lonlat The position in EPSG 4326
-	 * @param String id The ID of the POI
-	 * @param String type The type of the POI
+	 * @param lonlat {OpenLayers.LonLat} The position in EPSG 4326
+	 * @param id {String} The ID of the POI
+	 * @param type {String} The type of the POI
 	 */
 	addOLMMarker: function(lonlat, id, type)
 	{
@@ -123,9 +123,9 @@ FacilMap.Layer.Markers.OpenLinkMap = OpenLayers.Class(FacilMap.Layer.Markers, {
 	/**
 	 * Downloads the information for a specific POI to be displayed in the popup and passes it on to
 	 * a callback function.
-	 * @param String id The ID of the POI to load the information for
-	 * @param String type The type of the POI to load the information for
-	 * @param Function callback A function that receives the HTML code with the information as first parameter
+	 * @param id {String} The ID of the POI to load the information for
+	 * @param type {String} The type of the POI to load the information for
+	 * @param callback {Function} A function that receives the HTML code with the information as first parameter
 	 */
 	getPopupContent : function(id, type, callback) {
 		var layer = this;
@@ -146,8 +146,8 @@ FacilMap.Layer.Markers.OpenLinkMap = OpenLayers.Class(FacilMap.Layer.Markers, {
 	 * When the OLM API sends POI information, internationalised strings are encoded as #key#. This function
 	 * replaces such placeholders by their actual translation.
 	 * This function is used by the {@link #getPopupContent} function.
-	 * @param String str The string to replace I18n string in
-	 * @return String The translated string
+	 * @param str {String} The string to replace I18n string in
+	 * @return {String} The translated string
 	 */
 	replaceI18n : function(str) {
 		var togo = str;

@@ -37,7 +37,7 @@ FacilMap.Layer.Markers.GeoSearch = OpenLayers.Class(FacilMap.Layer.Markers, {
 	 * The marker icon to use for the first search result.
 	 * @var OpenLayers.Icon
 	*/
-	highlightIcon : new OpenLayers.Icon("http://api.facilmap.org/marker-green.png", new OpenLayers.Size(21,25), new OpenLayers.Pixel(-9, -25)),
+	highlightIcon : new OpenLayers.Icon(FacilMap.apiUrl+"/img/marker-green.png", new OpenLayers.Size(21,25), new OpenLayers.Pixel(-9, -25)),
 
 	/**
 	 * The icon type for Nominatim search result icons. Either "p" or "n", see http://www.sjjb.co.uk/mapicons/SJJBMapIconsv0.03/recoloured/, p has a transparent background, n a coloured.
@@ -52,9 +52,9 @@ FacilMap.Layer.Markers.GeoSearch = OpenLayers.Class(FacilMap.Layer.Markers, {
 	iconSize : 24,
 
 	/**
-	 * @param String name
+	 * @param name {String}
 	 * @param FacilMap.NameFinder
-	 * @param Object options
+	 * @param options {Object}
 	*/
 	initialize: function(name, nameFinder, options) {
 		FacilMap.Layer.Markers.prototype.initialize.apply(this, [ name, options ]);
@@ -72,9 +72,9 @@ FacilMap.Layer.Markers.GeoSearch = OpenLayers.Class(FacilMap.Layer.Markers, {
 
 	/**
 	 * Use the NameFinder to search in OpenStreetMap data and add the search results as markers to this layer.
-	 * @param String query The search string.
-	 * @param boolean dontzoom Don’t zoom to the search result but keep the current view of the map. If this is set, no alert box will indicate that the search returned no results.
-	 * @param Array markersvisible Contains a boolean value (or a string representing a boolean) for each search result to indicate if a popup should be opened.
+	 * @param {String} {query} The search string.
+	 * @param dontzoom {boolean} Don’t zoom to the search result but keep the current view of the map. If this is set, no alert box will indicate that the search returned no results.
+	 * @param markersvisible {Array} Contains a boolean value (or a string representing a boolean) for each search result to indicate if a popup should be opened.
 	*/
 	geoSearch: function(query, dontzoom, markersvisible)
 	{

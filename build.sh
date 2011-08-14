@@ -2,7 +2,7 @@
 cd "$(dirname "$0")"
 
 list_files() {
-	echo "src/js/jquery-1.6.2.js"
+	find "src/js/jquery" -type f -name "*.js" | sort_js_files
 	echo "src/js/base.js"
 	echo "src/js/classes/Util.js"
 	find "src/js/olfix" -type f -name "*.js" | sort_js_files

@@ -31,7 +31,7 @@ FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
 	*/
 	permalinkProjection : new OpenLayers.Projection("EPSG:4326"),
 
-	attributionIcon : new OpenLayers.Icon(FacilMap.apiUrl+"/logo_beta.png", new OpenLayers.Size(170, 129), new OpenLayers.Pixel(-25, -108)),
+	attributionIcon : new OpenLayers.Icon(FacilMap.apiUrl+"/img/logo_beta.png", new OpenLayers.Size(170, 129), new OpenLayers.Pixel(-25, -108)),
 
 	initialize : function(div, options)
 	{
@@ -194,7 +194,7 @@ FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
 	/**
 	 * Zoom to the specified query object. Remember to add your layers and to eventually set OpenLayers.ProxyHost before running
 	 * this method.
-	 * @param Object query Usually FacilMap.Util.decodeQueryString(location.hash.replace(/^#/, ""))
+	 * @param query {Object} Usually FacilMap.Util.decodeQueryString(location.hash.replace(/^#/, ""))
 	*/
 
 	zoomToQuery: function(query)
@@ -322,7 +322,7 @@ FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
 	 * hash part by calling location.hash = "#"+FacilMap.Util.encodeQueryString(map.getQueryObject());
 	 * Only non-default settings will be added to this query object. Remember to set the visibility of your overlay layers _before_ adding
 	 * them to the map, as the default visibility value will be determined during adding it.
-	 * @return Object
+	 * @return {Object}
 	*/
 
 	getQueryObject: function()

@@ -36,8 +36,8 @@ FacilMap.Layer.Google.API_KEY = null;
 /**
  * Loads the Google Maps API with the API key set in {@link FacilMap.Layer.Google.API_KEY} and calls the given callback
  * function as soon as it’s loaded.
- * @param Function callback
- * @return void
+ * @param callback {Function}
+ * @return {void}
 */
 FacilMap.Layer.Google.loadAPI = function(callback) {
 	var url = null;
