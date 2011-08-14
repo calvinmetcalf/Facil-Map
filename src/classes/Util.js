@@ -582,6 +582,9 @@ FacilMap.Util = {
 		var f = FacilMap.Util.addCSSRule;
 		if(f.idx == null)
 			f.idx = 0;
+		
+		if(document.styleSheets.length == 0)
+			FacilMap.$("head").append("<style type=\"text/css\"></style>");
 
 		var s = document.styleSheets[0];
 		var rule;
