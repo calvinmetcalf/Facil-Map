@@ -2,12 +2,12 @@
 cd "$(dirname "$0")"
 
 list_files() {
-	echo "src/jquery-1.6.2.js"
-	echo "src/base.js"
-	echo "src/classes/Util.js"
-	find "src/olfix" -type f -name "*.js" | sort_js_files
-	find "src/i18n" -type f -name "*.js" | sort_js_files
-	find "src/classes" -type f -name "*.js" | grep -vx src/classes/Util.js | sort_js_files
+	echo "src/js/jquery-1.6.2.js"
+	echo "src/js/base.js"
+	echo "src/js/classes/Util.js"
+	find "src/js/olfix" -type f -name "*.js" | sort_js_files
+	find "src/js/i18n" -type f -name "*.js" | sort_js_files
+	find "src/js/classes" -type f -name "*.js" | grep -vx src/classes/Util.js | sort_js_files
 }
 
 sort_js_files() {
