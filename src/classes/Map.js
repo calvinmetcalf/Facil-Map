@@ -40,7 +40,7 @@ FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
 				new OpenLayers.Control.Navigation(),
 				new OpenLayers.Control.PanZoomBar(),
 				new FacilMap.Control.LayerSwitcher(),
-				new OpenLayers.Control.Attribution(),
+				new FacilMap.Control.Attribution(),
 				new FacilMap.Control.KeyboardDefaults(),
 				new OpenLayers.Control.MousePosition(),
 				new FacilMap.Control.ScaleLine() ],

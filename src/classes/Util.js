@@ -494,11 +494,11 @@ FacilMap.Util = {
 	 * @param {Boolean} onTop If ture, add before all other CSS rules
 	 */
 	loadCSSFile : function(url, onTop) {
-		var urlA = fm.Utils.makeAbsoluteURL(url);
+		var urlA = fm.Util.makeAbsoluteURL(url);
 		var exists = false;
 
 		$("link[rel=stylesheet]").each(function(){
-			if(fm.Utils.makeAbsoluteURL($(this).attr("href")) == urlA)
+			if(fm.Util.makeAbsoluteURL($(this).attr("href")) == urlA)
 			{
 				exists = true;
 				return false;
@@ -605,20 +605,15 @@ FacilMap.Util = {
 		// See http://www.hunlock.com/blogs/Totally_Pwn_CSS_with_Javascript
 
 		var f = fm.Util.addCSSRule;
-		if(f.idx == null)
-			f.idx = 0;
-		
-		if(document.styleSheets.length == 0)
-			fm.$("head").append("<style type=\"text/css\"></style>");
+		if(f.styleEl == null)
+		{
+			f.styleEl = $("<style type=\"text/css\"></style>");
+			$("head").prepend(f.styleEl);
+		}
 
-		var s = document.styleSheets[0];
-		var rule;
-		if(s.addRule) // M$IE
-			rule = s.addRule(selector, rules, f.idx);
-		else
-			rule = s.insertRule(selector + " { " + rules + " }", f.idx);
-		ol.Util.extend(s.style, rules);
-		f.idx++;
+		var curStyles = f.styleEl.html();
+		curStyles += selector+" { "+rules+" }\n";
+		f.styleEl.html(curStyles);
 	},
 
 	/**
@@ -642,6 +637,15 @@ FacilMap.Util = {
 				after.apply(obj, [ ]);
 			return ret;
 		};
+	},
+
+	/**
+	 * Displays an inline popup with the given message
+	 * @param content {Element}
+	 * @param title {String}
+	 */
+	popup : function(content, title) {
+		$("<div></div>").append(content).dialog({ modal: true, title: title, width: window.innerWidth/2, buttons: { "OK" : function() { $(this).dialog("close"); } }});
 	}
 }
 

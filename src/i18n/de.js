@@ -72,6 +72,7 @@ OpenLayers.Lang.de = OpenLayers.Util.extend(OpenLayers.Lang.de, {
 	"Tags" : "Attribute",
 	"POI" : "POI",
 	"OpenStreetBugs" : "OpenStreetBugs",
+	"License" : "Lizenz",
 	"olm.address" : "Adresse",
 	"olm.contact" : "Kontakt",
 	"olm.fuel" : "Tankstelle",
