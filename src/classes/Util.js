@@ -596,27 +596,6 @@ FacilMap.Util = {
 	},
 
 	/**
-	 * Add the specified CSS rule to the document. The rules are added from the top so they can be overridden
-	 * in the HTML code.
-	 * @param selector {String} The selector, for example ".class"
-	 * @param rules {String} The rules, for example "font-weight:bold;"
-	 */
-	addCSSRule: function(selector, rules) {
-		// See http://www.hunlock.com/blogs/Totally_Pwn_CSS_with_Javascript
-
-		var f = fm.Util.addCSSRule;
-		if(f.styleEl == null)
-		{
-			f.styleEl = $("<style type=\"text/css\"></style>");
-			$("head").prepend(f.styleEl);
-		}
-
-		var curStyles = f.styleEl.html();
-		curStyles += selector+" { "+rules+" }\n";
-		f.styleEl.html(curStyles);
-	},
-
-	/**
 	 * “Adds” code to the beginning and the end of a method. Actually, the method is replaced by a new method that
 	 * first calls the “before” method, then the actual method (giving all parameters), and then the “after” method.
 	 * The return value of the actual method is then returned.

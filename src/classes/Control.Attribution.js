@@ -56,6 +56,4 @@ fm.Control.Attribution = ol.Class(ol.Control, {
 	CLASS_NAME : "FacilMap.Control.Attribution"
 });
 
-fm.Util.addCSSRule(".fmControlAttribution", "font-size:smaller; right:3px; bottom:1.5em; position:absolute;");
-
 })(FacilMap, OpenLayers, FacilMap.$);

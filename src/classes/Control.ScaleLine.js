@@ -24,7 +24,3 @@
 FacilMap.Control.ScaleLine = OpenLayers.Class(OpenLayers.Control.ScaleLine, {
 	CLASS_NAME : "FacilMap.Control.ScaleLine"
 });
-
-FacilMap.Util.addCSSRule(".olMap .fmControlScaleLine", "left:auto; bottom:50px; right:5px;");
-FacilMap.Util.addCSSRule(".olMap .fmControlScaleLine .olControlScaleLineTop", "margin-left:auto;");
-FacilMap.Util.addCSSRule(".olMap .fmControlScaleLine .olControlScaleLineBottom", "margin-left:auto;");
