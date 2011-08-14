@@ -35,6 +35,7 @@ fm.Control.Attribution = ol.Class(ol.Control, {
 				attr.append("<li>"+it+"</li>");
 			});
 			fm.Util.popup(attr[0], ol.i18n("License"));
+			return false;
 		});
 
 		$(div).append(link);
