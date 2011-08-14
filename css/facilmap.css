@@ -1,3 +1,17 @@
+.fmMap,.fmMap a,.fmMap a:visited {
+	color:#00272a;
+}
+
+.olMap.fmMap * {
+	border-color:#00272a;
+}
+
+.fmMap a,.fmMap a:visited {
+	/*color:#00272a;*/
+	font-weight:bold;
+	text-decoration:underline;
+}
+
 .olMap .fmControlAttribution {
 	font-size:smaller;
 	right:3px;

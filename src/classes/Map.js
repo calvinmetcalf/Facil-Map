@@ -17,6 +17,8 @@
 	Obtain the source code from http://gitorious.org/facilmap.
 */
 
+(function(fm, ol, $){
+
 /**
  * A map with the default values needed for OpenStreetMap and other world maps.
  * If you plan to use the getQueryMethod() function, remember to set the visibility of your overlay layers _before_ adding them to the map.
@@ -24,33 +26,33 @@
  * @event newHash The return value of getQueryObject() probably has changed.
 */
 
-FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
+fm.Map = ol.Class(ol.Map, {
 	/**
 	 * The projection to use in coordinates in the Permalink.
 	 * @var OpenLayers.Projection
 	*/
-	permalinkProjection : new OpenLayers.Projection("EPSG:4326"),
+	permalinkProjection : new ol.Projection("EPSG:4326"),
 
-	attributionIcon : new OpenLayers.Icon(FacilMap.apiUrl+"/img/logo_beta.png", new OpenLayers.Size(170, 129), new OpenLayers.Pixel(-25, -108)),
+	attributionIcon : new ol.Icon(fm.apiUrl+"/img/logo_beta.png", new ol.Size(170, 129), new ol.Pixel(-25, -108)),
 
 	initialize : function(div, options)
 	{
-		OpenLayers.Map.prototype.initialize.apply(this, [ div, OpenLayers.Util.extend({
+		ol.Map.prototype.initialize.apply(this, [ div, ol.Util.extend({
 			controls: [
-				new OpenLayers.Control.Navigation(),
-				new OpenLayers.Control.PanZoomBar(),
-				new FacilMap.Control.LayerSwitcher(),
-				new FacilMap.Control.Attribution(),
-				new FacilMap.Control.KeyboardDefaults(),
-				new OpenLayers.Control.MousePosition(),
-				new FacilMap.Control.ScaleLine() ],
-			//maxExtent: new OpenLayers.Bounds(-180, -85, 180, 85), // FIXME: 4326 as projection does not seem to work
-			maxExtent: new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34),
+				new ol.Control.Navigation(),
+				new ol.Control.PanZoomBar(),
+				new fm.Control.LayerSwitcher(),
+				new fm.Control.Attribution(),
+				new fm.Control.KeyboardDefaults(),
+				new ol.Control.MousePosition(),
+				new fm.Control.ScaleLine() ],
+			//maxExtent: new ol.Bounds(-180, -85, 180, 85), // FIXME: 4326 as projection does not seem to work
+			maxExtent: new ol.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34),
 			maxResolution: 156543.0399,
 			numZoomLevels: 19,
 			units: 'm',
-			projection: new OpenLayers.Projection("EPSG:900913"),
-			displayProjection: new OpenLayers.Projection("EPSG:4326")
+			projection: new ol.Projection("EPSG:900913"),
+			displayProjection: new ol.Projection("EPSG:4326")
 		}, options) ]);
 
 		this.events.addEventType("mapResize");
@@ -62,31 +64,33 @@ FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
 
 		if(this.attributionIcon != null)
 		{
-			var div = this.attributionIcon.draw(new OpenLayers.Pixel(0, 0));
+			var div = this.attributionIcon.draw(new ol.Pixel(0, 0));
 			div.style.zIndex = 10000;
 			this.div.appendChild(div);
 			var drawFunc = function() {
 				var left = 0;
-				if(OpenLayers.Layer.Google.cache[this.id] && OpenLayers.Layer.Google.cache[this.id].poweredBy && OpenLayers.Layer.Google.cache[this.id].poweredBy.style.display != "none")
+				if(ol.Layer.Google.cache[this.id] && ol.Layer.Google.cache[this.id].poweredBy && ol.Layer.Google.cache[this.id].poweredBy.style.display != "none")
 					left = 55;
-				this.attributionIcon.moveTo(new OpenLayers.Pixel(left, this.getSize().h));
+				this.attributionIcon.moveTo(new ol.Pixel(left, this.getSize().h));
 			};
 			this.events.register("mapResize", this, drawFunc);
 			this.events.register("changebaselayer", this, drawFunc);
 			drawFunc.apply(this);
 		}
+
+		$(this.div).addClass(fm.Util.makeClassName(this));
 	},
 
 	updateSize : function()
 	{
-		var ret = OpenLayers.Map.prototype.updateSize.apply(this, arguments);
+		var ret = ol.Map.prototype.updateSize.apply(this, arguments);
 		this.events.triggerEvent("mapResize");
 		return ret;
 	},
 
 	addLayer : function(layer)
 	{
-		var ret = OpenLayers.Map.prototype.addLayer.apply(this, arguments);
+		var ret = ol.Map.prototype.addLayer.apply(this, arguments);
 
 		if(typeof layer.shortName == "undefined")
 			layer.shortName = layer.name;
@@ -113,7 +117,7 @@ FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
 				this.setQueryObject(obj);
 		};
 
-		layer.div.className = FacilMap.Util.makeClassName(layer) + " " + layer.div.className;
+		layer.div.className = fm.Util.makeClassName(layer) + " " + layer.div.className;
 
 		if(layer.saveInPermalink && layer.removableInLayerSwitcher)
 			this.events.triggerEvent("newHash");
@@ -122,7 +126,7 @@ FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
 	removeLayer : function(layer)
 	{
 		var trigger = (layer.saveInPermalink && layer.removableInLayerSwitcher);
-		var ret = OpenLayers.Map.prototype.removeLayer.apply(this, arguments);
+		var ret = ol.Map.prototype.removeLayer.apply(this, arguments);
 		if(trigger)
 			this.events.triggerEvent("newHash");
 		return ret;
@@ -132,48 +136,48 @@ FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
 	{
 		var map = this;
 
-		this.addLayer(new FacilMap.Layer.OSM.Mapnik(OpenLayers.i18n("Mapnik"), { shortName : "Mpnk" }));
-		this.addLayer(new FacilMap.Layer.OSM.MapSurfer.Road(OpenLayers.i18n("MapSurfer Road"), { shortName : "MSfR" }));
-		this.addLayer(new FacilMap.Layer.OSM.MapSurfer.Topographic(OpenLayers.i18n("MapSurfer Topographic"), { shortName : "MSfT" }));
-		this.addLayer(new FacilMap.Layer.OSM.OpenStreetBrowser(OpenLayers.i18n("OpenStreetBrowser"), { shortName : "OSBr" }));
-		this.addLayer(new FacilMap.Layer.OSM.Osmarender(OpenLayers.i18n("Osmarender"), { shortName : "Osmr" }));
-		this.addLayer(new FacilMap.Layer.OSM.CycleMap(OpenLayers.i18n("OpenCycleMap"), { shortName : "OCyc" }));
-		//this.addLayer(new FacilMap.Layer.OSM.Wanderkarte(OpenLayers.i18n("Reit- und Wanderkarte"), { shortName : "OSMC" }));
-		this.addLayer(new FacilMap.Layer.OSM.HikeAndBike(OpenLayers.i18n("Hike & Bike Map"), { shortName : "HiBi" }));
-		this.addLayer(new FacilMap.Layer.OSM.OpenPisteMap(OpenLayers.i18n("OpenPisteMap"), { shortName : "OPis" }));
-		this.addLayer(new FacilMap.Layer.OSM.OPNVKarte(OpenLayers.i18n("ÖPNV-Karte"), { shortName : "OPNV" }));
-		//this.addLayer(new FacilMap.Layer.OSM.Kybl3DMap(OpenLayers.i18n("Izometrická 3D mapa ČR"), { shortName : "kybl" }));
+		this.addLayer(new fm.Layer.OSM.Mapnik(ol.i18n("Mapnik"), { shortName : "Mpnk" }));
+		this.addLayer(new fm.Layer.OSM.MapSurfer.Road(ol.i18n("MapSurfer Road"), { shortName : "MSfR" }));
+		this.addLayer(new fm.Layer.OSM.MapSurfer.Topographic(ol.i18n("MapSurfer Topographic"), { shortName : "MSfT" }));
+		this.addLayer(new fm.Layer.OSM.OpenStreetBrowser(ol.i18n("OpenStreetBrowser"), { shortName : "OSBr" }));
+		this.addLayer(new fm.Layer.OSM.Osmarender(ol.i18n("Osmarender"), { shortName : "Osmr" }));
+		this.addLayer(new fm.Layer.OSM.CycleMap(ol.i18n("OpenCycleMap"), { shortName : "OCyc" }));
+		//this.addLayer(new fm.Layer.OSM.Wanderkarte(ol.i18n("Reit- und Wanderkarte"), { shortName : "OSMC" }));
+		this.addLayer(new fm.Layer.OSM.HikeAndBike(ol.i18n("Hike & Bike Map"), { shortName : "HiBi" }));
+		this.addLayer(new fm.Layer.OSM.OpenPisteMap(ol.i18n("OpenPisteMap"), { shortName : "OPis" }));
+		this.addLayer(new fm.Layer.OSM.OPNVKarte(ol.i18n("ÖPNV-Karte"), { shortName : "OPNV" }));
+		//this.addLayer(new fm.Layer.OSM.Kybl3DMap(ol.i18n("Izometrická 3D mapa ČR"), { shortName : "kybl" }));
 
-		this.addLayer(new FacilMap.Layer.OSM.OOMStreets(OpenLayers.i18n("Streets overlay"), { shortName : "OOMS", visibility : false }));
-		this.addLayer(new FacilMap.Layer.OSM.OOMLabels(OpenLayers.i18n("Labels overlay"), { shortName : "OOML", visibility : false }));
-		this.addLayer(new FacilMap.Layer.OSM.Hiking(OpenLayers.i18n("Hiking symbols"), { visibility: false, shortName : "Hike" }));
-		this.addLayer(new FacilMap.Layer.Markers.OpenLinkMap(OpenLayers.i18n("POI"), { shortName: "OLiM" }));
+		this.addLayer(new fm.Layer.OSM.OOMStreets(ol.i18n("Streets overlay"), { shortName : "OOMS", visibility : false }));
+		this.addLayer(new fm.Layer.OSM.OOMLabels(ol.i18n("Labels overlay"), { shortName : "OOML", visibility : false }));
+		this.addLayer(new fm.Layer.OSM.Hiking(ol.i18n("Hiking symbols"), { visibility: false, shortName : "Hike" }));
+		this.addLayer(new fm.Layer.Markers.OpenLinkMap(ol.i18n("POI"), { shortName: "OLiM" }));
 
-		FacilMap.Layer.Markers.OpenStreetBugs.loadAPI(function() {
-			map.addLayer(new FacilMap.Layer.Markers.OpenStreetBugs(OpenLayers.i18n("OpenStreetBugs"), { visibility: false, shortName: "OSBu" }));
+		fm.Layer.Markers.OpenStreetBugs.loadAPI(function() {
+			map.addLayer(new fm.Layer.Markers.OpenStreetBugs(ol.i18n("OpenStreetBugs"), { visibility: false, shortName: "OSBu" }));
 		});
 	},
 
 	addAllAvailableGoogleLayers : function()
 	{
 		var map = this;
-		FacilMap.Layer.Google.loadAPI(function() {
-			map.addLayer(new FacilMap.Layer.Google.Maps(OpenLayers.i18n("Google Streets"), { shortName : "GgSt" }));
-			map.addLayer(new FacilMap.Layer.Google.MapsSatellite(OpenLayers.i18n("Google Satellite"), { shortName : "GgSa" }));
-			map.addLayer(new FacilMap.Layer.Google.MapsHybrid(OpenLayers.i18n("Google Hybrid"), { shortName : "GgHy" }));
-			map.addLayer(new FacilMap.Layer.Google.MapsTerrain(OpenLayers.i18n("Google Terrain"), { shortName : "GgTe" }));
-			map.addLayer(new FacilMap.Layer.Google.MapMaker(OpenLayers.i18n("Google MapMaker"), { shortName : "GgMM" }));
-			map.addLayer(new FacilMap.Layer.Google.MapMakerHybrid(OpenLayers.i18n("Google MapMaker Hybrid"), { shortName : "GgMH" }));
+		fm.Layer.Google.loadAPI(function() {
+			map.addLayer(new fm.Layer.Google.Maps(ol.i18n("Google Streets"), { shortName : "GgSt" }));
+			map.addLayer(new fm.Layer.Google.MapsSatellite(ol.i18n("Google Satellite"), { shortName : "GgSa" }));
+			map.addLayer(new fm.Layer.Google.MapsHybrid(ol.i18n("Google Hybrid"), { shortName : "GgHy" }));
+			map.addLayer(new fm.Layer.Google.MapsTerrain(ol.i18n("Google Terrain"), { shortName : "GgTe" }));
+			map.addLayer(new fm.Layer.Google.MapMaker(ol.i18n("Google MapMaker"), { shortName : "GgMM" }));
+			map.addLayer(new fm.Layer.Google.MapMakerHybrid(ol.i18n("Google MapMaker Hybrid"), { shortName : "GgMH" }));
 		});
 	},
 
 	addAllAvailableYahooLayers : function()
 	{
 		var map = this;
-		FacilMap.Layer.Yahoo.loadAPI(function() {
-			map.addLayer(new FacilMap.Layer.Yahoo.Maps(OpenLayers.i18n("Yahoo Street"), { shortName : "YaSt" }));
-			map.addLayer(new FacilMap.Layer.Yahoo.Satellite(OpenLayers.i18n("Yahoo Satellite"), { shortName : "YaSa" }));
-			map.addLayer(new FacilMap.Layer.Yahoo.Hybrid(OpenLayers.i18n("Yahoo Hybrid"), { shortName : "YaHy" }));
+		fm.Layer.Yahoo.loadAPI(function() {
+			map.addLayer(new fm.Layer.Yahoo.Maps(ol.i18n("Yahoo Street"), { shortName : "YaSt" }));
+			map.addLayer(new fm.Layer.Yahoo.Satellite(ol.i18n("Yahoo Satellite"), { shortName : "YaSa" }));
+			map.addLayer(new fm.Layer.Yahoo.Hybrid(ol.i18n("Yahoo Hybrid"), { shortName : "YaHy" }));
 		});
 	},
 
@@ -182,10 +186,10 @@ FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
 	*/
 	addAllAvailableLayers : function()
 	{
-		this.addLayer(new FacilMap.Layer.other.Relief(OpenLayers.i18n("Relief"), { visibility: false, shortName : "Rlie" }));
+		this.addLayer(new fm.Layer.other.Relief(ol.i18n("Relief"), { visibility: false, shortName : "Rlie" }));
 
 		this.addAllAvailableOSMLayers();
-		this.addLayer(new FacilMap.Layer.other.OSStreetView(OpenLayers.i18n("Ordnance Survey (UK)"), { shortName : "OSSV" }));
+		this.addLayer(new fm.Layer.other.OSStreetView(ol.i18n("Ordnance Survey (UK)"), { shortName : "OSSV" }));
 
 		this.addAllAvailableGoogleLayers();
 		this.addAllAvailableYahooLayers();
@@ -231,7 +235,7 @@ FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
 			query.lat = 0;
 		if(!query.zoom)
 			query.zoom = 2;
-		this.setCenter(new OpenLayers.LonLat(1*query.lon, 1*query.lat).transform(this.permalinkProjection, this.getProjectionObject()), 1*query.zoom);
+		this.setCenter(new ol.LonLat(1*query.lon, 1*query.lat).transform(this.permalinkProjection, this.getProjectionObject()), 1*query.zoom);
 
 		// Initialise removable layers
 		var removableLayers = { };
@@ -288,7 +292,7 @@ FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
 			{ // Update the removableInLayerSwitcher links
 				for(var i=0; i<this.controls.length; i++)
 				{
-					if(this.controls[i] instanceof FacilMap.Control.LayerSwitcher)
+					if(this.controls[i] instanceof fm.Control.LayerSwitcher)
 						this.controls[i].redraw(true);
 				}
 			}
@@ -314,7 +318,7 @@ FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
 		}
 
 		// Adding markers might have moved the map, reset map view
-		this.setCenter(new OpenLayers.LonLat(1*query.lon, 1*query.lat).transform(this.permalinkProjection, this.getProjectionObject()), 1*query.zoom);
+		this.setCenter(new ol.LonLat(1*query.lon, 1*query.lat).transform(this.permalinkProjection, this.getProjectionObject()), 1*query.zoom);
 	},
 
 	/**
@@ -361,7 +365,7 @@ FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
 			}
 		}
 
-		if(FacilMap.Util.encodeQueryString(hashObject) == "lon=0;lat=0;zoom=2;layer="+firstBaseLayer)
+		if(fm.Util.encodeQueryString(hashObject) == "lon=0;lat=0;zoom=2;layer="+firstBaseLayer)
 			return { };
 
 		return hashObject;
@@ -369,3 +373,5 @@ FacilMap.Map = OpenLayers.Class(OpenLayers.Map, {
 
 	CLASS_NAME : "FacilMap.Map"
 });
+
+})(FacilMap, OpenLayers, FacilMap.$);
