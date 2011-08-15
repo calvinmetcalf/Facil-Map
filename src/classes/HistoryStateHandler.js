@@ -17,22 +17,18 @@
 	Obtain the source code from http://gitorious.org/facilmap.
 */
 
+(function(fm, ol, $){
+
 /**
- * A class to control the URL hash part.
- * @event hashChanged The URL hash has been changed by the user
+ * A class to control the history state saved in the browser’s location bar.
+ * @event stateChanged The history state has been changed by the user
 */
-FacilMap.URLHashHandler = OpenLayers.Class({
+fm.HistoryStateHandler = ol.Class({
 	/**
 	 * The interval in milliseconds, how often location.hash shall be checked for changes.
 	 * @var Number
 	*/
 	interval : 500,
-
-	/**
-	 * Is set to true on the map event newHash. Makes update() update the location hash.
-	 * @var boolean
-	*/
-	hashChanged : false,
 
 	/**
 	 * The return value of setInterval.
@@ -41,7 +37,7 @@ FacilMap.URLHashHandler = OpenLayers.Class({
 
 	/**
 	 * The last value of location.hash that was set by this class. If it differs from location.hash, the user has changed it.
-	 * @var String
+	 * @var {Object}
 	*/
 	lastHash : null,
 
@@ -54,10 +50,10 @@ FacilMap.URLHashHandler = OpenLayers.Class({
 	started : false,
 
 	initialize : function() {
-		this.events = new OpenLayers.Events(this, null, [ "hashChanged" ]);
+		this.events = new ol.Events(this, null, [ "stateChanged" ]);
 
 		if("onhashchange" in window)
-			this.eventHandler = OpenLayers.Function.bindAsEventListener(this.checkHash, this);;
+			this.eventHandler = ol.Function.bindAsEventListener(this.checkHash, this);;
 	},
 
 	/**
@@ -69,10 +65,10 @@ FacilMap.URLHashHandler = OpenLayers.Class({
 			return;
 
 		var obj = this;
-		this.lastHash = this.getLocationHash();
+		this.lastHash = this._getLocationHash();
 
 		if(this.eventHandler)
-			OpenLayers.Event.observe(window, "hashchange", this.eventHandler);
+			ol.Event.observe(window, "hashchange", this.eventHandler);
 		else
 			this.intervalObject = setInterval(function(){ obj.checkHash(); }, this.interval);
 
@@ -88,7 +84,7 @@ FacilMap.URLHashHandler = OpenLayers.Class({
 			return;
 
 		if(this.eventHandler)
-			OpenLayers.Event.observe(window, "hashchange", this.eventHandler);
+			ol.Event.stopObserving(window, "hashchange", this.eventHandler);
 		else
 		{
 			clearInterval(this.intervalObject);
@@ -104,16 +100,33 @@ FacilMap.URLHashHandler = OpenLayers.Class({
 	*/
 	checkHash : function() {
 		var oldHash = this.lastHash;
-		this.lastHash = this.getLocationHash();
+		this.lastHash = this._getLocationHash();
 		if(this.lastHash != oldHash)
-			this.events.triggerEvent("hashChanged", { oldHash: oldHash, newHash: this.lastHash });
+			this.events.triggerEvent("stateChanged");
 	},
 
 	/**
-	 * Gets the part after the # in the URL.
-	 * @return {String}
+	 * Gets the current state.
+	 * @return {Object}
 	*/
-	getLocationHash : function() {
+	getState : function() {
+		return fm.Util.decodeQueryString(this._getLocationHash())
+	},
+
+	/**
+	 * Sets the new object as state. The stateChanged event will not be fired.
+	 * @param state {Object} The new state object
+	 * @return {void}
+	*/
+
+	setState : function(state) {
+		this._setLocationHash(fm.Util.encodeQueryString(state));
+	},
+
+	/**
+	 * @return {String}
+	 */
+	_getLocationHash : function() {
 		// At least in Firefox, location.hash contains “&” if the hash part contains “%26”. This makes searching for URLs (such as OSM PermaLinks) hard and we work around that problem by extracting the desired value from location.href.
 		var match = location.href.match(/#(.*)$/);
 		if(match)
@@ -123,13 +136,11 @@ FacilMap.URLHashHandler = OpenLayers.Class({
 	},
 
 	/**
-	 * Sets the location has to the given hash. The hashChanged event will not be fired.
-	 * @param hash {String} The hash part without #
-	 * @return {void}
-	*/
-	setLocationHash : function(hash)
+	 * @param hash {String}
+	 */
+	_setLocationHash : function(hash)
 	{
-		if(hash == this.getLocationHash())
+		if(hash == this._getLocationHash())
 			return;
 
 		var restart = false;
@@ -149,5 +160,7 @@ FacilMap.URLHashHandler = OpenLayers.Class({
 			this.start();
 	},
 
-	CLASS_NAME: "FacilMap.URLHashHandler"
+	CLASS_NAME: "FacilMap.HistoryStateHandler"
 });
+
+})(FacilMap, OpenLayers, FacilMap.$);

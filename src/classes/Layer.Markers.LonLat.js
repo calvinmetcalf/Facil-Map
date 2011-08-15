@@ -73,7 +73,7 @@ FacilMap.Layer.Markers.LonLat = OpenLayers.Class(FacilMap.Layer.Markers, {
 			this.markers[i].fmFeature.popup.setContentHTML(content);
 		}
 	},
-	getQueryObject : function() {
+	getStateObject : function() {
 		var obj = { };
 		for(var i=0; i<this.markers.length; i++)
 		{
@@ -87,7 +87,7 @@ FacilMap.Layer.Markers.LonLat = OpenLayers.Class(FacilMap.Layer.Markers, {
 		}
 		return obj;
 	},
-	setQueryObject : function(obj) {
+	setStateObject : function(obj) {
 		this.clearMarkers();
 		for(var i in obj)
 		{

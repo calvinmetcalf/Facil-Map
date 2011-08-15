@@ -23,7 +23,7 @@
  * A map with the default values needed for OpenStreetMap and other world maps.
  * If you plan to use the getQueryMethod() function, remember to set the visibility of your overlay layers _before_ adding them to the map.
  * @event mapResize The map div has been resized.
- * @event newHash The return value of getQueryObject() probably has changed.
+ * @event newState The return value of getStateObject() probably has changed.
 */
 
 fm.Map = ol.Class(ol.Map, {
@@ -32,6 +32,8 @@ fm.Map = ol.Class(ol.Map, {
 	 * @var OpenLayers.Projection
 	*/
 	permalinkProjection : new ol.Projection("EPSG:4326"),
+
+	updateHistoryState : false,
 
 	attributionIcon : new ol.Icon(fm.apiUrl+"/img/logo_beta.png", new ol.Size(170, 129), new ol.Pixel(-25, -108)),
 
@@ -58,11 +60,11 @@ fm.Map = ol.Class(ol.Map, {
 		}, options) ]);
 
 		this.events.addEventType("mapResize");
-		this.events.addEventType("newHash");
+		this.events.addEventType("newState");
 
-		this.events.register("move", this, function(){ this.events.triggerEvent("newHash"); });
-		this.events.register("changebaselayer", this, function(){ this.events.triggerEvent("newHash"); });
-		this.events.register("changelayer", this, function(){ this.events.triggerEvent("newHash"); });
+		this.events.register("move", this, function(){ this.events.triggerEvent("newState"); });
+		this.events.register("changebaselayer", this, function(){ this.events.triggerEvent("newState"); });
+		this.events.register("changelayer", this, function(){ this.events.triggerEvent("newState"); });
 
 		if(this.attributionIcon != null)
 		{
@@ -81,6 +83,14 @@ fm.Map = ol.Class(ol.Map, {
 		}
 
 		$(this.div).addClass(fm.Util.makeClassName(this));
+
+		this.uniqueId = $(this.div).attr("id");
+		if(!this.uniqueId)
+		{
+			if(fm.idCounter == null)
+				fm.idCounter = 0;
+			this.uniqueId = "fm"+(fm.idCounter++);
+		}
 	},
 
 	updateSize : function()
@@ -103,26 +113,34 @@ fm.Map = ol.Class(ol.Map, {
 		layer.events.addEventType("queryObjectChanged");
 
 		if(layer.saveInPermalink)
-			layer.events.register("queryObjectChanged", this, function() { this.events.triggerEvent("newHash"); });
+			layer.events.register("queryObjectChanged", this, function() { this.events.triggerEvent("newState"); });
 
-		layer.getQueryObjectFixed = function() {
-			var ret = (this.getQueryObject == undefined || !this.saveInPermalink ? { } : this.getQueryObject());
+		layer.getStateObjectFixed = function() {
+			var ret = (this.getStateObject == undefined || !this.saveInPermalink ? { } : this.getStateObject());
 			if(!this.isBaseLayer && this.getVisibility() != this.fmDefaultVisibility)
 				ret.visibility = this.getVisibility();
 			return ret;
 		};
 
-		layer.setQueryObjectFixed = function(obj) {
+		layer.setStateObjectFixed = function(obj) {
 			if(!this.isBaseLayer)
 				this.setVisibility(typeof obj.visibility == "undefined" ? this.fmDefaultVisibility : (obj.visibility != "0"));
-			if(this.setQueryObject != undefined)
-				this.setQueryObject(obj);
+			if(this.setStateObject != undefined)
+				this.setStateObject(obj);
 		};
 
 		layer.div.className = fm.Util.makeClassName(layer) + " " + layer.div.className;
 
+		if(layer.isBaseLayer && this.updateHistoryState)
+		{ // Add the HistoryStateHandler. This can only be done once a base layer is there to be able
+		  // to calculate the default view
+			var stateControl = new fm.Control.HistoryStateHandler();
+			this.addControl(stateControl);
+			stateControl.activate();
+		}
+
 		if(layer.saveInPermalink && layer.removableInLayerSwitcher)
-			this.events.triggerEvent("newHash");
+			this.events.triggerEvent("newState");
 	},
 
 	removeLayer : function(layer)
@@ -130,7 +148,7 @@ fm.Map = ol.Class(ol.Map, {
 		var trigger = (layer.saveInPermalink && layer.removableInLayerSwitcher);
 		var ret = ol.Map.prototype.removeLayer.apply(this, arguments);
 		if(trigger)
-			this.events.triggerEvent("newHash");
+			this.events.triggerEvent("newState");
 		return ret;
 	},
 
@@ -203,12 +221,16 @@ fm.Map = ol.Class(ol.Map, {
 	 * @param query {Object} Usually FacilMap.Util.decodeQueryString(location.hash.replace(/^#/, ""))
 	*/
 
-	zoomToQuery: function(query)
+	setStateObject: function(query)
 	{
 		var map = this;
 
+		query = (query || { });
+
 		// Zoom to search results only if the position is not manually set
 		var search_may_zoom = (typeof query.lon == "undefined" && typeof query.lat == "undefined");
+
+		query = $.extend(this.getDefaultStateObject(), query);
 
 		// Set base layer (layer)
 		if(query.layer)
@@ -231,12 +253,6 @@ fm.Map = ol.Class(ol.Map, {
 		}
 
 		// Set position (lon, lat, zoom)
-		if(!query.lon)
-			query.lon = 0;
-		if(!query.lat)
-			query.lat = 0;
-		if(!query.zoom)
-			query.zoom = 2;
 		this.setCenter(new ol.LonLat(1*query.lon, 1*query.lat).transform(this.permalinkProjection, this.getProjectionObject()), 1*query.zoom);
 
 		// Initialise removable layers
@@ -316,7 +332,7 @@ fm.Map = ol.Class(ol.Map, {
 			if(typeof query.l == "object" && typeof query.l[this.layers[i].shortName] == "object")
 				obj = query.l[this.layers[i].shortName];
 
-			this.layers[i].setQueryObjectFixed(obj);
+			this.layers[i].setStateObjectFixed(obj);
 		}
 
 		// Adding markers might have moved the map, reset map view
@@ -324,17 +340,33 @@ fm.Map = ol.Class(ol.Map, {
 	},
 
 	/**
-	 * Returns a Query object that you can pass to the zoomToQuery() function to restore the current view. Usually you save this to the location
-	 * hash part by calling location.hash = "#"+FacilMap.Util.encodeQueryString(map.getQueryObject());
+	 * Returns the state object for the map default view.
+	 * @return {Object}
+	 */
+	getDefaultStateObject : function() {
+		var maxExtent = this.getMaxExtent();
+		var lonlat = maxExtent.getCenterLonLat();
+
+		return {
+			lon : Math.round(lonlat.lon*100000000)/100000000,
+			lat : Math.round(lonlat.lat*100000000)/100000000,
+			zoom : this.getZoomForExtent(maxExtent),
+			layer : this.baseLayer.shortName
+		};
+	},
+
+	/**
+	 * Returns a Query object that you can pass to the setStateObject() function to restore the current view. Usually you save this to the location
+	 * hash part by calling location.hash = "#"+FacilMap.Util.encodeQueryString(map.getStateObject());
 	 * Only non-default settings will be added to this query object. Remember to set the visibility of your overlay layers _before_ adding
 	 * them to the map, as the default visibility value will be determined during adding it.
 	 * @return {Object}
 	*/
 
-	getQueryObject: function()
+	getStateObject: function()
 	{
 		if(!this.getCenter())
-			return false;
+			return null;
 
 		var lonlat = this.getCenter().clone().transform(this.getProjectionObject(), this.permalinkProjection);
 		var hashObject = {
@@ -349,26 +381,13 @@ fm.Map = ol.Class(ol.Map, {
 		for(var i=0; i<this.layers.length; i++)
 		{
 			var l = this.layers[i];
-			hashObject.l[l.shortName] = l.getQueryObjectFixed();
+			hashObject.l[l.shortName] = l.getStateObjectFixed();
 			if(l.removableInLayerSwitcher && l.saveInPermalink)
 				hashObject.r[l.shortName] = {
 					"class" : l.CLASS_NAME,
 					name : l.name
 				};
 		}
-
-		var firstBaseLayer = null;
-		for(var i=0; i<this.layers.length; i++)
-		{
-			if(this.layers[i].isBaseLayer)
-			{
-				firstBaseLayer = this.layers[i].shortName;
-				break;
-			}
-		}
-
-		if(fm.Util.encodeQueryString(hashObject) == "lon=0;lat=0;zoom=2;layer="+firstBaseLayer)
-			return { };
 
 		return hashObject;
 	},

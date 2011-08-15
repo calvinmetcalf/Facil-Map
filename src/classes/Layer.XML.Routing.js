@@ -427,7 +427,7 @@ FacilMap.Layer.XML.Routing = OpenLayers.Class(FacilMap.Layer.XML, {
 			this.map.zoomToExtent(extent);
 	},
 
-	getQueryObject : function() {
+	getStateObject : function() {
 		if(this.provider.from == null || this.provider.to == null || this.provider.medium == null || this.provider.routingType == null)
 			return { };
 		else
@@ -448,7 +448,7 @@ FacilMap.Layer.XML.Routing = OpenLayers.Class(FacilMap.Layer.XML, {
 		}
 	},
 
-	setQueryObject : function(obj) {
+	setStateObject : function(obj) {
 		var doUpdate = false;
 		if(obj.medium != this.provider.medium)
 		{

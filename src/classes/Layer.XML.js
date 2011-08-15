@@ -145,13 +145,13 @@ FacilMap.Layer.XML = OpenLayers.Class(OpenLayers.Layer.GML, {
 			}
 		}
 	},
-	getQueryObject : function() {
+	getStateObject : function() {
 		var obj = { };
 		if(this.removableInLayerSwitcher)
 			obj.url = this.fmURL;
 		return obj;
 	},
-	setQueryObject : function(obj) {
+	setStateObject : function(obj) {
 		if(obj.url != undefined && obj.url != this.fmURL)
 		{
 			this.fmUrl = obj.url;

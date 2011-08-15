@@ -159,7 +159,7 @@ FacilMap.Layer.Markers.GeoSearch = OpenLayers.Class(FacilMap.Layer.Markers, {
 		var eventType = (results.length == 0 ? "searchFailure" : "searchSuccess");
 		this.events.triggerEvent(eventType, { object : this, type : eventType, element: null, dontzoom: dontzoom, query: query });
 	},
-	getQueryObject : function() {
+	getStateObject : function() {
 		var obj = {
 		};
 
@@ -180,7 +180,7 @@ FacilMap.Layer.Markers.GeoSearch = OpenLayers.Class(FacilMap.Layer.Markers, {
 		}
 		return obj;
 	},
-	setQueryObject : function(obj) {
+	setStateObject : function(obj) {
 		// If obj.search is undefined, call nevertheless to reset the search
 		this.geoSearch(obj.search, true, obj.smopen);
 	},
