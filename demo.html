@@ -32,8 +32,9 @@
 		<div id="map"></div>
 		<script type="text/javascript">
 		// <![CDATA[
-			var map = new FacilMap.Map("map", { updateHistoryState: true });
+			var map = new FacilMap.Map("map");
 			map.addAllAvailableLayers();
+			map.addControl(new FacilMap.Control.HistoryStateHandler({ autoActivate:true }));
 		// ]]>
 		</script>
 	</body>

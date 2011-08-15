@@ -33,8 +33,6 @@ fm.Map = ol.Class(ol.Map, {
 	*/
 	permalinkProjection : new ol.Projection("EPSG:4326"),
 
-	updateHistoryState : false,
-
 	attributionIcon : new ol.Icon(fm.apiUrl+"/img/logo_beta.png", new ol.Size(170, 129), new ol.Pixel(-25, -108)),
 
 	initialize : function(div, options)
@@ -130,14 +128,6 @@ fm.Map = ol.Class(ol.Map, {
 		};
 
 		layer.div.className = fm.Util.makeClassName(layer) + " " + layer.div.className;
-
-		if(layer.isBaseLayer && this.updateHistoryState)
-		{ // Add the HistoryStateHandler. This can only be done once a base layer is there to be able
-		  // to calculate the default view
-			var stateControl = new fm.Control.HistoryStateHandler();
-			this.addControl(stateControl);
-			stateControl.activate();
-		}
 
 		if(layer.saveInPermalink && layer.removableInLayerSwitcher)
 			this.events.triggerEvent("newState");

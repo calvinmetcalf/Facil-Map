@@ -1,5 +1,6 @@
 .fmMap,.fmMap a,.fmMap a:visited {
 	color:#00272a;
+	text-shadow:#fff 1px 1px 0;
 }
 
 .olMap.fmMap * {
