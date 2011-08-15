@@ -1,10 +1,13 @@
 .fmMap,.fmMap a,.fmMap a:visited {
 	color:#00272a;
-	text-shadow:#fff 1px 1px 0;
 }
 
 .olMap.fmMap * {
 	border-color:#00272a;
+}
+
+.fmMap .fmControlAttribution,.fmMap .fmControlGeoLocation,.fmMap .olControlScaleLine {
+	text-shadow:#fff 1px 1px 0;
 }
 
 .fmMap a,.fmMap a:visited {
