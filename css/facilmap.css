@@ -1,17 +1,63 @@
-.fmMap,.fmMap a,.fmMap a:visited {
+.fmMap {
 	color:#00272a;
+}
+
+.fmMap a,.fmMap a:visited {
+	color:inherit;
 }
 
 .olMap.fmMap * {
 	border-color:#00272a;
 }
 
+/* === FacilMap.Control.Search === */
+
+.olMap .fmControlSearch {
+	background-color:#00272a;
+	opacity:0.75;
+	border-radius:5px;
+	position:absolute;
+	top:15px;
+	left:55px;
+	padding:42px 5px 5px 5px;
+	color:#fff;
+	width:352px;
+}
+
+.olMap .fmControlSearch input,.olMap .fmControlSearch select {
+	border-radius:3px;
+	background-color:#fff;
+	color:#00272a;
+	border:1px solid #000;
+	padding:1px;
+	box-sizing:content-box;
+	height:20px;
+}
+
+.olMap .fmControlSearch .from { position:absolute; top:5px; left:5px; width:161px; padding-right:20px; font-weight:bold; }
+.olMap .fmControlSearch .help { position:absolute; top:8px; left:169px; width:16px; height:16px; cursor:pointer; }
+.olMap .fmControlSearch .submit { position:absolute; top:5px; left:191px; width:75px; }
+.olMap .fmControlSearch .clear { position:absolute; top:5px; left:272px; width:75px; }
+.olMap .fmControlSearch .directions { position:absolute; top:29px; left:7px; height:12px; }
+
+.olMap .fmControlSearch .to { position:absolute; top:31px; left:5px; width:180px; font-weight:bold; }
+.olMap .fmControlSearch .type { position:absolute; top:31px; left:191px; width:100px; }
+.olMap .fmControlSearch .medium { position:absolute; top:31px; left:297px; width:100px; }
+
+.olMap .fmControlSearch.routing { padding-top:68px; width:402px; }
+.olMap .fmControlSearch.routing .from { padding-right:1px; width:180px; }
+.olMap .fmControlSearch.routing .submit { width:125px; }
+.olMap .fmControlSearch.routing .clear { left:322px; }
+.olMap .fmControlSearch.routing .directions { top:55px; }
+
+
+/* === */
+
 .fmMap .fmControlAttribution,.fmMap .fmControlGeoLocation,.fmMap .olControlScaleLine {
 	text-shadow:#fff 1px 1px 0;
 }
 
 .fmMap a,.fmMap a:visited {
-	/*color:#00272a;*/
 	font-weight:bold;
 	text-decoration:underline;
 }
@@ -60,8 +106,14 @@
 	cursor:pointer
 }
 
-.fmAutocomplete {
-	margin:0 -1px !important
+/* === FacilMap.AutoSuggest === */
+
+input.fmAutoSuggest {
+	position:relative; /* Opera fix */
+}
+
+ol.fmAutoSuggest {
+	margin:0 -1px !important;
 	padding:0 !important;
 	overflow:auto !important;
 	border:1px solid ButtonShadow !important;
@@ -73,13 +125,15 @@
 	display:block;
 }
 
-.fmAutocomplete li {
-	cursor:pointer !important
+ol.fmAutoSuggest li {
+	cursor:pointer !important;
 	padding:3px 6px !important;
 	display:block !important;
 }
 
-.fmAutocomplete li.selected {
+ol.fmAutoSuggest li.selected,ol.fmAutoSuggest li:hover {
 	background-color:Highlight !important;
 	color:HighlightText !important;
 }
+
+/* === */

@@ -73,6 +73,24 @@ OpenLayers.Lang.en = OpenLayers.Util.extend(OpenLayers.Lang.en, {
 	"POI" : "POI",
 	"License" : "License",
 	"OpenStreetBugs" : "OpenStreetBugs",
+	"Search help" : "Search help",
+	"searchHelpText" : '<p>Enter one of the following:</p>' +
+		'<ul>' +
+		'<li>The name of a place to look for, for example <code>London, England</code></li>' +
+		'<li>The name or category of a POI to look for, using the keyword <code>near</code>, for example <code>supermarket near London, England</code> or <code>Tesco near London, England</code></li>' +
+		'<li>GPS coordinates either in the format <code>lat,lon</code> or as an OpenStreetMap permalink, for example <code>48.1234,5.4321</code>, <code>http://www.openstreetmap.org/?lat=52.4382&amp;lon=13.4162&amp;zoom=14</code> or <code>http://osm.org/go/0MbBmCbE-</code></li>' +
+		'<li><code>node 123</code>, <code>way 123</code>, <code>relation 123</code> or <code>trace 123</code> to display the OpenStreetMap object with the given ID</li>' +
+		'<li>The URL of a GPX, KML, OSM or GML file to display it on the map.</li>' +
+		'</ul>',
+	"Search" : "Search",
+	"Clear" : "Clear",
+	"Shortest" : "Shortest",
+	"Fastest" : "Fastest",
+	"Car" : "By car",
+	"Bicycle" : "By bicycle",
+	"Foot" : "By foot",
+	"Get directions" : "Get directions",
+	"Hide directions" : "Hide directions",
 	"olm.object" : "Objects",
 	"olm.address" : "Address",
 	"olm.contact" : "Contact",
