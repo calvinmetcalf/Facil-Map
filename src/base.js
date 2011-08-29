@@ -39,7 +39,7 @@ var FacilMap = {
 	setTimeout(function(){
 		// Execute after loading all the JavaScript files
 
-		fm.Util.loadCSSFile(fm.apiUrl+"/css/jquery/jquery-ui-1.8.15.custom.css", true);
+		fm.Util.loadCSSFile(fm.apiUrl+"/css/jquery/jquery-ui-1.8.16.custom.css", true);
 		fm.Util.loadCSSFile(fm.apiUrl+"/css/facilmap.css", true);
 	}, 0);
 
