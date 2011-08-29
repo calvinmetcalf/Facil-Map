@@ -29,7 +29,7 @@ fm.NameFinder.Nominatim = ol.Class(fm.NameFinder, {
 	find : function(query, callbackFunction) {
 		query.replace(/^\s+/, "").replace(/\s+$/, "");
 
-		var nameFinder = this;
+		var t = this;
 
 		fm.NameFinder.prototype.find.apply(this, [ query, function(results) {
 			if(results != undefined && results.length > 0)
@@ -37,23 +37,32 @@ fm.NameFinder.Nominatim = ol.Class(fm.NameFinder, {
 			else
 			{ // NameFinder
 				ol.Request.GET({
-					url : nameFinder.nameFinderURL,
-					params : { "q": query, "format" : "xml", "polygon" : "0", "addressdetails" : "0", limit: this.limit },
+					url : t.nameFinderURL,
+					params : { "q": query, "format" : "xml", "polygon" : "0", "addressdetails" : "1", "limit" : t.limit },
 					success : function(request) {
 						var results = [ ];
-						$("place", request.responseXML).each(function(){
-							var it = $(this);
-							var box = it.attr("boundingbox").split(",");
+						$("searchresults > place", request.responseXML).each(function(){
+							var place = $(this);
+
+							var box = place.attr("boundingbox").split(",");
+							var path = [ ];
+							$.each([ "country", "state", "county", "city", "city_district", "suburb", "town", "village", "residential", "road", "house" ], function(i, it) {
+								var part = $(it, place).text();
+								if(part)
+									path.push(part);
+							});
+
 							results.push({
-								lonlat : new ol.LonLat(it.attr("lon"), it.attr("lat")),
-								name : it.attr("display_name"),
-								info : it.attr("class"),
-								icon : it.attr("icon"),
+								lonlat : new ol.LonLat(place.attr("lon"), place.attr("lat")),
+								path : path,
+								info : place.attr("class"),
+								icon : place.attr("icon"),
+								//name : place.attr("display_name"),
 								getZoom : function(map) {
 									return map.getZoomForExtent(fm.Util.toMapProjection(new ol.Bounds(box[2], box[1], box[3], box[0])));
 								},
 								osm : null,
-								rank : 1*it.attr("place_rank")
+								rank : 1*place.attr("place_rank")
 							});
 						});
 
@@ -66,6 +75,8 @@ fm.NameFinder.Nominatim = ol.Class(fm.NameFinder, {
 								results[j-1] = tmp;
 							}
 						}
+
+						t.normaliseResultNames(results);
 
 						callbackFunction(results);
 					},
@@ -80,6 +91,40 @@ fm.NameFinder.Nominatim = ol.Class(fm.NameFinder, {
 	findNear : function(query, near, callback) {
 		// TODO: What if near contains coordinates?
 		this.find(query+" near "+near, callback);
+	},
+
+	normaliseResultNames : function(results) {
+		var obj = { };
+
+		var getObjForPath = function(path, cur) {
+			cur = (cur || obj);
+			path = [ ].concat(path);
+			var p = path.shift();
+			if(!cur[p])
+				cur[p] = { };
+			return (path.length == 0 ? cur[p] : getObjForPath(path, cur[p]));
+		};
+
+		$.each(results, function(i, it) {
+			getObjForPath(it.path);
+		});
+
+		console.log(obj);
+
+		$.each(results, function(i, it) {
+			var pathPart = [ ];
+			var toIndex = 1;
+			$.each(it.path, function(i2, it2) {
+				pathPart.push(it2);
+				if(fm.Util.getIndexes(getObjForPath(pathPart)).length > 1)
+					toIndex = i2+2;
+			});
+			var pathPart = it.path.slice(0, toIndex);
+
+			if(pathPart.length != it.path.length)
+				pathPart.push(it.path[it.path.length-1]);
+			it.name = pathPart.reverse().join(", ");
+		});
 	},
 
 	CLASS_NAME : "FacilMap.NameFinder.Nominatim"
