@@ -625,6 +625,16 @@ FacilMap.Util = {
 	 */
 	popup : function(content, title) {
 		$("<div></div>").append(content).dialog({ modal: true, title: title, width: window.innerWidth/2, buttons: { "OK" : function() { $(this).dialog("close"); } }});
+	},
+
+	/**
+	 * Converts the given GPS coordinates to the current map projection
+	 * @param lonlat {OpenLayers.LonLat}
+	 * @param map {OpenLayers.Map}
+	 * @return {OpenLayers.LonLat}
+	 */
+	toMapProjection : function(lonlat, map) {
+		return lonlat.clone().transform(new ol.Projection("EPSG:4326"), map.getProjectionObject());
 	}
 }
 

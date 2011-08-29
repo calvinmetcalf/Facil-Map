@@ -24,15 +24,7 @@
 */
 fm.NameFinder.Nominatim = ol.Class(fm.NameFinder, {
 	nameFinderURL : "http://open.mapquestapi.com/nominatim/v1/search",
-
-	/**
-	 * @param nameFinderURL {String} http://nominatim.openstreetmap.org/search. To work around the same origin policy, pass a wrapper that lives on your webspace.
-	*/
-	initialize : function(nameFinderURL) {
-		fm.NameFinder.prototype.initialize.apply(this, [ ]);
-		if(nameFinderURL)
-			this.nameFinderURL = nameFinderURL;
-	},
+	limit : 25,
 
 	find : function(query, callbackFunction) {
 		query.replace(/^\s+/, "").replace(/\s+$/, "");
@@ -46,37 +38,32 @@ fm.NameFinder.Nominatim = ol.Class(fm.NameFinder, {
 			{ // NameFinder
 				ol.Request.GET({
 					url : nameFinder.nameFinderURL,
-					params : { "q": query, "format" : "xml", "polygon" : "0", "addressdetails" : "0" },
+					params : { "q": query, "format" : "xml", "polygon" : "0", "addressdetails" : "0", limit: this.limit },
 					success : function(request) {
 						var results = [ ];
-						if(request.responseXML)
+						$("place", request.responseXML).each(function(){
+							var it = $(this);
+							var box = it.attr("boundingbox").split(",");
+							results.push({
+								lonlat : new ol.LonLat(it.attr("lon"), it.attr("lat")),
+								name : it.attr("display_name"),
+								info : it.attr("class"),
+								icon : it.attr("icon"),
+								getZoom : function(map) {
+									return map.getZoomForExtent(fm.Util.toMapProjection(new ol.Bounds(box[2], box[1], box[3], box[0])));
+								},
+								osm : null,
+								rank : 1*it.attr("place_rank")
+							});
+						});
+
+						for(var i=0; i<results.length; i++)
 						{
-							var searchresults = request.responseXML.getElementsByTagName("searchresults");
-
-							if(searchresults.length > 0)
+							for(var j=i; j > 0 && results[j-1].rank > results[j].rank; j--)
 							{
-								if(searchresults[0].getAttribute("findplace") == null || searchresults[0].getAttribute("findplace") == "" || searchresults[0].getAttribute("foundnearplace") == "yes")
-								{
-									var named = searchresults[0].childNodes;
-									for(var i=0; i<named.length; i++)
-									{
-										if(named[i].nodeType != 1) continue;
-
-										var box = named[i].getAttribute("boundingbox").split(",");
-										(function(box) {
-											results.push({
-												lonlat : new ol.LonLat(named[i].getAttribute("lon"), named[i].getAttribute("lat")),
-												name : named[i].getAttribute("display_name"),
-												info : named[i].getAttribute("class"),
-												icon : named[i].getAttribute("icon"),
-												getZoom : function(map) {
-													return map.getZoomForExtent(box.clone().transform(new ol.Projection("EPSG:4326"), map.getProjectionObject()));
-												},
-												osm : null
-											});
-										})(new ol.Bounds(box[2], box[1], box[3], box[0]));
-									}
-								}
+								var tmp = results[j];
+								results[j] = results[j-1];
+								results[j-1] = tmp;
 							}
 						}
 

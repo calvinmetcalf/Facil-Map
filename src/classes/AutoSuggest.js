@@ -63,6 +63,7 @@ fm.AutoSuggest = ol.Class({
 			t.input.unbind("click", clickOpener);
 
 			// Wait some time before closing the suggestion list on blur so that clicking the results still works
+			// TODO: Dragging of scroll bar inside list is not possible this way
 			setTimeout(function(){ t._hideList(); }, 150);
 		});
 
@@ -121,15 +122,12 @@ fm.AutoSuggest = ol.Class({
 		}
 
 		var val = t.input.val();
-		if(t._waitingValue != val)
+		if(val != t._waitingValue)
 		{
+			t._waitingValue = val;
 			if(t._timeout != null)
-			{
 				clearTimeout(t._timeout);
-				t._timeout = null;
-				t._waitingValue = null;
-			}
-			t._timeout = setTimeout(function(){ t._timeout = null; t._waitingValue = null; t._open(); }, t.typingTimeout);
+			t._timeout = setTimeout(function(){ t._timeout = null; t._open(); }, t.typingTimeout);
 		}
 		return true;
 	},
@@ -200,7 +198,6 @@ fm.AutoSuggest = ol.Class({
 		{
 			clearTimeout(this._timeout);
 			this._timeout = null;
-			this._waitingValue = null;
 		}
 
 		// Prevent showing the list if find() is currently waiting for a response

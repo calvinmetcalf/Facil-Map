@@ -23,7 +23,9 @@
  * An abstract class whose implementations connect to a NameFinder.
 */
 fm.NameFinder = ol.Class({
-	initialize : function() {
+	initialize : function(options) {
+		ol.Util.extend(this, options);
+
 		this.makeSuggestions = $.proxy(this.makeSuggestions, this);
 	},
 
