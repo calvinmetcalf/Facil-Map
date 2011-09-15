@@ -59,7 +59,7 @@ fm.NameFinder.Nominatim = ol.Class(fm.NameFinder, {
 								icon : place.attr("icon"),
 								//name : place.attr("display_name"),
 								getZoom : function(map) {
-									return map.getZoomForExtent(fm.Util.toMapProjection(new ol.Bounds(box[2], box[1], box[3], box[0])));
+									return map.getZoomForExtent(fm.Util.toMapProjection(new ol.Bounds(box[2], box[1], box[3], box[0]), map));
 								},
 								osm : null,
 								rank : 1*place.attr("place_rank")
