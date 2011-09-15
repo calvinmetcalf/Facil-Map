@@ -89,6 +89,25 @@ fm.Map = ol.Class(ol.Map, {
 				fm.idCounter = 0;
 			this.uniqueId = "fm"+(fm.idCounter++);
 		}
+
+		// Add loading control with support in OpenLayers.Request
+		var loadingControl = new fm.Control.Loading();
+		this.addControl(loadingControl);
+		var issueBkp = ol.Request.issue;
+		ol.Request.issue = function(config) {
+			var args = $.makeArray(arguments);
+
+			var callbackBkp = args[0].callback;
+			args[0].callback = function() {
+				loadingControl.loadEnd();
+				if(callbackBkp)
+					return callbackBkp.apply(this, arguments);
+			};
+
+			loadingControl.loadStart();
+
+			return issueBkp.apply(this, args);
+		};
 	},
 
 	updateSize : function()

@@ -97,6 +97,7 @@ OpenLayers.Lang.en = OpenLayers.Util.extend(OpenLayers.Lang.en, {
 	"Found the following places:": "Found the following places:",
 	"From" : "From",
 	"To" : "To",
+	"Loading" : "Loading",
 	"olm.object" : "Objects",
 	"olm.address" : "Address",
 	"olm.contact" : "Contact",

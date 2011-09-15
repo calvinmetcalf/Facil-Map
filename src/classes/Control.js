@@ -17,4 +17,10 @@
 	Obtain the source code from http://gitorious.org/facilmap.
 */
 
-FacilMap.Control = { };
+(function(fm, ol, $){
+
+	fm.Control = ol.Class(ol.Control, {
+		CLASS_NAME : "FacilMap.Control"
+	});
+
+})(FacilMap, OpenLayers, FacilMap.$);
