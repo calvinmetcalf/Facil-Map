@@ -53,7 +53,7 @@ fm.AutoSuggest = ol.Class({
 
 		t.input.attr("autocomplete", "off").addClass("fmAutoSuggest");
 
-		t.input.keydown(function(e){ t._keyDown(e); });
+		t.input.keydown(function(e){ return t._keyDown(e); });
 
 		var clickOpener = function() { t._open(); };
 		t.input.focus(function() {
@@ -109,9 +109,10 @@ fm.AutoSuggest = ol.Class({
 					t._hideList();
 					return false;
 				}
-				else
+				else if(t._list.css("display") != "none")
 				{ // If no item is selected, close suggestion box
 					t._hideList();
+					return false;
 				}
 			}
 			else if(e.keyCode == kc_escape)
@@ -121,20 +122,24 @@ fm.AutoSuggest = ol.Class({
 			}
 		}
 
-		var val = t.input.val();
-		if(val != t._waitingValue)
-		{
-			t._waitingValue = val;
-			if(t._timeout != null)
-				clearTimeout(t._timeout);
-			t._timeout = setTimeout(function(){ t._timeout = null; t._open(); }, t.typingTimeout);
-		}
+		setTimeout(function(){
+			var val = t.input.val();
+			if(val != t._waitingValue)
+			{
+				t._waitingValue = val;
+				if(t._timeout != null)
+				{
+					clearTimeout(t._timeout);
+					t._timeout = null;
+				}
+				t._timeout = setTimeout(function(){ t._timeout = null; t._open(val); }, t.typingTimeout);
+			}
+		}, 0);
 		return true;
 	},
 
-	_open : function() {
+	_open : function(val) {
 		var t = this;
-		var val = t.input.val();
 
 		if(val == t._loadedValue)
 			t._showList();
@@ -156,13 +161,15 @@ fm.AutoSuggest = ol.Class({
 		var t = this;
 
 		var selected = $("> li.selected", t._list).attr("data-value");
-		t._loadedValue = value;
-		t._showList();
 
+		t._list.empty();
 		$.each(suggestions, function(i, it) {
 			$("<li></li>").attr("data-value", it.value).append(it.html).appendTo(t._list)
 				.click(function(){ t.input.val($(this).attr("data-value")); t._hideList(); });
 		});
+
+		t._loadedValue = value;
+		t._showList();
 	},
 
 	_selectItem : function(li)
