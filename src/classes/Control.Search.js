@@ -23,6 +23,8 @@ fm.Control.Search = ol.Class(ol.Control, {
 	nameFinder : null,
 
 	layerMarkers : null,
+	layerRouting : null,
+	layerXML : null,
 
 	/**
 	 * @param nameFinder {FacilMap.NameFinder}
@@ -56,6 +58,21 @@ fm.Control.Search = ol.Class(ol.Control, {
 					navigationControl.activate();
 				});
 			}
+
+			t.layerMarkers = new fm.Layer.Markers.SearchResults(ol.i18n("Search results"));
+			t.map.addLayer(t.layerMarkers);
+
+			t.layerRouting = new fm.Layer.XML.Routing("[routing]", { showInLayerSwitcher : false });
+			t.map.addLayer(t.layerRouting);
+
+			t.layerXML = new fm.Layer.XML("[xml]", null, { showInLayerSwitcher : false });
+			t.map.addLayer(t.layerXML);
+			t.layerXML.events.register("allloadend", t.layerXML, function() {
+				var extent = this.getDataExtent();
+				if(extent)
+					this.map.zoomToExtent(extent);
+				//onSearchEnd();
+			});
 
 			var inputFrom = $('<input type="text" class="from" />').appendTo(form);
 			var helpButton = $('<img src="'+fm.apiUrl+'/img/help.png" alt="?" class="help" />').appendTo(form);
@@ -94,8 +111,8 @@ fm.Control.Search = ol.Class(ol.Control, {
 			buttonSearch.click(function(){ t.search(inputFrom.val(), routingVisible ? inputTo.val() : null); return false; });
 			buttonClear.click(function() { t.search(""); });
 
-			t.layerMarkers = new fm.Layer.Markers.SearchResults(ol.i18n("Search results"), { shortName : "s", saveInPermalink : true });
-			t.map.addLayer(t.layerMarkers);
+			selectType.change(function(){ t.layerRouting.setType($(this).val()); }).change();
+			selectMedium.change(function(){ t.layerRouting.setMedium($(this).val()); }).change();
 		}
 
 		return ret;
@@ -193,6 +210,11 @@ fm.Control.Search = ol.Class(ol.Control, {
 
 	clear : function() {
 		$("div.results", this.div).remove();
+
+		this.layerMarkers.clearMarkers();
+		this.layerXML.setUrl();
+		this.layerRouting.setFrom(null);
+		this.layerRouting.setTo(null);
 	},
 
 	showPOISearchResults : function(poi, place) {
@@ -211,34 +233,44 @@ fm.Control.Search = ol.Class(ol.Control, {
 	showSearchResults : function(query) {
 		var t = this;
 		this.nameFinder.find(query, function(results) {
-			t._makeResultList(null, results, ol.i18n("Did you mean?"), function(result) {
+			var showResult = function(result) {
 				t.layerMarkers.showResults([ result ]);
 				t.map.setCenter(fm.Util.toMapProjection(result.lonlat, t.map), result.getZoom(t.map));
-			}).appendTo(t.div);
+			};
+
+			t._makeResultList(null, results, ol.i18n("Did you mean?"), showResult).appendTo(t.div);
+
+			if(results.length > 0)
+				showResult(results[0]);
 		});
 	},
 
 	showGPX : function(url) {
-		var layer = new FacilMap.Layer.XML(null, url, { removableInLayerSwitcher: true, saveInPermalink : true });
-		this.map.addLayer(layer);
-		layer.events.register("allloadend", layer, function() {
-			var extent = this.getDataExtent();
-			if(extent)
-				this.map.zoomToExtent(extent);
-			//onSearchEnd();
-		});
+		var t = this;
+		t.layerXML.setUrl(url);
 	},
 
 	showRoute : function(query1, query2) {
 		var t = this;
-		this.nameFinder.findMultiple([ query1, query2 ], function(results) {
-			t._makeResultList(query1, results[query1], ol.i18n("Did you mean?"), function() {
-
-			}).appendTo(t.div);
-			t._makeResultList(query2, results[query2], ol.i18n("Did you mean?"), function() {
-
-			}).appendTo(t.div);
-		})
+		t.nameFinder.findMultiple([ query1, query2 ], function(results) {
+			if(results[query1].length > 0 && results[query2].length > 0)
+			{
+				t.layerRouting.setFrom(results[query1][0].lonlat, true);
+				t.layerRouting.setTo(results[query2][0].lonlat, true);
+			}
+			if(results[query1].length == 0 || results[query2].length > 0)
+			{
+				t._makeResultList(query1, results[query1], ol.i18n("Did you mean?"), function(result) {
+					t.layerRouting.setFrom(result.lonlat, true);
+				}).appendTo(t.div);
+			}
+			if(results[query2].length == 0 || results[query1].length > 0)
+			{
+				t._makeResultList(query2, results[query2], ol.i18n("Did you mean?"), function(result) {
+					t.layerRouting.setTo(result.lonlat, true);
+				}).appendTo(t.div);
+			}
+		});
 	},
 
 	_makeResultList : function(query, results, heading, onclick) {

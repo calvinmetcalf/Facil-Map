@@ -380,9 +380,6 @@ FacilMap.Layer.XML.Routing = OpenLayers.Class(FacilMap.Layer.XML, {
 			this.addMarker(this.viaMarkers[i]);
 		}
 
-		if(this.provider.from == null || this.provider.to == null || this.provider.medium == null || this.provider.routingType == null)
-			return null;
-
 		this.zoomAtNextSuccess = zoom;
 		this.provider.setDOM(null);
 

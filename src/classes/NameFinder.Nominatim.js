@@ -109,8 +109,6 @@ fm.NameFinder.Nominatim = ol.Class(fm.NameFinder, {
 			getObjForPath(it.path);
 		});
 
-		console.log(obj);
-
 		$.each(results, function(i, it) {
 			var pathPart = [ ];
 			var toIndex = 1;
