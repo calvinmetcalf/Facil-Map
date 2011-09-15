@@ -21,10 +21,11 @@
 
 fm.Control.Search = ol.Class(ol.Control, {
 	nameFinder : null,
+	tabindex : 1,
 
-	layerMarkers : null,
-	layerRouting : null,
-	layerXML : null,
+	_layerMarkers : null,
+	_layerRouting : null,
+	_layerXML : null,
 
 	/**
 	 * @param nameFinder {FacilMap.NameFinder}
@@ -59,15 +60,15 @@ fm.Control.Search = ol.Class(ol.Control, {
 				});
 			}
 
-			t.layerMarkers = new fm.Layer.Markers.SearchResults(ol.i18n("Search results"));
-			t.map.addLayer(t.layerMarkers);
+			t._layerMarkers = new fm.Layer.Markers.SearchResults(ol.i18n("Search results"));
+			t.map.addLayer(t._layerMarkers);
 
-			t.layerRouting = new fm.Layer.XML.Routing("[routing]", { showInLayerSwitcher : false });
-			t.map.addLayer(t.layerRouting);
+			t._layerRouting = new fm.Layer.XML.Routing("[routing]", { showInLayerSwitcher : false });
+			t.map.addLayer(t._layerRouting);
 
-			t.layerXML = new fm.Layer.XML("[xml]", null, { showInLayerSwitcher : false });
-			t.map.addLayer(t.layerXML);
-			t.layerXML.events.register("allloadend", t.layerXML, function() {
+			t._layerXML = new fm.Layer.XML("[xml]", null, { showInLayerSwitcher : false });
+			t.map.addLayer(t._layerXML);
+			t._layerXML.events.register("allloadend", t._layerXML, function() {
 				var extent = this.getDataExtent();
 				if(extent)
 					this.map.zoomToExtent(extent);
@@ -102,6 +103,11 @@ fm.Control.Search = ol.Class(ol.Control, {
 				buttonSearch.val(ol.i18n(routingVisible ? "Get directions" : "Search"));
 				$(ret)[routingVisible ? "addClass" : "removeClass"]("routing");
 				helpButton.css("display", routingVisible ? "none" : "");
+
+				$.each(routingVisible ? [ inputFrom, inputTo, buttonSearch, buttonClear, selectType, selectMedium, linkDirections ] : [ inputFrom, buttonSearch, buttonClear, linkDirections ], function(i, it) {
+					it.attr("tabindex", t.tabindex+i);
+				});
+
 				return false;
 			});
 			linkDirections.click();
@@ -111,8 +117,8 @@ fm.Control.Search = ol.Class(ol.Control, {
 			buttonSearch.click(function(){ t.search(inputFrom.val(), routingVisible ? inputTo.val() : null); return false; });
 			buttonClear.click(function() { t.search(""); });
 
-			selectType.change(function(){ t.layerRouting.setType($(this).val()); }).change();
-			selectMedium.change(function(){ t.layerRouting.setMedium($(this).val()); }).change();
+			selectType.change(function(){ t._layerRouting.setType($(this).val()); }).change();
+			selectMedium.change(function(){ t._layerRouting.setMedium($(this).val()); }).change();
 		}
 
 		return ret;
@@ -211,17 +217,17 @@ fm.Control.Search = ol.Class(ol.Control, {
 	clear : function() {
 		$("div.results", this.div).remove();
 
-		this.layerMarkers.clearMarkers();
-		this.layerXML.setUrl();
-		this.layerRouting.setFrom(null);
-		this.layerRouting.setTo(null);
+		this._layerMarkers.clearMarkers();
+		this._layerXML.setUrl();
+		this._layerRouting.setFrom(null);
+		this._layerRouting.setTo(null);
 	},
 
 	showPOISearchResults : function(poi, place) {
 		var t = this;
 		this.nameFinder.findNear(poi, place, function(results) {
-			t.layerMarkers.showResults(results);
-			t.map.zoomToExtent(t.layerMarkers.getDataExtent());
+			t._layerMarkers.showResults(results);
+			t.map.zoomToExtent(t._layerMarkers.getDataExtent());
 			t._makeResultList(null, results, ol.i18n("Found the following places:"), function(result) {
 				t.map.setCenter(fm.Util.toMapProjection(result.lonlat, t.map), result.getZoom(t.map));
 				$.each(results, function(i, it) { it.marker.fmFeature.popup.hide(); });
@@ -234,7 +240,7 @@ fm.Control.Search = ol.Class(ol.Control, {
 		var t = this;
 		this.nameFinder.find(query, function(results) {
 			var showResult = function(result) {
-				t.layerMarkers.showResults([ result ]);
+				t._layerMarkers.showResults([ result ]);
 				t.map.setCenter(fm.Util.toMapProjection(result.lonlat, t.map), result.getZoom(t.map));
 			};
 
@@ -247,7 +253,7 @@ fm.Control.Search = ol.Class(ol.Control, {
 
 	showGPX : function(url) {
 		var t = this;
-		t.layerXML.setUrl(url);
+		t._layerXML.setUrl(url);
 	},
 
 	showRoute : function(query1, query2) {
@@ -255,19 +261,19 @@ fm.Control.Search = ol.Class(ol.Control, {
 		t.nameFinder.findMultiple([ query1, query2 ], function(results) {
 			if(results[query1].length > 0 && results[query2].length > 0)
 			{
-				t.layerRouting.setFrom(results[query1][0].lonlat, true);
-				t.layerRouting.setTo(results[query2][0].lonlat, true);
+				t._layerRouting.setFrom(results[query1][0].lonlat, true);
+				t._layerRouting.setTo(results[query2][0].lonlat, true);
 			}
 			if(results[query1].length == 0 || results[query2].length > 0)
 			{
 				t._makeResultList(query1, results[query1], ol.i18n("Did you mean?"), function(result) {
-					t.layerRouting.setFrom(result.lonlat, true);
+					t._layerRouting.setFrom(result.lonlat, true);
 				}).appendTo(t.div);
 			}
 			if(results[query2].length == 0 || results[query1].length > 0)
 			{
 				t._makeResultList(query2, results[query2], ol.i18n("Did you mean?"), function(result) {
-					t.layerRouting.setTo(result.lonlat, true);
+					t._layerRouting.setTo(result.lonlat, true);
 				}).appendTo(t.div);
 			}
 		});
