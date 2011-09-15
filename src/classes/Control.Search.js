@@ -183,7 +183,7 @@ fm.Control.Search = ol.Class(ol.Control, {
 				{
 					var poi = this.getPOISearchTerm(query1);
 					if(poi.poi != null)
-						this.showPOISearchResults(poi.poi, poi.place)
+						this.showPOISearchResults(poi.poi, poi.place);
 					else
 						this.showSearchResults(poi.place);
 				}
@@ -221,12 +221,10 @@ fm.Control.Search = ol.Class(ol.Control, {
 	showGPX : function(url) {
 		var layer = new FacilMap.Layer.XML(null, url, { removableInLayerSwitcher: true, saveInPermalink : true });
 		this.map.addLayer(layer);
-		layer.events.register("loadend", layer, function() {
+		layer.events.register("allloadend", layer, function() {
 			var extent = this.getDataExtent();
 			if(extent)
 				this.map.zoomToExtent(extent);
-		});
-		layer.events.register("allloadend", layer, function() {
 			//onSearchEnd();
 		});
 	},
