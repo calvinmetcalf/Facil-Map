@@ -27,6 +27,9 @@ fm.Control.Search = ol.Class(ol.Control, {
 	_layerRouting : null,
 	_layerXML : null,
 
+	_lastFromSuggestion : null,
+	_lastToSuggestion : null,
+
 	/**
 	 * @param nameFinder {FacilMap.NameFinder}
 	 * @param options
@@ -91,8 +94,8 @@ fm.Control.Search = ol.Class(ol.Control, {
 				'<option value="'+FacilMap.Routing.Medium.FOOT+'">'+ol.i18n("Foot")+'</option>' +
 			'</select>').appendTo(form);
 
-			new FacilMap.AutoSuggest(inputFrom[0], this.makeSuggestions);
-			new FacilMap.AutoSuggest(inputTo[0], this.makeSuggestions);
+			new FacilMap.AutoSuggest(inputFrom[0], this.makeSuggestions, { setValue : function(suggestion) { t._lastFromSuggestion = suggestion; inputFrom.val(suggestion.value); }});
+			new FacilMap.AutoSuggest(inputTo[0], this.makeSuggestions, { setValue : function(suggestion) { t._lastToSuggestion = suggestion; inputTo.val(suggestion.value); }});
 
 			var routingVisible = true;
 			linkDirections.click(function(){
@@ -114,7 +117,7 @@ fm.Control.Search = ol.Class(ol.Control, {
 
 			helpButton.click(function(){ fm.Util.popup(ol.i18n("searchHelpText"), ol.i18n("Search help")); });
 
-			buttonSearch.click(function(){ t.search(inputFrom.val(), routingVisible ? inputTo.val() : null); return false; });
+			form.submit(function(){ t.search(inputFrom.val(), routingVisible ? inputTo.val() : null); return false; });
 			buttonClear.click(function() { t.search(""); });
 
 			selectType.change(function(){ t._layerRouting.setType($(this).val()); }).change();
@@ -131,6 +134,7 @@ fm.Control.Search = ol.Class(ol.Control, {
 	 * @param callback {Function}
 	 */
 	makeSuggestions : function(query, callback) {
+		var t = this;
 		var poi = this.getPOISearchTerm(query);
 
 		this.nameFinder.makeSuggestions(poi.place, function(suggestions) {
@@ -225,6 +229,7 @@ fm.Control.Search = ol.Class(ol.Control, {
 
 	showPOISearchResults : function(poi, place) {
 		var t = this;
+		// TODO: Use _lastFromSuggestion for place
 		this.nameFinder.findNear(poi, place, function(results) {
 			t._layerMarkers.showResults(results);
 			t.map.zoomToExtent(t._layerMarkers.getDataExtent());
@@ -238,7 +243,7 @@ fm.Control.Search = ol.Class(ol.Control, {
 
 	showSearchResults : function(query) {
 		var t = this;
-		this.nameFinder.find(query, function(results) {
+		var handleResults = function(results) {
 			var showResult = function(result) {
 				t._layerMarkers.showResults([ result ]);
 				t.map.setCenter(fm.Util.toMapProjection(result.lonlat, t.map), result.getZoom(t.map));
@@ -248,7 +253,12 @@ fm.Control.Search = ol.Class(ol.Control, {
 
 			if(results.length > 0)
 				showResult(results[0]);
-		});
+		};
+
+		if(t._lastFromSuggestion && t._lastFromSuggestion.value == query)
+			handleResults([ t._lastFromSuggestion.result ]);
+		else
+			this.nameFinder.find(query, handleResults);
 	},
 
 	showGPX : function(url) {
@@ -258,7 +268,7 @@ fm.Control.Search = ol.Class(ol.Control, {
 
 	showRoute : function(query1, query2) {
 		var t = this;
-		t.nameFinder.findMultiple([ query1, query2 ], function(results) {
+		var handleResults = function(results) {
 			if(results[query1].length > 0 && results[query2].length > 0)
 			{
 				t._layerRouting.setFrom(results[query1][0].lonlat, true);
@@ -276,7 +286,28 @@ fm.Control.Search = ol.Class(ol.Control, {
 					t._layerRouting.setTo(result.lonlat, true);
 				}).appendTo(t.div);
 			}
-		});
+		};
+
+		var query = [ ];
+		var result = { };
+		if(t._lastFromSuggestion && t._lastFromSuggestion.value == query1)
+			result[query1] = [ t._lastFromSuggestion.result ];
+		else
+			query.push(query1);
+		if(t._lastToSuggestion && t._lastToSuggestion.value == query2)
+			result[query2] = [ t._lastToSuggestion.result ];
+		else
+			query.push(query2);
+
+		if(query.length > 0)
+		{
+			t.nameFinder.findMultiple(query, function(a_results) {
+				$.extend(result, a_results);
+				handleResults(result);
+			});
+		}
+		else
+			handleResults(result);
 	},
 
 	_makeResultList : function(query, results, heading, onclick) {
@@ -289,7 +320,7 @@ fm.Control.Search = ol.Class(ol.Control, {
 			else
 				error.text(ol.i18n("No results found."));
 		}
-		else
+		else if(results.length > 1)
 		{
 			$('<h2></h2>').text(heading).appendTo(div);
 			var list = $("<ul></ul>").appendTo(div);

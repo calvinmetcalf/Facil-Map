@@ -28,6 +28,7 @@ fm.AutoSuggest = ol.Class({
 	input : null,
 	suggestionFunction : null,
 	typingTimeout : 500,
+	setValue : function(suggestion){ this.input.val(suggestion.value); },
 
 	_timeout : null,
 	_list : null,
@@ -45,11 +46,13 @@ fm.AutoSuggest = ol.Class({
 	 *                                      The suggestions are objects with the properties value
 	 *                                      (the value to be set for the input field) and html (the
 	 *                                      HTML code to display as suggestion).
+	 * @param options {Object} Options to extend this object with
 	 */
-	initialize : function(input, suggestionFunction) {
+	initialize : function(input, suggestionFunction, options) {
 		var t = this;
 		t.input = $(input);
 		t.suggestionFunction = suggestionFunction;
+		$.extend(t, options);
 
 		t.input.attr("autocomplete", "off").addClass("fmAutoSuggest");
 
@@ -118,7 +121,8 @@ fm.AutoSuggest = ol.Class({
 			{
 				if(selected.size() != 0)
 				{ // If item is selected, put value in input field
-					t.input.val(selected.attr("data-value"));
+					t.setValue(selected.data("fmAutoSuggest-suggestion"));
+					t._waitingValue = t.input.val();
 					t.input.focus();
 					t._hideList();
 					return false;
@@ -174,12 +178,10 @@ fm.AutoSuggest = ol.Class({
 	_openResult : function(value, suggestions) {
 		var t = this;
 
-		var selected = $("> li.selected", t._list).attr("data-value");
-
 		t._list.empty();
 		$.each(suggestions, function(i, it) {
-			$("<li></li>").attr("data-value", it.value).append(it.html).appendTo(t._list)
-				.click(function(){ t.input.val($(this).attr("data-value")); t._hideList(); t.input.focus(); });
+			$("<li></li>").data("fmAutoSuggest-suggestion", it).append(it.html).appendTo(t._list)
+				.click(function(){ t.setValue($(this).data("fmAutoSuggest-suggestion")); t._hideList(); t.input.focus(); });
 		});
 
 		t._loadedValue = value;

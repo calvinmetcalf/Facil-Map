@@ -53,6 +53,7 @@ fm.NameFinder.Nominatim = ol.Class(fm.NameFinder, {
 							});
 
 							results.push({
+								id : place.attr("place_id"),
 								lonlat : new ol.LonLat(place.attr("lon"), place.attr("lat")),
 								path : path,
 								info : place.attr("class"),

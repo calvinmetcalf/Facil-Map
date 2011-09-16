@@ -50,6 +50,7 @@ fm.NameFinder = ol.Class({
 		if(lonlat)
 		{
 			var results = [ {
+				id : 0,
 				lonlat : lonlat.lonlat,
 				info : ol.i18n("Coordinates"),
 				name : lonlat.lonlat.lat + ", " + lonlat.lonlat.lon,
@@ -136,7 +137,8 @@ fm.NameFinder = ol.Class({
 			$.each(results, function(i, it) {
 				ret.push({
 					html : "<strong>"+fm.Util.htmlspecialchars(it.name)+"</strong> ("+fm.Util.htmlspecialchars(it.info)+")",
-					value : it.name
+					value : it.name,
+					result : it
 				});
 			});
 			callback(ret);
