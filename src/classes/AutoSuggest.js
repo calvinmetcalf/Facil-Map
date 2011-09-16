@@ -53,7 +53,16 @@ fm.AutoSuggest = ol.Class({
 
 		t.input.attr("autocomplete", "off").addClass("fmAutoSuggest");
 
+		t._list = $('<ol class="fmAutoSuggest"></ol>').appendTo(t.input.parent()).css({
+			"position" : "absolute",
+			"display" : "none"
+		});
+
 		t.input.keydown(function(e){ return t._keyDown(e); });
+
+		var mouseover = false;
+		t.input.add(t._list).mouseout(function() { mouseover = false; });
+		t.input.add(t._list).mouseover(function(){ mouseover = true; });
 
 		var clickOpener = function() { t._open(t.input.val()); };
 		t.input.focus(function() {
@@ -62,15 +71,13 @@ fm.AutoSuggest = ol.Class({
 		t.input.blur(function(){
 			t.input.unbind("click", clickOpener);
 
-			// Wait some time before closing the suggestion list on blur so that clicking the results still works
-			// TODO: Dragging of scroll bar inside list is not possible this way
-			setTimeout(function(){ t._hideList(); }, 150);
+			if(!mouseover)
+				t._hideList();
 		});
-
-		t._list = $('<ol class="fmAutoSuggest"></ol>').appendTo(t.input.parent()).css({
-			"position" : "absolute",
-			"display" : "none"
-		});
+		$(input.ownerDocument).click(function(){
+			if(!mouseover)
+				t._hideList();
+		})
 	},
 
 	_keyDown : function(e) {
@@ -81,6 +88,13 @@ fm.AutoSuggest = ol.Class({
 		var kc_return = 13;
 		var kc_enter = 14;
 		var kc_escape = 27;
+		var kc_tab = 9;
+
+		if(!e.ctrlKey && !e.altKey && !e.metaKey && e.keyCode == kc_tab)
+		{
+			t._hideList();
+			return true;
+		}
 
 		if(!e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey)
 		{
@@ -165,7 +179,7 @@ fm.AutoSuggest = ol.Class({
 		t._list.empty();
 		$.each(suggestions, function(i, it) {
 			$("<li></li>").attr("data-value", it.value).append(it.html).appendTo(t._list)
-				.click(function(){ t.input.val($(this).attr("data-value")); t._hideList(); });
+				.click(function(){ t.input.val($(this).attr("data-value")); t._hideList(); t.input.focus(); });
 		});
 
 		t._loadedValue = value;
