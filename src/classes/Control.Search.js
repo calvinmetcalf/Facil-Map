@@ -63,6 +63,9 @@ fm.Control.Search = ol.Class(ol.Control, {
 				});
 			}
 
+			/////////////////
+			// Control layers
+
 			t._layerMarkers = new fm.Layer.Markers.SearchResults(ol.i18n("Search results"));
 			t.map.addLayer(t._layerMarkers);
 
@@ -77,6 +80,9 @@ fm.Control.Search = ol.Class(ol.Control, {
 					this.map.zoomToExtent(extent);
 				//onSearchEnd();
 			});
+
+			///////////////
+			// Forms fields
 
 			var inputFrom = $('<input type="text" class="from" />').appendTo(form);
 			var helpButton = $('<img src="'+fm.apiUrl+'/img/help.png" alt="?" class="help" />').appendTo(form);
@@ -94,6 +100,10 @@ fm.Control.Search = ol.Class(ol.Control, {
 				'<option value="'+FacilMap.Routing.Medium.FOOT+'">'+ol.i18n("Foot")+'</option>' +
 			'</select>').appendTo(form);
 
+			/////////////////
+			// Event handlers
+
+			// AutoSuggest feature: store selected suggestion to avoid duplicate NameFinder calls
 			new FacilMap.AutoSuggest(inputFrom[0], this.makeSuggestions, { setValue : function(suggestion) { t._lastFromSuggestion = suggestion; inputFrom.val(suggestion.value); }});
 			new FacilMap.AutoSuggest(inputTo[0], this.makeSuggestions, { setValue : function(suggestion) { t._lastToSuggestion = suggestion; inputTo.val(suggestion.value); }});
 
@@ -210,9 +220,9 @@ fm.Control.Search = ol.Class(ol.Control, {
 				{
 					var poi = this.getPOISearchTerm(query1);
 					if(poi.poi != null)
-						this.showPOISearchResults(poi.poi, poi.place);
+						this.showPOISearchResults(poi.poi, poi.place, query1);
 					else
-						this.showSearchResults(poi.place);
+						this.showSearchResults(query1);
 				}
 			}
 		}
@@ -227,9 +237,12 @@ fm.Control.Search = ol.Class(ol.Control, {
 		this._layerRouting.setTo(null);
 	},
 
-	showPOISearchResults : function(poi, place) {
+	showPOISearchResults : function(poi, place, query) {
 		var t = this;
-		// TODO: Use _lastFromSuggestion for place
+
+		if(t._lastFromSuggestion && t._lastFromSuggestion.value == query)
+			place = t._lastFromSuggestion.result.lonlat.lat+","+t._lastFromSuggestion.result.lonlat.lon;
+
 		this.nameFinder.findNear(poi, place, function(results) {
 			t._layerMarkers.showResults(results);
 			t.map.zoomToExtent(t._layerMarkers.getDataExtent());

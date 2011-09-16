@@ -90,7 +90,9 @@ fm.NameFinder.Nominatim = ol.Class(fm.NameFinder, {
 	},
 
 	findNear : function(query, near, callback) {
-		// TODO: What if near contains coordinates?
+		var lonlat = this.isLonLatQuery(near);
+		if(lonlat)
+			near = "["+lonlat.lonlat.lat+","+lonlat.lonlat.lon+"]";
 		this.find(query+" near "+near, callback);
 	},
 
