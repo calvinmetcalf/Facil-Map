@@ -55,7 +55,7 @@ fm.AutoSuggest = ol.Class({
 
 		t.input.keydown(function(e){ return t._keyDown(e); });
 
-		var clickOpener = function() { t._open(); };
+		var clickOpener = function() { t._open(t.input.val()); };
 		t.input.focus(function() {
 			setTimeout(function() { t.input.bind("click", clickOpener); }, 150);
 		});
@@ -90,7 +90,7 @@ fm.AutoSuggest = ol.Class({
 			{
 				// If list is closed, open list
 				if(t._list.css("display") == "none")
-					t._open();
+					t._open(t.input.val());
 				else
 				{
 					var newItem = selected[e.keyCode == kc_up ? "prev" : "next"]();
@@ -109,10 +109,9 @@ fm.AutoSuggest = ol.Class({
 					t._hideList();
 					return false;
 				}
-				else if(t._list.css("display") != "none")
+				else
 				{ // If no item is selected, close suggestion box
 					t._hideList();
-					return false;
 				}
 			}
 			else if(e.keyCode == kc_escape)
@@ -153,6 +152,7 @@ fm.AutoSuggest = ol.Class({
 			t.suggestionFunction(val, function(suggestions) {
 				if(val == t._loadingValue) // t._loadingValue is set to null in _hideList()
 					t._openResult(val, suggestions);
+				t._loadingValue = null;
 			});
 		}
 	},
