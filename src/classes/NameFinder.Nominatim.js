@@ -46,10 +46,10 @@ fm.NameFinder.Nominatim = ol.Class(fm.NameFinder, {
 
 							var box = place.attr("boundingbox").split(",");
 							var path = [ ];
-							$.each([ "country", "state", "county", "city", "city_district", "suburb", "town", "village", "hamlet", "residential", "road", "house" ], function(i, it) {
-								var part = $(it, place).text();
+							$("> *", place).not("country_code,boundary").each(function(){
+								var part = $(this).text();
 								if(part)
-									path.push(part);
+									path.unshift(part);
 							});
 
 							results.push({
