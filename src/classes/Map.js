@@ -174,9 +174,10 @@ fm.Map = ol.Class(ol.Map, {
 		//this.addLayer(new fm.Layer.OSM.Wanderkarte(ol.i18n("Reit- und Wanderkarte"), { shortName : "OSMC" }));
 		this.addLayer(new fm.Layer.OSM.HikeAndBike(ol.i18n("Hike & Bike Map"), { shortName : "HiBi" }));
 		this.addLayer(new fm.Layer.OSM.OpenPisteMap(ol.i18n("OpenPisteMap"), { shortName : "OPis" }));
-		this.addLayer(new fm.Layer.OSM.OPNVKarte(ol.i18n("ÖPNV-Karte"), { shortName : "OPNV" }));
+		//this.addLayer(new fm.Layer.OSM.OPNVKarte(ol.i18n("ÖPNV-Karte"), { shortName : "OPNV" }));
 		//this.addLayer(new fm.Layer.OSM.Kybl3DMap(ol.i18n("Izometrická 3D mapa ČR"), { shortName : "kybl" }));
 
+		this.addLayer(new fm.Layer.OSM.OpenPTMap(ol.i18n("Public transportation"), { shortName : "OPTM", visibility : false }));
 		this.addLayer(new fm.Layer.OSM.OOMStreets(ol.i18n("Streets overlay"), { shortName : "OOMS", visibility : false }));
 		this.addLayer(new fm.Layer.OSM.OOMLabels(ol.i18n("Labels overlay"), { shortName : "OOML", visibility : false }));
 		this.addLayer(new fm.Layer.OSM.Hiking(ol.i18n("Hiking symbols"), { visibility: false, shortName : "Hike" }));
