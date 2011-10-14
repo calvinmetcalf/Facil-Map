@@ -43,7 +43,6 @@ FacilMap.Layer.XML = OpenLayers.Class(OpenLayers.Layer.GML, {
 	initialize : function(name, url, options) {
 		this.fmURL = url;
 		this.relations = { };
-		this.shortName = "xml"+FacilMap.Layer.XML.shortNameI++;
 
 		if(this.colour == null)
 		{
@@ -169,4 +168,3 @@ FacilMap.Layer.XML = OpenLayers.Class(OpenLayers.Layer.GML, {
 FacilMap.Layer.XML.relationURL = "http://www.openstreetmap.org/api/0.6/relation/${id}/full";
 
 FacilMap.Layer.XML.colourCounter = 1;
-FacilMap.Layer.XML.shortNameI = 1;

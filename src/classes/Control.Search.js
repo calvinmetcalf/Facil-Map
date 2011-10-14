@@ -30,6 +30,8 @@ fm.Control.Search = ol.Class(ol.Control, {
 	_lastFromSuggestion : null,
 	_lastToSuggestion : null,
 
+	_stateObject : { },
+
 	/**
 	 * @param nameFinder {FacilMap.NameFinder}
 	 * @param options
@@ -40,6 +42,8 @@ fm.Control.Search = ol.Class(ol.Control, {
 		this.makeSuggestions = $.proxy(this.makeSuggestions, this);
 
 		ol.Control.prototype.initialize.apply(this, arguments);
+
+		this.events.addEventType("stateObjectChanged");
 	},
 
 	draw : function() {
@@ -129,9 +133,6 @@ fm.Control.Search = ol.Class(ol.Control, {
 
 			form.submit(function(){ t.search(inputFrom.val(), routingVisible ? inputTo.val() : null); return false; });
 			buttonClear.click(function() { t.search(""); });
-
-			selectType.change(function(){ t._layerRouting.setType($(this).val()); }).change();
-			selectMedium.change(function(){ t._layerRouting.setMedium($(this).val()); }).change();
 		}
 
 		return ret;
@@ -189,8 +190,10 @@ fm.Control.Search = ol.Class(ol.Control, {
 	 * contents of the search fields
 	 * @param query1 {String} The content of the “from” field
 	 * @param query2 {String} The content of the “to” field
+	 * @param type {FacilMap.Routing.Type}
+	 * @param medium {FacilMap.Routing.Medium}
 	 */
-	search : function(query1, query2) {
+	search : function(query1, query2, type, medium) {
 		this.clear();
 
 		query1 = (query1 || "").replace(/^\s+/, "").replace(/\s+$/, "");
@@ -199,9 +202,21 @@ fm.Control.Search = ol.Class(ol.Control, {
 		if(query1)
 		{
 			if(query2)
-				this.showRoute(query1, query2);
+			{
+				this._stateObject = {
+					from : query1,
+					to : query2,
+					type : type,
+					medium : medium
+				};
+				this.showRoute(query1, query2, type, medium);
+			}
 			else
 			{
+				this._stateObject = {
+					query : query1
+				};
+
 				var m = query1.match(/^(node|way|relation|trace)\s*#?\s*(\d+)$/i);
 				if(m)
 				{
@@ -235,6 +250,9 @@ fm.Control.Search = ol.Class(ol.Control, {
 		this._layerXML.setUrl();
 		this._layerRouting.setFrom(null);
 		this._layerRouting.setTo(null);
+
+		this._stateObject = { };
+		this.events.triggerEvent("stateObjectChanged");
 	},
 
 	showPOISearchResults : function(poi, place, query) {
@@ -258,6 +276,8 @@ fm.Control.Search = ol.Class(ol.Control, {
 		var t = this;
 		var handleResults = function(results) {
 			var showResult = function(result) {
+				t._stateObject = { "query" : query, id : result.id };
+
 				t._layerMarkers.showResults([ result ]);
 				t.map.setCenter(fm.Util.toMapProjection(result.lonlat, t.map), result.getZoom(t.map));
 			};
@@ -277,11 +297,16 @@ fm.Control.Search = ol.Class(ol.Control, {
 	showGPX : function(url) {
 		var t = this;
 		t._layerXML.setUrl(url);
+		t._stateObject = { "gpx" : url };
 	},
 
-	showRoute : function(query1, query2) {
+	showRoute : function(query1, query2, type, medium) {
 		var t = this;
+
 		var handleResults = function(results) {
+			t._layerRouting.setType(type);
+			t._layerRouting.setMedium(medium);
+
 			if(results[query1].length > 0 && results[query2].length > 0)
 			{
 				t._layerRouting.setFrom(results[query1][0].lonlat, true);
@@ -347,6 +372,24 @@ fm.Control.Search = ol.Class(ol.Control, {
 			});
 		}
 		return div;
+	},
+
+	getStateObject : function() {
+		return this._stateObject;
+	},
+
+	setStateObject : function(obj) {
+		this.clear();
+
+		$(".from", this.div).val(obj.from || obj.query || "");
+		$(".to", this.div).val(obj.to || "");
+		$(".medium", this.div).val(obj.medium || null);
+		$(".type", this.div).val(obj.type || null);
+
+		if(!!obj.from != $(this.div).hasClass("routing"))
+			$(".directions", this.div).click();
+
+		$("form", this.div).submit();
 	},
 
 	CLASS_NAME : "FacilMap.Control.Search"

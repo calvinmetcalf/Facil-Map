@@ -34,8 +34,8 @@
 		// <![CDATA[
 			var map = new FacilMap.Map("map");
 			map.addAllAvailableLayers();
+			map.addControl(new FacilMap.Control.Search({ permalinkName : "s" }));
 			map.addControl(new FacilMap.Control.HistoryStateHandler({ autoActivate:true }));
-			map.addControl(new FacilMap.Control.Search());
 		// ]]>
 		</script>
 	</body>

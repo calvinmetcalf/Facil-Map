@@ -90,7 +90,7 @@ FacilMap.Layer.XML.Routing = OpenLayers.Class(FacilMap.Layer.XML, {
 							break;
 						}
 					}
-					routingLayer.events.triggerEvent("queryObjectChanged");
+					routingLayer.events.triggerEvent("stateObjectChanged");
 				}
 				routingLayer.events.triggerEvent("draggedRoute");
 			}
@@ -166,7 +166,7 @@ FacilMap.Layer.XML.Routing = OpenLayers.Class(FacilMap.Layer.XML, {
 					{
 						routingLayer.provider.via.splice(i, 1);
 						routingLayer.updateRouting();
-						routingLayer.events.triggerEvent("queryObjectChanged");
+						routingLayer.events.triggerEvent("stateObjectChanged");
 						routingLayer.events.triggerEvent("draggedRoute");
 						return false;
 					}
@@ -264,7 +264,7 @@ FacilMap.Layer.XML.Routing = OpenLayers.Class(FacilMap.Layer.XML, {
 	reorderViaPoints : function(callback) {
 		var layer = this;
 		this.provider.reorderViaPoints(function(error) {
-			layer.events.triggerEvent("queryObjectChanged");
+			layer.events.triggerEvent("stateObjectChanged");
 			layer.updateRouting(false);
 
 			if(callback != null)
@@ -286,7 +286,7 @@ FacilMap.Layer.XML.Routing = OpenLayers.Class(FacilMap.Layer.XML, {
 		}
 		this.provider.from = from;
 
-		this.events.triggerEvent("queryObjectChanged");
+		this.events.triggerEvent("stateObjectChanged");
 		this.updateRouting(zoom);
 	},
 
@@ -304,7 +304,7 @@ FacilMap.Layer.XML.Routing = OpenLayers.Class(FacilMap.Layer.XML, {
 		}
 		this.provider.to = to;
 
-		this.events.triggerEvent("queryObjectChanged");
+		this.events.triggerEvent("stateObjectChanged");
 		this.updateRouting(zoom);
 	},
 
@@ -321,7 +321,7 @@ FacilMap.Layer.XML.Routing = OpenLayers.Class(FacilMap.Layer.XML, {
 			return;
 		}
 		this.provider.medium = medium;
-		this.events.triggerEvent("queryObjectChanged");
+		this.events.triggerEvent("stateObjectChanged");
 		this.updateRouting(zoom);
 	},
 
@@ -338,7 +338,7 @@ FacilMap.Layer.XML.Routing = OpenLayers.Class(FacilMap.Layer.XML, {
 			return;
 		}
 		this.provider.routingType = type;
-		this.events.triggerEvent("queryObjectChanged");
+		this.events.triggerEvent("stateObjectChanged");
 		this.updateRouting(zoom);
 	},
 

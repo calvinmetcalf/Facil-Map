@@ -38,8 +38,8 @@ FacilMap.Layer.Markers.LonLat = OpenLayers.Class(FacilMap.Layer.Markers, {
 		this.events.addEventType("markerAdded");
 		this.events.addEventType("markerRemoved");
 
-		this.events.register("markerAdded", this, function(){ this.events.triggerEvent("queryObjectChanged"); });
-		this.events.register("markerRemoved", this, function(){ this.events.triggerEvent("queryObjectChanged"); });
+		this.events.register("markerAdded", this, function(){ this.events.triggerEvent("stateObjectChanged"); });
+		this.events.register("markerRemoved", this, function(){ this.events.triggerEvent("stateObjectChanged"); });
 	},
 	addLonLatMarker : function(lonlat, title, icon)
 	{
