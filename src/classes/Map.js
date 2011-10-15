@@ -149,9 +149,9 @@ fm.Map = ol.Class(ol.Map, {
 		var map = this;
 
 		this.addLayer(new fm.Layer.OSM.Mapnik(ol.i18n("Mapnik"), { permalinkName : "Mpnk" }));
-		this.addLayer(new fm.Layer.OSM.MapSurfer.Road(ol.i18n("MapSurfer Road"), { permalinkName : "MSfR" }));
-		this.addLayer(new fm.Layer.OSM.MapSurfer.Topographic(ol.i18n("MapSurfer Topographic"), { permalinkName : "MSfT" }));
-		this.addLayer(new fm.Layer.OSM.OpenStreetBrowser(ol.i18n("OpenStreetBrowser"), { permalinkName : "OSBr" }));
+		//this.addLayer(new fm.Layer.OSM.MapSurfer.Road(ol.i18n("MapSurfer Road"), { permalinkName : "MSfR" }));
+		//this.addLayer(new fm.Layer.OSM.MapSurfer.Topographic(ol.i18n("MapSurfer Topographic"), { permalinkName : "MSfT" }));
+		//this.addLayer(new fm.Layer.OSM.OpenStreetBrowser(ol.i18n("OpenStreetBrowser"), { permalinkName : "OSBr" }));
 		this.addLayer(new fm.Layer.OSM.Osmarender(ol.i18n("Osmarender"), { permalinkName : "Osmr" }));
 		this.addLayer(new fm.Layer.OSM.CycleMap(ol.i18n("OpenCycleMap"), { permalinkName : "OCyc" }));
 		//this.addLayer(new fm.Layer.OSM.Wanderkarte(ol.i18n("Reit- und Wanderkarte"), { permalinkName : "OSMC" }));
@@ -202,7 +202,7 @@ fm.Map = ol.Class(ol.Map, {
 		this.addLayer(new fm.Layer.other.Relief(ol.i18n("Relief"), { visibility: false, permalinkName : "Rlie" }));
 
 		this.addAllAvailableOSMLayers();
-		this.addLayer(new fm.Layer.other.OSStreetView(ol.i18n("Ordnance Survey (UK)"), { permalinkName : "OSSV" }));
+		//this.addLayer(new fm.Layer.other.OSStreetView(ol.i18n("Ordnance Survey (UK)"), { permalinkName : "OSSV" }));
 
 		this.addAllAvailableGoogleLayers();
 		this.addAllAvailableYahooLayers();

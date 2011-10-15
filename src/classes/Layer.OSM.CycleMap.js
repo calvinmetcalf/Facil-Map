@@ -26,7 +26,7 @@ FacilMap.Layer.OSM.CycleMap = OpenLayers.Class(OpenLayers.Layer.OSM, {
 	initialize : function(name, options) {
 		OpenLayers.Layer.OSM.prototype.initialize.apply(this, [
 			name,
-			[ "http://a.andy.sandbox.cloudmade.com/tiles/cycle/${z}/${x}/${y}.png", "http://b.andy.sandbox.cloudmade.com/tiles/cycle/${z}/${x}/${y}.png", "http://c.andy.sandbox.cloudmade.com/tiles/cycle/${z}/${x}/${y}.png" ],
+			[ "http://a.tile.opencyclemap.org/cycle/${z}/${x}/${y}.png", "http://b.tile.opencyclemap.org/cycle/${z}/${x}/${y}.png", "http://c.tile.opencyclemap.org/cycle/${z}/${x}/${y}.png" ],
 			options
 		]);
 	},
