@@ -35,6 +35,12 @@
 			var map = new FacilMap.Map("map");
 			map.addAllAvailableLayers();
 			map.addControl(new FacilMap.Control.Search({ permalinkName : "s" }));
+map.setCenter(new OpenLayers.LonLat(-71.38,42.31) // Center of the map
+          .transform(
+            new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984
+            new OpenLayers.Projection("EPSG:900913") // to Spherical Mercator Projection
+          ), 8 // Zoom level
+        );
 			map.addControl(new FacilMap.Control.HistoryStateHandler({ autoActivate:true }));
 		// ]]>
 		</script>
